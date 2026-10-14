@@ -52,6 +52,9 @@ class Config:
     anchors_max: int = 30
     wake_tokens: int = 1500
     # daemon
+    # v0.9: the service lives only while an agent is open; it stops ~1-2 minutes after the last one closes.
+    # true = keep it running (robots, automation, servers).
+    stay_running: bool = False
     host: str = '127.0.0.1'
     port: int = 7439
 

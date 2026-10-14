@@ -1,6 +1,6 @@
 # Installing Hypnos
 
-Hypnos is a human-like memory for AI agents. It writes down everything during a session, sorts it into checked facts while it "sleeps", and gives each new session the memories it needs, with the evidence. It runs quietly in the background, with no windows.
+Hypnos is a human-like memory for AI agents. It writes down everything during a session, sorts it into checked facts while it "sleeps", and gives each new session the memories it needs, with the evidence. It runs only while one of your agents is open, with no windows, and switches itself off about a minute and a half after the last one closes.
 
 ## One line
 

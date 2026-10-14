@@ -10,6 +10,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from .config import load_config
 from .engine import Memory
 
+AGENT_TIMEOUT = 75             # v0.9: an open agent checks in every 30 s; silent this long = closed
+STOP_AFTER = 90                # v0.9: no open agent and no activity this long -> the service stops
 IDLE_SLEEP_MINUTES = 10        # sleep trigger: idle for this long with unconsolidated log (v0.9: was 30)
 MAX_AWAKE_ROWS = 150           # sleep trigger: this many unconsolidated rows (v0.9: was 400)
 GLOBAL_SPACE = 'global'        # v0.9: things the user wants remembered in every project
@@ -25,6 +27,8 @@ class Service:
         self.queued: set[tuple] = set()
         self.jobs: queue.Queue = queue.Queue()      # v0.9: one sleep at a time for the whole machine
         self.lock = threading.Lock()
+        self.agents: dict[str, float] = {}           # v0.9: open agent sessions (their MCP servers) -> last check-in
+        self.started = self.last_activity = time.time()
         # v0.9 fast /memory-cleanup: the list is built in the background after every change and served ready-made
         self.views: dict[str, tuple] = {}            # space -> (generation, view)
         self.gen: dict[str, int] = {}
@@ -121,6 +125,14 @@ class Service:
         return sorted({r['session'] for r in m.store.unconsolidated()} - live)
 
     def handle(self, path, d):
+        if path == '/attach':                                       # an agent is open (its MCP server checks in)
+            self.agents[str(d.get('agent'))] = time.time()
+            return {'ok': True}
+        if path == '/detach':                                       # that agent closed
+            self.agents.pop(str(d.get('agent')), None)
+            return {'ok': True}
+        if path != '/ping':
+            self.last_activity = time.time()
         space, profile = d.get('space', 'default'), d.get('profile', 'generic')
         m = self.mem(space, profile)
         if path == '/log':
@@ -214,6 +226,31 @@ class Service:
                     self.sleep_async(space, m.profile.name, s)
 
 
+def stop_when_agents_close(svc):
+    """v0.9: memory runs only while an agent is open. When the last one closes, stop the service and everything it
+    started (writer models, laya-serve). Nothing is lost: every message is already on disk, and whatever was not
+    sorted into facts yet is done the next time an agent opens."""
+    import os
+    import signal
+    import subprocess
+    while True:
+        time.sleep(15)
+        now = time.time()
+        svc.agents = {a: t for a, t in svc.agents.items() if now - t < AGENT_TIMEOUT}
+        if svc.agents or now - svc.last_activity < STOP_AFTER or now - svc.started < STOP_AFTER:
+            continue
+        print('[hypnos] no agent open: stopping', flush=True)
+        if os.name == 'nt':                                         # this process and every child it started
+            from .proc import hidden
+            subprocess.run(['taskkill', '/T', '/F', '/PID', str(os.getpid())], capture_output=True, **hidden())
+        else:
+            try:
+                os.killpg(os.getpgid(0), signal.SIGTERM)
+            except Exception:
+                pass
+        os._exit(0)
+
+
 def keep_laya_running(cfg):
     """v0.9: with Laya as the System One model, start `laya-serve` on this machine (hidden) when it is not up."""
     import os
@@ -261,6 +298,8 @@ def serve(host=None, port=None):
             pass
 
     threading.Thread(target=svc.idle_loop, daemon=True).start()
+    if not svc.cfg.stay_running:
+        threading.Thread(target=stop_when_agents_close, args=(svc,), daemon=True).start()
     if svc.cfg.systemone == 'laya' and svc.cfg.jev:
         threading.Thread(target=keep_laya_running, args=(svc.cfg,), daemon=True).start()
     print(f'[hypnos] serving on http://{host}:{port}  (memory in {svc.cfg.spaces_dir})', flush=True)

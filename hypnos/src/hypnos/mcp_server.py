@@ -7,6 +7,26 @@ import os
 from .client import call, ensure_running, space_for_dir
 
 
+def _check_in_while_open():
+    """v0.9: this MCP server lives exactly as long as the agent that started it. It tells the memory service it is
+    open every 30 s (restarting the service if needed) and says goodbye on exit, so the service can stop when the
+    last agent closes."""
+    import atexit
+    import threading
+    import time
+    import uuid
+    agent = f'{os.getpid()}-{uuid.uuid4().hex[:6]}'
+
+    def beat():
+        while True:
+            if call('/attach', {'agent': agent}, timeout=3) is None:
+                ensure_running()
+                call('/attach', {'agent': agent}, timeout=3)
+            time.sleep(30)
+    threading.Thread(target=beat, daemon=True).start()
+    atexit.register(lambda: call('/detach', {'agent': agent}, timeout=2))
+
+
 def main():
     try:                                                   # mcp 2.x renamed FastMCP to MCPServer
         from mcp.server.mcpserver import MCPServer as FastMCP
@@ -20,6 +40,7 @@ def main():
     profile = os.environ.get('HYPNOS_PROFILE', 'coding')
     base = {'space': space, 'profile': profile, 'session': os.environ.get('HYPNOS_SESSION', 'mcp')}
     ensure_running()
+    _check_in_while_open()
     app = FastMCP('hypnos')
 
     def _call(path, extra, timeout=30):
