@@ -110,7 +110,9 @@ class ClaudeWriter(Writer):
 
     def complete(self, prompt, attachments=()):
         body = prompt + ''.join(f'\n\n--- attached file {i + 1} ---\n{a}' for i, a in enumerate(attachments))
-        p = subprocess.run([self.exe, '-p', '--model', self.model, '--output-format', 'json', '--strict-mcp-config'], input=body,
+        # --no-session-persistence: writer calls must not show up in the user's Claude Code session list
+        p = subprocess.run([self.exe, '-p', '--model', self.model, '--output-format', 'json', '--strict-mcp-config',
+                            '--no-session-persistence'], input=body,
                            env=_child_env(), capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=300, **hidden())
         try:
             out = json.loads(p.stdout)
