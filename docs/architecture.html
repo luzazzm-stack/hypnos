@@ -394,6 +394,7 @@ footer { margin-top: 88px; border-top: 1px solid var(--line); padding: 24px 0 56
 
 <section id="install" style="border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:8px 0 32px;background:var(--panel)">
   <h2 style="margin:0 0 6px">Install Hypnos in one line</h2>
+  <p style="margin:0 0 8px"><b>Current version: v0.9.5</b> (Oct 16): never stores a fact twice, keeps memory small, cleanup you can actually use. <a href="https://github.com/luzazzm-stack/hypnos/blob/main/CHANGELOG.md">What changed</a>.</p>
   <p style="margin:0 0 12px;color:var(--muted)">Connects Claude Code, opencode, Codex, Gemini CLI, Cursor and Windsurf, then runs in the background with no windows. Steps for coding agents are in <a href="https://github.com/luzazzm-stack/hypnos/blob/main/INSTALL.md">INSTALL.md</a>. Read the story in the <a href="blog.html">blog post</a>.</p>
   <p style="margin:0 0 4px;font-weight:600">macOS / Linux</p>
   <pre style="overflow-x:auto;margin:0 0 12px"><code>curl -fsSL https://agent-memory-architecture-chi.vercel.app/install.sh | sh</code></pre>
@@ -408,7 +409,7 @@ footer { margin-top: 88px; border-top: 1px solid var(--line); padding: 24px 0 56
   </div>
   <div class="reader">
     <span class="badge-ic"><svg class="ic"><use href="#i-bot"/></svg></span>
-    <div><b>If you are an AI agent</b>The full architecture is JSON in the element <code>#architecture-spec</code>. Rules R1 to R15 are hard constraints. If prose and JSON disagree, the JSON wins. All tab panels are in the HTML source.</div>
+    <div><b>If you are an AI agent</b>The full architecture is JSON in the element <code>#architecture-spec</code>. Rules R1 to R18 are hard constraints. If prose and JSON disagree, the JSON wins. All tab panels are in the HTML source.</div>
   </div>
 </div>
 
@@ -947,6 +948,9 @@ unarchive on any recall hit</code></pre>
     <li><div class="rh"><svg class="ic"><use href="#i-code"/></svg><span class="rid">R13</span></div><b>Stale code evidence cannot drive a decision.</b>If the cited code changed since its commit, read the current code first.</li>
     <li><div class="rh"><svg class="ic"><use href="#i-lock"/></svg><span class="rid">R14</span></div><b>One writer at a time.</b>Shared memory is written only under the lock. Branch facts stay in their branch scope until merged.</li>
     <li><div class="rh"><svg class="ic"><use href="#i-eye"/></svg><span class="rid">R15</span></div><b>Exact values come from evidence.</b>When a question asks for an exact value, recall may stop, and the answer may quote, only from fact evidence, anchors or the original log, never from a summary's wording.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-db"/></svg><span class="rid">R16</span></div><b>No fact is stored twice.</b>A new fact that only restates a stored one is dropped. A different number, date, version, name, file, id or ordinal always makes it a new fact. (v0.9.5)</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-file"/></svg><span class="rid">R17</span></div><b>Memory never learns from itself.</b>Hypnos's own output (cleanup lists, wake notes, recalled memory) and memory or session housekeeping (<code>/memory-cleanup</code>, <code>/deleate</code> and the answers to them) are never logged. (v0.9.5)</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-layers"/></svg><span class="rid">R18</span></div><b>Coding memory keeps only what a later session needs.</b>One-off steps, a tool's internals, counts from a single run and session titles are dropped before saving. What the user states is always kept. (v0.9.5)</li>
   </ol>
 </section>
 
@@ -960,7 +964,7 @@ unarchive on any recall hit</code></pre>
     <tbody>
       <tr><td><code>sleep_context_threshold</code></td><td><span class="val">0.75</span></td><td>Sleep when this share of the context window is used</td></tr>
       <tr><td><code>sleep_on_task_end</code></td><td><span class="val">true</span></td><td>Sleep when a task finishes and nothing is queued</td></tr>
-      <tr><td><code>idle_timeout_minutes</code></td><td><span class="val">30</span></td><td>Sleep after this long with no input</td></tr>
+      <tr><td><code>idle_timeout_minutes</code></td><td><span class="val">10</span></td><td>Sleep after this long with no input</td></tr>
       <tr><td><code>max_awake_tokens</code></td><td><span class="val">2,000,000</span></td><td>Hard cap on tokens processed between sleeps</td></tr>
       <tr><td><code>nap_fraction</code></td><td><span class="val">0.33</span></td><td>Share of oldest context consolidated in a nap</td></tr>
       <tr><td><code>sleep_token_budget</code></td><td><span class="val">400,000</span></td><td>LLM tokens one sleep may spend before deferrable steps stop</td></tr>
@@ -2198,12 +2202,24 @@ unarchive on any recall hit</code></pre>
     {
       "id": "R15",
       "rule": "When a question asks for an exact value, recall may stop, and the answer may quote, only from fact evidence, anchors or the original log, never from a summary."
+    },
+    {
+      "id": "R16",
+      "rule": "No fact is stored twice: a new fact that only restates a stored one is dropped; any different number, date, version, name, file, id or ordinal makes it a new fact."
+    },
+    {
+      "id": "R17",
+      "rule": "Memory never learns from itself: its own output and memory/session housekeeping commands (and the answers to them) are never logged."
+    },
+    {
+      "id": "R18",
+      "rule": "Coding memory keeps only what a later session needs and cannot read in files; facts the user states are always kept."
     }
   ],
   "parameters": {
     "sleep_context_threshold": 0.75,
     "sleep_on_task_end": true,
-    "idle_timeout_minutes": 30,
+    "idle_timeout_minutes": 10,
     "max_awake_tokens": 2000000,
     "nap_fraction": 0.33,
     "sleep_token_budget": 400000,

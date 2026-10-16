@@ -7,7 +7,7 @@ cd hypnos
 uv run --python 3.12 --with pytest --with-editable . python -m pytest -q tests
 ```
 
-The tests run fully offline. They use `FakeWriter` (a deterministic writer with no LLM) and no Jev, so they need no keys and no network.
+Hypnos supports Python 3.10 and newer; the installers use 3.12. The tests run fully offline. They use `FakeWriter` (a deterministic writer with no LLM) and no Jev, so they need no keys and no network.
 
 ## Ground rules
 
@@ -24,5 +24,7 @@ The tests run fully offline. They use `FakeWriter` (a deterministic writer with 
 | `hypnos/src/hypnos/engine.py` | log, sleep, recall, wake, pin/correct/forget |
 | `hypnos/src/hypnos/store.py` | SQLite schema, FTS5 search |
 | `hypnos/src/hypnos/profiles.py` | per-agent fact kinds and staleness |
+| `hypnos/src/hypnos/jev.py`, `llm.py` | System One model (Jev, Laya, or the LLM) and the writer models |
+| `hypnos/src/hypnos/config.py`, `setup_wizard.py` | `~/.hypnos/config.toml` and `hypnos setup` |
 | `hypnos/src/hypnos/daemon.py`, `client.py`, `hooks.py`, `mcp_server.py`, `cli.py` | service and entry points |
 | `hypnos/src/hypnos/integrations/` | chat proxy and agent adapters |

@@ -24,11 +24,22 @@ async function call(path: string, body: unknown, ms = 2000): Promise<any> {
   }
 }
 
+// Housekeeping commands memory must not learn from (v0.9.5): while one runs, and for the short answers to it
+// ("1-5, T2", "show T3", "yes"), nothing is logged. Add more with HYPNOS_QUIET_COMMANDS="cmd1,cmd2".
+const QUIET = new Set(["memory-cleanup", "deleate", ...(process.env.HYPNOS_QUIET_COMMANDS ?? "").split(",").map((c) => c.trim().replace(/^\//, "")).filter(Boolean)])
+// Hypnos's own output (cleanup lists, wake notes, recalled memory) is never stored again.
+const OWN = ["Long-term memory (hypnos", "Relevant long-term memory (hypnos)", "[memory topics]", "All facts by topic, newest first", "Duplicates (the older copy goes)"]
+const ownText = (t: string) => OWN.some((m) => t.includes(m)) || (t.includes("Memory for ") && t.slice(0, 300).includes(" facts."))
+const quietCommand = (t: string) => { const m = t.match(/^\s*\/([\w.:-]+)/); return !!m && QUIET.has(m[1].split(":").pop()!.toLowerCase()) }
+const ALLOWED = new Set("all duplicates unused stale purge show list open and yes no ok okay keep delete remove them these it fix none cancel next more page done".split(" "))
+const selectionReply = (t: string) => t.length <= 120 && t.toLowerCase().replace(/\bt\d+\b|[\d,;.\s-]/g, " ").split(/\s+/).filter(Boolean).every((w) => ALLOWED.has(w))
+
 export const Hypnos: Plugin = async ({ directory, worktree }) => {
   if (process.env.HYPNOS_DISABLE) return {}
   const root = (worktree || directory || "").split(/[\\/]/).filter(Boolean).pop() ?? "default"
   const base = { space: process.env.HYPNOS_SPACE ?? `code-${root}`, profile: "coding" }
   const memo: Record<string, { query: string; context: string; others?: string[] }> = {}
+  const quiet: Record<string, boolean> = {}                     // sessions running a housekeeping command
 
   if (!(await call("/ping", {}, 800))) {
     try {
@@ -45,6 +56,9 @@ export const Hypnos: Plugin = async ({ directory, worktree }) => {
         .trim()
       if (!text) return
       memo[input.sessionID] = { query: text, context: "" }
+      if (quietCommand(text) || ownText(text)) { quiet[input.sessionID] = true; return }
+      if (quiet[input.sessionID] && selectionReply(text)) return
+      quiet[input.sessionID] = false
       call("/log", { ...base, session: input.sessionID, role: "user", content: text, meta: { cwd: directory } })
       const r = await call("/recall", { ...base, session: input.sessionID, query: text, gate: true, budget: 2500 }, 20000)
       memo[input.sessionID] = { query: text, context: r?.context ?? "", others: r?.others ?? [] }
@@ -71,8 +85,11 @@ export const Hypnos: Plugin = async ({ directory, worktree }) => {
 
     "tool.execute.after": async (input, output) => {
       if (["todowrite", "todoread"].includes(input.tool)) return
+      if (quiet[input.sessionID] || input.tool.startsWith("hypnos_")) return
       const args: any = input.args ?? {}
+      if (String(args.command ?? "").includes("hypnos cleanup")) return
       const fp = args.filePath ?? args.path
+      if (ownText(String(output.output ?? ""))) return
       call("/log", {
         ...base,
         session: input.sessionID,

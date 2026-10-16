@@ -1,18 +1,30 @@
 # Changelog
 
-## v0.9.1: bug fixes from real use: 2026-10-16
+## v0.9.5: fixes from real use (no duplicates, small memory, usable cleanup): 2026-10-16
 
-- **Never a duplicate.** A new fact that only restates a stored one is not saved. System One gets a "repeat" answer in the check it already makes for every new fact; without System One, a plain-code check compares meaning (local embeddings), words, and every number, date, version, name, file, id and ordinal. Any difference in those keeps both facts ("Level 6" vs "Level 7", "v0.8" vs "v0.9", "10 emails" vs "20 emails", "VS Code" vs "Neovim").
-- **Housekeeping stays out of memory.** `/memory-cleanup`, `/deleate` and short answers to them ("1-5, T2", "yes") are not logged, and Hypnos never stores its own output (cleanup lists, wake notes, recalled memory) again. More commands: `HYPNOS_QUIET_COMMANDS`.
-- **`/memory-cleanup` lists every fact**, numbered under its topic, instead of only topic counts; lines are cut at a word; "show Tn" numbers the older facts too. Facts that differ in a number, name or id are no longer offered as duplicates.
-- **One memory per session.** A session keeps the memory of the folder it started in, even after it changes folder, so logging, recall, the cleanup list and deleting all use the same memory (before, "delete 3" could hit a different list).
-- **No ghost sessions.** Memory-writer calls through `claude -p` no longer appear in the Claude Code session list (`--no-session-persistence`).
-- **Keep memory small.** Coding memory keeps only what a later session needs and cannot read in files (rules, decisions, where things are, outcomes, things written nowhere); one-off steps, a tool's internals, run counts and session titles are dropped before saving. Facts the user states are always kept.
-- **Right topics without System One.** The memory model picks the topic instead of a 3-shared-words guess that filed facts under unrelated topics.
-- **No silent System One failure.** When the System One account refuses (no credits, bad key), Hypnos logs it and says so in the wake note instead of quietly falling back to weaker checks.
+- A fact is never stored twice. A new fact that only restates a stored one is dropped. System One gets a "repeat" answer in the check it already makes for every new fact; without System One, plain code compares meaning (local embeddings), words, and every number, date, version, name, file, id and ordinal. Any difference in those keeps both facts ("Level 6" vs "Level 7", "v0.8" vs "v0.9", "10 emails" vs "20 emails", "VS Code" vs "Neovim").
+- `/memory-cleanup`, `/deleate` and short answers to them ("1-5, T2", "yes") are no longer logged, in Claude Code and opencode. Hypnos also never stores its own output (cleanup lists, wake notes, recalled memory). Add more commands with `HYPNOS_QUIET_COMMANDS`.
+- `/memory-cleanup` lists every fact, numbered under its topic, where it used to show only topic counts. Lines are cut at a word, and "show Tn" numbers the older facts too. Facts that differ in a number, name or id are no longer offered as duplicates.
+- A session keeps the memory of the folder it started in, even after it changes folder, so logging, recall, the cleanup list and deleting all use the same memory. Before this, "delete 3" could hit a different list.
+- Memory-writer calls through `claude -p` no longer show up in the Claude Code session list (`--no-session-persistence`).
+- Coding memory stays small. It keeps only what a later session needs and cannot read in files (rules, decisions, where things are, outcomes, things written nowhere), and drops one-off steps, a tool's internals, run counts and session titles before saving. Facts the user states are always kept.
+- Without System One, the memory model picks a fact's topic. The old 3-shared-words guess filed facts under unrelated topics.
+- When the System One account refuses (no credits, bad key), Hypnos logs it and says so in the wake note. It used to fall back to weaker checks silently.
+- One-time clean-up of existing memory on this laptop: Claude Haiku sorted 3,217 facts into keep and junk in two passes; 2,741 junk facts were archived (restorable) and 56 logged housekeeping runs wiped.
 
-## v0.9 (in progress): memory you can manage, no echo, sooner sleep: 2026-10-13
+## v0.9: usable by anyone (one-line install, any agent, any model): 2026-10-13 to 2026-10-15
 
+- Renamed to Hypnos (was `agentmem`): command `hypnos`, data in `~/.hypnos` (moved over from `~/.agentmem` automatically), settings `HYPNOS_*` (`AGENTMEM_*` still read), MCP server `hypnos`.
+- One-line install: `install.sh` (macOS/Linux) and `install.ps1` (Windows) bring uv and Python 3.12, install Hypnos and run setup.
+- `hypnos setup` connects Claude Code, opencode, Codex, Gemini CLI, Cursor and Windsurf and removes old agentmem entries. `--uninstall` undoes everything; `--yes` runs it without questions, for agents and scripts.
+- No model is fixed. `--list-models` lists every model the machine can use (opencode, Ollama, Claude, Codex, API keys) and suggests the best value; `--memory-model` sets the fallback chain.
+- System One can be Jev (hosted), Laya (local, free) or none, in which case the memory model makes the checks: a little more accurate, more tokens.
+- Memory runs only while an agent is open and stops about 90 s after the last one closes; `stay_running = true` keeps it on for servers and robots. Every background process is hidden (no windows).
+- The `/memory-cleanup` list is prepared in the background and opens in under a second (`hypnos cleanup`); deletes run in one transaction.
+- Sleep writes facts from several chunks at once and checks claims in batches. Machines with less than 12 GB of RAM use one writer at a time.
+- "The assistant can't do X" is never saved.
+- opencode writer runs no longer appear in the user's opencode history.
+- Reverted after LoCoMo: a first v0.9 gave the fact writer the date on every log line, asked it to turn relative dates into absolute ones, and told the answering model that later messages override earlier ones. It scored 47.0% against v0.8's 57.5%, so all three were removed. The fixed v0.9 tied v0.8 at 60.5% (Muse Spark 1.3 answering, Claude Haiku 5.5 grading).
 - No echo: recall skips messages of the current conversation that the agent still sees (until a compaction), and skips Jev entirely when memory holds nothing else.
 - Sooner sleep: when a new session starts, after 10 idle minutes (was 30), or at 150 new rows (was 400). PreCompact marks the compaction.
 - Memory management: `memory_review`, `memory_cleanup_suggestions` (near-duplicates, unused for 30 days, stale, purgeable), `memory_forget_ids`, `memory_purge`, `memory_pause`; `/memory-cleanup` slash command for Claude Code and opencode.

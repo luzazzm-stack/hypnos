@@ -1,5 +1,5 @@
 """MCP server (stdio) exposing memory tools to any MCP client: Claude Code, opencode, Claude Desktop, Cursor, ...
-The memory space defaults to HYPNOS_SPACE, else the git repo of the current directory."""
+The memory space is HYPNOS_SPACE, else the space the running Claude Code session is pinned to, else the git repo of the current directory."""
 from __future__ import annotations
 import json
 import os

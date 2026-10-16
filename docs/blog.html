@@ -6,7 +6,7 @@
 <title>Building Hypnos</title>
 <meta name="author" content="Luza Maharjan">
 <meta name="copyright" content="© 2026 Luza Maharjan. All rights reserved.">
-<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9, with every benchmark against Mem0, GBrain and my own earlier versions.">
+<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.5, with every benchmark against Mem0, GBrain and my own earlier versions.">
 <meta property="og:title" content="Building Hypnos: memory for AI agents that sleeps on it">
 <meta property="og:description" content="Nine versions, every benchmark, including the one where my new version lost by 10 points.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -115,7 +115,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <tr><td>v0.7</td><td>Sep 28</td><td>Recall rewritten: evidence first, search facts and raw messages together</td></tr>
 <tr><td>v0.8</td><td>Sep 29</td><td>System One routes each question and picks the smallest context that answers</td></tr>
 <tr class="me"><td>v0.9</td><td>Oct 15</td><td>Usable by anyone: one-line install, works with any coding agent, cleanup, no windows</td></tr>
-<tr class="me"><td>v0.9.1</td><td>Oct 16</td><td>Bug fixes from a day of real use: never a duplicate, housekeeping stays out of memory</td></tr>
+<tr class="me"><td>v0.9.5</td><td>Oct 16</td><td>Fixes from a day of real use: never a duplicate, small memory, housekeeping stays out of memory</td></tr>
 </tbody></table></div>
 
 <p>v0.1 and v0.2 were designs on paper, so they have no scores. Everything from v0.3 on was measured.</p>
@@ -206,7 +206,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <tr><td>Temporal</td><td>82%</td><td>60%</td><td>80%</td></tr>
 <tr><td>Open-domain</td><td>24%</td><td>22%</td><td>32%</td></tr>
 <tr><td>"Not mentioned" answers</td><td>46</td><td>61</td><td>43</td></tr>
-<tr><td>Facts saved, first conversation</td><td>160</td><td>93</td><td>177</td></tr>
+<tr><td>Facts saved, second conversation</td><td>160</td><td>93</td><td>151</td></tr>
 </tbody></table></div>
 <p class="note">v0.8's own answers were graded again in each run, and scored 57.5% in the first and 60.5% in the second; only scores from the same run are compared.</p>
 
@@ -216,31 +216,35 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 
 <h2>What v0.9 adds</h2>
 
-<p>v0.9 doesn't remember better than v0.8. It makes the memory something other people can actually use.</p>
+<p>On the benchmark, v0.9 tied v0.8. Everything it adds is about letting other people use the memory.</p>
 
-<p><strong>One-line install.</strong> One command on macOS, Linux or Windows. It downloads what it needs, finds Claude Code, opencode, Codex, Gemini CLI, Cursor and Windsurf, and connects to each one. A coding agent can run the install itself: there are exact steps for agents in the install guide.</p>
+<p>Installing takes one command on macOS, Linux or Windows. It downloads what it needs, finds Claude Code, opencode, Codex, Gemini CLI, Cursor and Windsurf, and connects to each one. A coding agent can run the install itself: the install guide has exact steps for agents.</p>
 
-<p><strong>Your choice of model.</strong> Nothing is tied to one model. Setup lists every model your machine can use, free ones included, and the person or agent installing it picks the best value. If a model goes down or runs out of quota, the next one takes over.</p>
+<p>Nothing is tied to one model. Setup lists every model your machine can use, free ones included, and the person or agent installing it picks the best value. If a model goes down or runs out of quota, the next one takes over.</p>
 
-<p><strong>Quiet.</strong> Memory runs only while one of your agents is open, with no windows, and switches itself off about a minute and a half after you close the last one. On machines with less than 12 GB of RAM it saves one model call at a time, so the computer doesn't lag.</p>
+<p>Memory runs only while one of your agents is open, with no windows, and switches itself off about a minute and a half after you close the last one. On machines with less than 12 GB of RAM it saves one model call at a time, so the computer doesn't lag.</p>
 
-<p><strong><code>/memory-cleanup</code></strong> shows duplicates, unused facts and stale facts by topic in under a second. Delete by number or by topic.</p>
+<p><code>/memory-cleanup</code> opens in under a second, and you delete by number or by topic.</p>
 
-<p><strong>Many sessions at once.</strong> Each session is told what the others in the same project are doing, and that their tasks aren't its own. It never hands your own current conversation back to you as a "memory".</p>
+<p>Several sessions can work in the same project at once. Each one is told what the others are doing and that their tasks aren't its own, and it never hands your current conversation back to you as a "memory".</p>
 
-<p><strong>It doesn't remember refusals.</strong> "The assistant couldn't do X" is never saved, so a later session won't refuse the same thing because a memory told it to.</p>
+<p>Refusals aren't remembered. "The assistant couldn't do X" is never saved, so a later session won't refuse the same thing because a memory told it to.</p>
 
-<h2>The first day of real use: v0.9.1</h2>
+<h2>The first day of real use: v0.9.5</h2>
 
 <p>A day of using v0.9 on my own laptop turned up bugs no benchmark had shown.</p>
 
-<p><strong>Memory filled up with repeats.</strong> The same fact got saved two or three times in slightly different words. One reason: the System One account had run out of credits, and Hypnos quietly fell back to weaker checks without saying so. Now a fact that only restates one already stored is never saved, with or without System One. A different number, date, version, name or file always counts as a new fact, so "Level 6" and "Level 7" are both kept. And when System One stops answering, Hypnos tells you.</p>
+<p>Memory filled up with repeats: the same fact, saved two or three times in slightly different words. Part of the cause was that my System One account had run out of credits, and Hypnos fell back to weaker checks without telling me. Now a fact that only restates one already stored is never saved, with or without System One. A different number, date, version, name or file still counts as a new fact, so "Level 6" and "Level 7" are both kept. When System One stops answering, Hypnos says so.</p>
 
-<p><strong>Cleaning up made more junk.</strong> Running <code>/memory-cleanup</code> or deleting old sessions was itself remembered, and the next sleep turned the cleanup list back into "new" facts. Housekeeping commands and Hypnos's own output are now never saved.</p>
+<p>Cleaning up made more junk. Running <code>/memory-cleanup</code> or deleting old sessions got remembered too, and the next sleep turned the cleanup list back into "new" facts. Housekeeping commands and Hypnos's own output are never saved now.</p>
 
-<p><strong>The cleanup list couldn't be used.</strong> It showed "117 facts" in a topic but not the facts, and the list and the delete could point at different memories. Now every fact has a number, and one session always uses one memory.</p>
+<p>The cleanup list itself was hard to use. It showed "117 facts" in a topic but not the facts, and the list and the delete could point at different memories. Every fact has a number now, and one session always uses one memory.</p>
 
-<p><strong>Ghost sessions.</strong> When the free models were down, the fallback writer's calls showed up in the session list as "Write the BIG memory summary…". They no longer do.</p>
+<p>Most of the memory was useless. A coding session produces about ten facts from every small chunk of work, and most of them were one-off steps, test errors, how a tool works inside, or counts from a single run. After three days of use my laptop held 3,217 facts. I had Claude Haiku sort them twice into "a later session needs this" and "junk", and archived the junk. About 557 are left, roughly one in six. The same check now runs before anything is saved, and a fact stays only if it is a rule or preference, a decision, where something lives, an outcome that matters, or something written nowhere else. What you tell it to remember is always kept.</p>
+
+<p>Some facts landed in the wrong topic. Without System One, a fact went to whichever topic shared three words with it, which is how notes about deleting sessions ended up under "reverse engineering". The memory model picks the topic now.</p>
+
+<p>And when the free models were down, the fallback writer's calls showed up in my session list as "Write the BIG memory summary…". They don't anymore.</p>
 
 <h2>Things I tested and didn't ship</h2>
 

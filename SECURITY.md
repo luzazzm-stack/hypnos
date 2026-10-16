@@ -7,8 +7,8 @@ hypnos stores what your agents see. Treat its database like the data it contains
 - **Real deletion:** `hypnos forget "..." --hard` replaces the original log text with a tombstone, and flags every fact that cited it.
 - **What leaves the machine:**
   - During sleep, redacted log text goes to the writer LLM you configure.
-  - Short questions and evidence go to Jev, if a TypeSafe key is set.
-  - Choose a local writer (Ollama through the `openai` writer) to keep everything on the machine.
+  - Short questions and evidence go to the System One model: to TypeSafe if you chose Jev; Laya runs on your machine; with no System One model, the writer LLM answers them.
+  - Choose a local writer (Ollama through the `openai` writer) and Laya (or no System One model) to keep everything on the machine.
 - **Free-tier writers:** OpenCode's free Muse Spark tier may use prompts and completions to train Meta models. Don't use it on sensitive data.
 
 Please report security issues privately to the repository owner.

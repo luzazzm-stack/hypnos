@@ -23,7 +23,7 @@ mem.sleep()                                     # at the end of the run
 
 ## No-code tools (n8n, Zapier, Make): HTTP
 
-Start the service once with `hypnos serve` (it listens on `127.0.0.1:7439`). Then add HTTP request steps:
+Set `stay_running = true` in `~/.hypnos/config.toml` (otherwise the service stops about 90 seconds after the last agent closes), then start it once with `hypnos serve` (it listens on `127.0.0.1:7439`). Then add HTTP request steps:
 
 | When | POST to | Body (JSON) |
 |---|---|---|

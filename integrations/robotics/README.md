@@ -28,6 +28,8 @@ print(mem.where_is("red_mug"))
 
 **Evidence:** every observation carries `obs:<sensor>@<time>` evidence. That's the robot version of R2 ("every fact cites evidence").
 
+**Local service:** `RobotMemory` works in-process by default. If you use it through the service (`use_service=True`), set `stay_running = true` in `~/.hypnos/config.toml`, so the service doesn't stop when no coding agent is open.
+
 **Where it fits:** use it for **episodic and semantic memory**: what happened, what worked, where things were. Don't put it in the real-time control loop; recall takes hundreds of milliseconds.
 
 **ROS 2:** see [`examples/ros2_memory_node.py`](../../examples/ros2_memory_node.py). It's a node that:

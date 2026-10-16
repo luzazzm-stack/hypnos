@@ -1,6 +1,6 @@
 # Which version for which system
 
-One memory engine, with a version tuned for each kind of AI system. A version (a "profile") decides what is worth remembering, what counts as evidence, and when a fact goes out of date. Recall, sleep, Jev routing, cleanup and the safety rules are the same everywhere.
+One memory engine, with a version tuned for each kind of AI system. A version (a "profile") decides what is worth remembering, what counts as evidence, and when a fact goes out of date. Recall, sleep, System One routing, cleanup and the safety rules are the same everywhere.
 
 | System | Version (profile) | Remembers | Goes out of date | How to connect |
 |---|---|---|---|---|
@@ -18,10 +18,11 @@ One memory engine, with a version tuned for each kind of AI system. A version (a
 1. **MCP server** (`hypnos mcp`): for any MCP client. Tools for recall, remember, note, review, cleanup, forget, purge, pause.
 2. **Hooks** (`hypnos hook claude|generic <event>`): automatic memory for agents with a hook system.
 3. **OpenAI-compatible proxy** (`hypnos chat-proxy`): for any app or agent that talks to an LLM API. Change the base URL and it has memory.
-4. **Python and HTTP**: `from hypnos.integrations.agents import ...`, or JSON over HTTP to the local service (`/log`, `/recall`, `/sleep`, `/pin`, `/review`, `/cleanup`, `/forget_ids`, `/purge`, `/pause`) from any language.
+4. **Python and HTTP**: `from hypnos.integrations.agents import ...`, or JSON over HTTP to the local service (`/log`, `/recall`, `/sleep`, `/pin`, `/review`, `/cleanup_view`, `/cleanup_apply`, `/forget_ids`, `/purge`, `/pause`) from any language.
 
 ## The same everywhere
 
-- **Sleep writers fall back.** Free models first, then a small paid one (Claude Haiku), and a bigger one only if all the others are down. A failing model rests for 30 minutes (`writer_chain` in `~/.hypnos/config.toml`).
+- **Sleep writers fall back.** No model is fixed: `hypnos setup --list-models` shows what this machine can use and `--memory-model` sets the order (`writer_chain` in `~/.hypnos/config.toml`). Cheap or free models go first, a bigger one only if all the others are down. A failing model rests for 30 minutes and the next one takes over.
+- **No duplicates.** A new fact that only restates a stored one is not saved. Facts that differ in any number, date, version, name, file, id or ordinal are kept as different facts.
 - **Many agents at once.** One local service serves every agent and session. Sleeps run in a queue, and a session's own live conversation is never recalled back to it.
-- **You stay in charge.** Review and clean up with `/memory-cleanup` or the review and cleanup tools. Pause memory, forget a fact together with its original message, or purge for good.
+- **You stay in charge.** Review and clean up with `/memory-cleanup` (every fact numbered under its topic; delete by number, range or topic) or the review and cleanup tools. Pause memory, forget a fact together with its original message, or purge for good.

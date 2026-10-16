@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](hypnos/pyproject.toml)
 [![MCP](https://img.shields.io/badge/MCP-server-6E56CF)](integrations/claude-code/README.md)
-[![Version](https://img.shields.io/badge/version-0.9.1-2ea44f)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.9.5-2ea44f)](CHANGELOG.md)
 [![License: All rights reserved](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](LICENSE)
 ![Status](https://img.shields.io/badge/status-research%20preview-orange)
 
@@ -18,12 +18,12 @@
 
 Hypnos gives any agent a memory that survives across sessions: coding agents, chat assistants, search and browsing agents, automation, and robots. Like a person, it notes everything during the day, sorts it into checked facts while it sleeps, and the next morning remembers what matters.
 
-- **Grounded:** every fact cites the log line it came from, and a separate check confirms the line supports it.
-- **Frugal:** most questions are answered from a ~60-token topic summary plus a few facts (~610 tokens per question on LoCoMo).
-- **Current:** new facts replace outdated ones with validity windows and keep the history; code facts go stale when git shows the file changed.
-- **Local-first:** SQLite on your machine; secrets are removed before anything is written; real deletes on request.
-- **Light:** runs hidden in the background, only while an agent is open, and stops by itself ~90 s after the last one closes.
-- **Plugs in anywhere:** Claude Code, opencode, Codex, Gemini CLI, Cursor, Windsurf, any MCP client, an OpenAI-compatible chat proxy, and Python adapters.
+- Every fact cites the log line it came from, and a separate check confirms the line supports it.
+- Most questions are answered from a ~60-token topic summary plus a few facts (~610 tokens per question on LoCoMo).
+- New facts replace outdated ones with validity windows, and the history is kept. Code facts go stale when git shows the file changed.
+- It stores everything in SQLite on your machine, removes secrets before anything is written, and really deletes on request.
+- It runs hidden in the background, only while an agent is open, and stops by itself ~90 s after the last one closes.
+- It works with Claude Code, opencode, Codex, Gemini CLI, Cursor, Windsurf, any MCP client, an OpenAI-compatible chat proxy, and Python adapters.
 
 ## Install (one line)
 
@@ -65,7 +65,7 @@ print(mem.recall("which tests failed and why?").context)
 | Like a person | Hypnos |
 |---|---|
 | Notices everything during the day | every message and tool result is written to a raw log, instantly |
-| Sleeps on it | when a session ends or goes quiet, a small model turns the log into short facts, each with the exact quote it came from; facts without evidence are dropped |
+| Sleeps on it | when a session ends or goes quiet, a small model turns the log into short facts, each with the exact quote it came from; facts without evidence are dropped, and in coding memory so are one-off steps and details a later session can read in files |
 | Updates what it knows | a new fact that replaces an old one (a changed port, a new decision) retires the old one, with history kept |
 | Remembers what matters | each new message gets only the memories it needs: a summary for broad questions, exact facts with quotes for precise ones |
 | Never repeats itself | a fact that only restates one already stored is not saved again; a different number, date, name or file always counts as new |
@@ -96,13 +96,13 @@ flowchart LR
 | Original log | the topic's own log lines, word for word | ≤3,000 tokens |
 | Facts | verified claims, each with a quote, date, entities and validity window | per fact |
 
-It never saves an AI model's refusals or its own output ("the assistant can't do X"), never blocks your agent, and keeps each project's memory separate. Several sessions can run side by side; each knows what the others are doing and that their tasks are not its own.
+It never saves an AI model's refusals ("the assistant can't do X") or its own output (cleanup lists, recalled memory), never blocks your agent, and keeps each project's memory separate: a session uses the memory of the folder it started in, even if it moves to another folder. Several sessions can run side by side; each knows what the others are doing and that their tasks are not its own.
 
-The full design (rules R1–R15, the 20 typed decisions, parameters and a machine-readable JSON spec) is in **[docs/architecture.html](docs/architecture.html)**.
+The full design (rules R1 to R18, the 20 typed decisions, parameters and a machine-readable JSON spec) is in **[docs/architecture.html](docs/architecture.html)**.
 
 ### System One model
 
-Small yes/no and pick-one decisions (does this need memory, is this enough, does the quote support the claim, which topic, does the new fact replace the old one) go to a **System One model**, which answers in one fast step instead of writing text, 7–15× faster than an LLM in our runs.
+Small yes/no and pick-one decisions (does this need memory, is this enough, does the quote support the claim, which topic, does the new fact replace the old one) go to a **System One model**, which answers in one fast step instead of writing text, 7 to 15 times faster than an LLM in our runs.
 
 - **Jev** (TypeSafe): hosted, needs a key.
 - **Laya**: open weights, free, runs on your machine (`laya-serve`). Hypnos keeps it running while you use it, so memory costs nothing extra.
@@ -149,6 +149,7 @@ Writing facts and summaries needs an LLM. Hypnos isn't tied to one: setup lists 
 | v0.7 | 53% | ~3,100 tokens | evidence-first recall; ahead of Mem0 (51%) and GBrain (51%) in the same run |
 | v0.8 | 55% | ~600 tokens | System One routes each question to the smallest context that answers |
 | v0.9 | 60.5% (v0.8: 60.5% in the same run) | ~611 tokens | one-line install, any agent, any model, fast cleanup, parallel sleep, runs only while an agent is open. A first try with extra date instructions scored 47% and was reverted. |
+| v0.9.5 | not re-run yet | | fixes from real use: never stores a fact twice, keeps coding memory small (only what a later session needs), housekeeping and its own output never remembered, every fact numbered in `/memory-cleanup`, one memory per session, says when System One is down |
 
 **On our own sessions** (60 questions from 15 real Claude Code sessions; Muse Spark 1.3 wrote, answered and graded):
 
@@ -162,7 +163,7 @@ Writing facts and summaries needs an LLM. Hypnos isn't tied to one: setup lists 
 | Rolling summary | 36% | 3,185 |
 | Plain opencode searching the logs itself (24-question subset) | 92% | ~35,000 |
 
-These are **in-sample**: v0.4–v0.6 were tuned on these questions. The session logs are private (they contain real work), so the harness is published without them.
+These are **in-sample**: v0.4 to v0.6 were tuned on these questions. The session logs are private (they contain real work), so the harness is published without them.
 
 Everything, including per-question LoCoMo results and how each run was measured: [docs/RESULTS.md](docs/RESULTS.md), the [benchmarks page](docs/benchmarks.html), the [benchmark harness](benchmark/) and the [blog post](https://agent-memory-architecture-chi.vercel.app/blog.html).
 
@@ -170,7 +171,7 @@ Everything, including per-question LoCoMo results and how each run was measured:
 
 ```
 hypnos setup            connect agents, pick models (--list-models, --memory-model, --uninstall)
-hypnos cleanup          the /memory-cleanup list (--apply "1-5, T2")
+hypnos cleanup          the /memory-cleanup list (--apply "1-5, T2", --space NAME)
 hypnos mcp              MCP server (memory_recall, memory_remember, memory_note, cleanup tools, ...)
 hypnos hook ...         hook handler for Claude Code and other agents
 hypnos serve            the background service on 127.0.0.1:7439 (starts by itself)
@@ -195,10 +196,12 @@ future/           agentmem-rs: the v0.8 engine in Rust, frozen for later (not ma
 
 This is a research preview. Known limits:
 - the own-session evaluation is small and in-sample; LoCoMo is the fair comparison
-- recall takes about 3–4 s per prompt (mostly System One round trips); ideas to speed it up are in [docs/improvements-for-review.txt](docs/improvements-for-review.txt)
+- recall takes about 3 to 4 s per prompt (mostly System One round trips); ideas to speed it up are in [docs/improvements-for-review.txt](docs/improvements-for-review.txt)
 - sleep costs LLM calls (about 0.8M tokens for 15 long sessions)
 - entity resolution is by name only
 - tested installs: Windows and Linux; macOS not yet tested
+- without a working System One (no key, or no credits left), its checks run on the memory model, which uses more tokens; Hypnos says so when it happens
+- v0.9.5's changes to what gets saved have not been re-run on LoCoMo yet
 
 See [CHANGELOG.md](CHANGELOG.md), [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 

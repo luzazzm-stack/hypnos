@@ -4,7 +4,7 @@ The memory engine, local service, MCP server and CLI. See the [repository README
 
 ## Install
 
-Use the one-line installer (see [INSTALL.md](../INSTALL.md)). By hand:
+Use the one-line installer (see [INSTALL.md](../INSTALL.md)). By hand (Python 3.10 or newer; the installers use 3.12):
 
 ```bash
 uv tool install --python 3.12 "./hypnos[mcp,vectors]"     # `hypnos` command on PATH
@@ -24,6 +24,7 @@ writer = "auto"              # auto = the writer_chain below; or opencode | clau
 writer_chain = ["opencode:opencode/some-free-model", "openai:model@https://api.deepseek.com/v1#DEEPSEEK_API_KEY", "claude:haiku"]
 writer_parallel = 0          # 0 = automatic (1 under 12 GB RAM, else 3)
 vectors = true               # local bge-small meaning search
+stay_running = false         # false = stop ~90 s after the last agent closes; true keeps it on (servers, robots)
 port = 7439
 ```
 
@@ -52,8 +53,8 @@ hypnos serve                        local service (127.0.0.1:7439)
 hypnos mcp                          MCP server over stdio
 hypnos hook claude <Event>          Claude Code hook handler
 hypnos hook generic <event>         any other agent with hooks
-hypnos setup [--yes] [--list-models] [--memory-model ...] [--uninstall]
-hypnos cleanup [--apply "1-5, T2"]  the /memory-cleanup list
+hypnos setup [--yes] [--systemone jev|laya|none] [--list-models] [--memory-model ...] [--uninstall]
+hypnos cleanup [--apply "1-5, T2"] [--space NAME]   the /memory-cleanup list: every fact numbered under its topic
 hypnos chat-proxy --upstream URL    memory for any OpenAI-compatible chat client
 hypnos log|recall|sleep|pin|forget|status|export|wake --space S --profile P
 ```

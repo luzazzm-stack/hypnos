@@ -1,6 +1,6 @@
 # Installing Hypnos
 
-Hypnos is a human-like memory for AI agents. It writes down everything during a session, sorts it into checked facts while it "sleeps", and gives each new session the memories it needs, with the evidence. It runs only while one of your agents is open, with no windows, and switches itself off about a minute and a half after the last one closes.
+Hypnos is a human-like memory for AI agents. It writes down everything during a session, sorts it into checked facts while it "sleeps", and gives each new session the memories it needs, with the evidence. It runs only while one of your agents is open, with no windows, and switches itself off about a minute and a half after the last one closes. For servers or robots, set `stay_running = true` in `~/.hypnos/config.toml` to keep it on.
 
 ## One line
 
@@ -14,7 +14,7 @@ curl -fsSL https://agent-memory-architecture-chi.vercel.app/install.sh | sh
 irm https://agent-memory-architecture-chi.vercel.app/install.ps1 | iex
 ```
 
-It installs everything it needs (uv, and Python 3.12 through uv), connects every coding agent it finds (Claude Code, opencode, Codex, Gemini CLI, Cursor, Windsurf), asks which System One model to use, and starts the memory in the background. Restart your agent afterwards. `/memory-cleanup` shows and cleans what it keeps.
+It installs everything it needs (uv, and Python 3.12 through uv), connects every coding agent it finds (Claude Code, opencode, Codex, Gemini CLI, Cursor, Windsurf), asks which System One model to use, and starts the memory in the background. Restart your agent afterwards. `/memory-cleanup` lists every saved fact, numbered under its topic, and deletes the ones you pick.
 
 Uninstall: `hypnos setup --uninstall`, then `uv tool uninstall hypnos`. Your saved memory stays in `~/.hypnos` until you delete that folder.
 

@@ -11,10 +11,12 @@ Claude Code and opencode have their own guides ([claude-code](../claude-code/REA
 First, install once:
 
 ```bash
-uv tool install --editable ./hypnos --with mcp --with fastembed --with numpy    # puts `hypnos` on PATH
+uv tool install --python 3.12 "./hypnos[mcp,vectors]"    # puts `hypnos` on PATH
 ```
 
-The memory service starts by itself the first time a hook or the MCP server needs it. Every agent on the machine shares it, so a Codex session can recall what a Cursor session learned in the same project. Memory is kept per git repository (`code-<repo name>`).
+`hypnos setup` connects Codex, Gemini CLI, Cursor and Windsurf for you (MCP server, Gemini CLI's hooks, and the memory lines in `~/.codex/AGENTS.md` and `~/.gemini/GEMINI.md`). The tables below are for doing it by hand or for other agents.
+
+The memory service starts by itself the first time a hook or the MCP server needs it, and stops about 90 seconds after the last agent closes (`stay_running = true` in `~/.hypnos/config.toml` keeps it on). Every agent on the machine shares it, so a Codex session can recall what a Cursor session learned in the same project. Memory is kept per git repository or folder (`code-<repo or folder name>`), and a session keeps the memory of the folder it started in.
 
 ## 1. MCP server (any MCP agent)
 

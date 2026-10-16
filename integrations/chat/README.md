@@ -9,10 +9,12 @@ hypnos chat-proxy --upstream https://openrouter.ai/api/v1 --space chat-default  
 Point your chat app at `http://127.0.0.1:7440/v1`, keeping your usual API key. Each request goes through five steps:
 
 1. The user's latest message is **redacted and logged**.
-2. **G1** asks whether it needs memory. If yes, **v0.8 recall** (Jev-routed: the smallest context that answers) runs, and the result is added as a system message.
+2. **G1** asks whether it needs memory. If yes, **v0.8 recall** (System One-routed: the smallest context that answers) runs, and the result is added as a system message.
 3. The request is forwarded **unchanged otherwise**. Streaming passes straight through.
 4. The reply is **logged**.
-5. The service **sleeps** after 30 idle minutes, turning chats into verified facts: preferences, personal facts, projects, plans.
+5. The service **sleeps** after 10 idle minutes, turning chats into verified facts: preferences, personal facts, projects, plans.
+
+The service stops about 90 seconds after nothing is using it, and the proxy starts it again with the next request; whatever was not sorted yet is done then. To keep it running, set `stay_running = true` in `~/.hypnos/config.toml`.
 
 Send an `X-Session-Id` header to keep separate conversations apart.
 

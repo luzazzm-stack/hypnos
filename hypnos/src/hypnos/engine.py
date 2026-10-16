@@ -930,7 +930,7 @@ class Memory:
                          'scope': meta.get('scope', {}), 'meta': {k: meta[k] for k in ('cwd', 'url', 'sensor') if k in meta}})
         kept = [f for f in kept if not self._duplicate(f)]
         if self.profile.name == 'coding' and only_row is None:
-            kept = self._worth_keeping(kept)       # v0.9.1: coding memory keeps only what a later session needs
+            kept = self._worth_keeping(kept)       # v0.9.5: coding memory keeps only what a later session needs
         seen = []                                  # never store the same claim twice, from any episode or this batch
         kept = [f for f in kept if not (self._restated(f, seen) or seen.append(f['claim']))]
         topic = self._assign_topic(kept, allow_writer=allow_writer_topic) if kept else None
@@ -1067,7 +1067,7 @@ class Memory:
                 fw = _words(' '.join(claims))
                 ov = lambda t: len(fw & _words((t['name'] or '') + ' ' + (t['desc'] or '') + ' ' + (t['small'] or '')))
                 best = max(existing, key=ov)
-                # v0.9.1: was ">= 3 shared words", which filed facts under unrelated topics; now a clear majority only
+                # v0.9.5: was ">= 3 shared words", which filed facts under unrelated topics; now a clear majority only
                 if ov(best) >= 5 and ov(best) >= 0.3 * len(fw):
                     return best['id']
             # no Jev but a writer: the writer below picks the topic (accurate), instead of a keyword guess

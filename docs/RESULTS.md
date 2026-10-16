@@ -62,11 +62,13 @@ Same 200 questions, answered by Muse Spark 1.3, both answers per question graded
 | Open-domain | 20% / 24% | 22% | 32% |
 | "Not mentioned" answers | 46 | 61 | 43 |
 | Context per question | ~602 tokens | ~569 tokens | ~611 tokens |
-| Facts saved, first conversation | 160 | 93 | 177 |
+| Facts saved, conversation `locomo-1` | 160 | 93 | 151 |
 
 v0.8's two numbers are from the first and the second run (the grader re-marked 8 of its unchanged answers). The first v0.9 added three things: the date on every log line given to the fact writer, an instruction to turn relative dates into absolute ones, and a "later messages override earlier ones" note for the answering model. The small writer then saved far fewer facts (v0.9 lost 26 questions to v0.8 and won 5; 14 of the losses were "not mentioned"). With all three removed, v0.9 tied v0.8 exactly (121 correct each; each won 8 the other lost). Rule since then: no change to the writer or answering instructions ships without beating the previous version. Harness: `benchmark/locomo/compare/run_v09.py` (`TAG=v09b` for the rerun).
 
-**Results (2026-09-28):**
+### v0.6 vs keyword search (2026-09-28)
+
+Answered by Muse Spark 1.3, graded by Claude Haiku.
 
 | Category (50 Q each) | hypnos | keyword search |
 |---|---|---|
@@ -101,7 +103,7 @@ Run cost: 796 Opus 5.5 calls, 2.31M tokens ($19.11 at list price). Published LoC
 
 Python remains the main engine; the Rust version is frozen in `future/agentmem-rs` for later.
 
-Same 200 questions, same memories, both engines running v0.8 recall while warm; all answers graded together by Claude Haiku.
+Same 200 questions, same memories, both engines running v0.8 recall while warm; answered by Muse Spark 1.3, all answers graded together by Claude Haiku.
 
 | | With Rust (agentmem-rs) | Without Rust (Python) |
 |---|---|---|
@@ -116,7 +118,7 @@ Harness: `benchmark/locomo/compare/run_rust.py` (split over two machines, merged
 
 ### v0.8: Jev-routed recall (2026-09-29)
 
-Same 200 questions, same memories; all six answers per question graded blind and side by side by Claude Haiku.
+Same 200 questions, same memories, answered by Muse Spark 1.3; all six answers per question graded blind and side by side by Claude Haiku.
 
 | System | Overall | Multi-hop | Temporal | Single-hop | Open-domain | Context / question |
 |---|---|---|---|---|---|---|
