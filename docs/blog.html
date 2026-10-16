@@ -101,7 +101,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 
 <p>Most of the decisions in a memory system are yes/no or pick-one questions. Does this quote support this claim? Does the new fact replace the old one? Is this memory relevant to the question? Asking a chat model these costs a full LLM call each time. A System One model, like <a href="https://typesafe.ai">Jev</a> or the open-weights <a href="https://laya-ai.com">Laya</a>, answers them in one fast step instead of writing text. In my tests Jev made these calls 7 to 15 times faster than the chat model and agreed with it 76 to 90% of the time. Without one, Hypnos still works. The memory model you pick does those checks while saving, a little more accurately in places, but with more tokens.</p>
 
-<h2>Nine versions</h2>
+<h2>Nine versions, and a bug-fix release</h2>
 
 <div class="scroll"><table>
 <thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
@@ -115,6 +115,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <tr><td>v0.7</td><td>Sep 28</td><td>Recall rewritten: evidence first, search facts and raw messages together</td></tr>
 <tr><td>v0.8</td><td>Sep 29</td><td>System One routes each question and picks the smallest context that answers</td></tr>
 <tr class="me"><td>v0.9</td><td>Oct 15</td><td>Usable by anyone: one-line install, works with any coding agent, cleanup, no windows</td></tr>
+<tr class="me"><td>v0.9.1</td><td>Oct 16</td><td>Bug fixes from a day of real use: never a duplicate, housekeeping stays out of memory</td></tr>
 </tbody></table></div>
 
 <p>v0.1 and v0.2 were designs on paper, so they have no scores. Everything from v0.3 on was measured.</p>
@@ -228,6 +229,18 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <p><strong>Many sessions at once.</strong> Each session is told what the others in the same project are doing, and that their tasks aren't its own. It never hands your own current conversation back to you as a "memory".</p>
 
 <p><strong>It doesn't remember refusals.</strong> "The assistant couldn't do X" is never saved, so a later session won't refuse the same thing because a memory told it to.</p>
+
+<h2>The first day of real use: v0.9.1</h2>
+
+<p>A day of using v0.9 on my own laptop turned up bugs no benchmark had shown.</p>
+
+<p><strong>Memory filled up with repeats.</strong> The same fact got saved two or three times in slightly different words. One reason: the System One account had run out of credits, and Hypnos quietly fell back to weaker checks without saying so. Now a fact that only restates one already stored is never saved, with or without System One. A different number, date, version, name or file always counts as a new fact, so "Level 6" and "Level 7" are both kept. And when System One stops answering, Hypnos tells you.</p>
+
+<p><strong>Cleaning up made more junk.</strong> Running <code>/memory-cleanup</code> or deleting old sessions was itself remembered, and the next sleep turned the cleanup list back into "new" facts. Housekeeping commands and Hypnos's own output are now never saved.</p>
+
+<p><strong>The cleanup list couldn't be used.</strong> It showed "117 facts" in a topic but not the facts, and the list and the delete could point at different memories. Now every fact has a number, and one session always uses one memory.</p>
+
+<p><strong>Ghost sessions.</strong> When the free models were down, the fallback writer's calls showed up in the session list as "Write the BIG memory summary…". They no longer do.</p>
 
 <h2>Things I tested and didn't ship</h2>
 

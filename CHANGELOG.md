@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.9.1: bug fixes from real use: 2026-10-16
+
+- **Never a duplicate.** A new fact that only restates a stored one is not saved. System One gets a "repeat" answer in the check it already makes for every new fact; without System One, a plain-code check compares meaning (local embeddings), words, and every number, date, version, name, file, id and ordinal. Any difference in those keeps both facts ("Level 6" vs "Level 7", "v0.8" vs "v0.9", "10 emails" vs "20 emails", "VS Code" vs "Neovim").
+- **Housekeeping stays out of memory.** `/memory-cleanup`, `/deleate` and short answers to them ("1-5, T2", "yes") are not logged, and Hypnos never stores its own output (cleanup lists, wake notes, recalled memory) again. More commands: `HYPNOS_QUIET_COMMANDS`.
+- **`/memory-cleanup` lists every fact**, numbered under its topic, instead of only topic counts; lines are cut at a word; "show Tn" numbers the older facts too. Facts that differ in a number, name or id are no longer offered as duplicates.
+- **One memory per session.** A session keeps the memory of the folder it started in, even after it changes folder, so logging, recall, the cleanup list and deleting all use the same memory (before, "delete 3" could hit a different list).
+- **No ghost sessions.** Memory-writer calls through `claude -p` no longer appear in the Claude Code session list (`--no-session-persistence`).
+- **No silent System One failure.** When the System One account refuses (no credits, bad key), Hypnos logs it and says so in the wake note instead of quietly falling back to weaker checks.
+
 ## v0.9 (in progress): memory you can manage, no echo, sooner sleep: 2026-10-13
 
 - No echo: recall skips messages of the current conversation that the agent still sees (until a compaction), and skips Jev entirely when memory holds nothing else.

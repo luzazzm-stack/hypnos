@@ -11,4 +11,4 @@ from .engine import Memory, Recall
 from .profiles import PROFILES
 
 __all__ = ['Memory', 'Recall', 'Config', 'load_config', 'PROFILES']
-__version__ = '0.6.0'
+__version__ = '0.9.1'

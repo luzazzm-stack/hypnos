@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](hypnos/pyproject.toml)
 [![MCP](https://img.shields.io/badge/MCP-server-6E56CF)](integrations/claude-code/README.md)
-[![Version](https://img.shields.io/badge/version-0.9.0-2ea44f)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.9.1-2ea44f)](CHANGELOG.md)
 [![License: All rights reserved](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](LICENSE)
 ![Status](https://img.shields.io/badge/status-research%20preview-orange)
 
@@ -68,7 +68,8 @@ print(mem.recall("which tests failed and why?").context)
 | Sleeps on it | when a session ends or goes quiet, a small model turns the log into short facts, each with the exact quote it came from; facts without evidence are dropped |
 | Updates what it knows | a new fact that replaces an old one (a changed port, a new decision) retires the old one, with history kept |
 | Remembers what matters | each new message gets only the memories it needs: a summary for broad questions, exact facts with quotes for precise ones |
-| Forgets on request | `/memory-cleanup` shows duplicates, unused and stale facts by topic in under a second; delete by number or topic |
+| Never repeats itself | a fact that only restates one already stored is not saved again; a different number, date, name or file always counts as new |
+| Forgets on request | `/memory-cleanup` lists every fact by number under its topic, plus duplicates, unused and stale facts, in under a second; delete by number or topic. The cleanup itself is never remembered |
 
 ```mermaid
 flowchart LR
@@ -95,7 +96,7 @@ flowchart LR
 | Original log | the topic's own log lines, word for word | ≤3,000 tokens |
 | Facts | verified claims, each with a quote, date, entities and validity window | per fact |
 
-It never saves an AI model's refusals ("the assistant can't do X"), never blocks your agent, and keeps each project's memory separate. Several sessions can run side by side; each knows what the others are doing and that their tasks are not its own.
+It never saves an AI model's refusals or its own output ("the assistant can't do X"), never blocks your agent, and keeps each project's memory separate. Several sessions can run side by side; each knows what the others are doing and that their tasks are not its own.
 
 The full design (rules R1–R15, the 20 typed decisions, parameters and a machine-readable JSON spec) is in **[docs/architecture.html](docs/architecture.html)**.
 
