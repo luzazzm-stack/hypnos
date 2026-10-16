@@ -174,6 +174,24 @@ ENOUGH = ('Do the memories in `memories` contain the specific information the qu
 VERIFY = ('Does the evidence text in `evidence` directly support the claim in `claim`? Judge only from that evidence.',
           'The evidence states or clearly shows what the claim says.',
           'The evidence does not show it, contradicts it, or the claim adds details not in the evidence.')
+WORTH_KEEPING = ('Would a future coding session with this user need the fact in `fact`, and is it something an agent could '
+                 'NOT simply find by reading files?',
+                 "A rule or preference of the user, a decision and its reason, where a project, important file, account or "
+                 "credential file is, the final outcome of work, or something not written anywhere (who contacted the user, "
+                 "applications, agreements, deadlines).",
+                 "A one-off step, test, error or intermediate fix; how a script or tool works inside (commands, flags, layout); "
+                 "what a session was about; counts or results of one run; search results; housekeeping; temp paths.")
+JUNK_PROMPT = """You are keeping a coding assistant's long-term memory SMALL. The attached file has numbered facts from one
+work session. Mark a fact JUNK if a future session would not need it or could find it by reading files:
+- a one-off step, test, error or intermediate fix while building something
+- how a script, tool, skill or app works inside: its commands, flags, options, file layout, function names, UI behaviour
+- what a session or task was about, session titles or lists, what was asked in another session
+- counts, statuses, timings or results of one run; search results; pages that were empty or 404
+- housekeeping (listing, deleting or cleaning sessions or memories), temp/scratchpad paths, background task ids
+KEEP: the user's rules, preferences and corrections; decisions and why; where projects, important files, accounts and
+credential files are; the final outcome of work that matters later; things not in any file (who contacted the user,
+applications, agreements, deadlines, people and roles). When unsure, KEEP.
+Reply with ONLY a JSON array of the JUNK numbers, e.g. [2, 5, 9]. Nothing else."""
 NEEDS_MEMORY = ('Would answering or acting on the message in `message` benefit from recalling earlier sessions with this user '
                 '(past decisions, preferences, facts, work done before)?',
                 'Earlier context would likely help.',

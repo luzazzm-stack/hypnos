@@ -356,3 +356,16 @@ def test_system_one_account_problem_is_reported(mem, monkeypatch):
     mem.log('The deploy target is staging_east', role='agent', session='s1')
     mem.sleep()
     assert 'HTTP 402' in mem.wake() and mem.status()['systemone_problem']
+
+
+def test_coding_memory_drops_junk_without_system_one(mem):
+    mem.log('Wrote a one-off probe to tmp_scratch/probe_42.py and ran it once', role='agent', session='s1')
+    mem.log('The production database lives at db_host_prod:5432 behind the vpn_gateway', role='agent', session='s1')
+    mem.sleep()
+    claims = [r['claim'] for r in mem.store.q("SELECT claim FROM facts WHERE status='active'")]
+    assert any('db_host_prod' in c for c in claims) and not any('tmp_scratch' in c for c in claims)
+
+
+def test_user_stated_facts_are_never_dropped_as_junk(mem):
+    mem.pin('Always keep tmp_scratch/notes.md, I use it daily')
+    assert any('tmp_scratch' in r['claim'] for r in mem.store.q("SELECT claim FROM facts WHERE status='active'"))

@@ -929,6 +929,8 @@ class Memory:
                          'quote': quote[:300], 'evidence': evidence, 'verify_p': p, 'entities': ents, 'valid_from': hit['ts'],
                          'scope': meta.get('scope', {}), 'meta': {k: meta[k] for k in ('cwd', 'url', 'sensor') if k in meta}})
         kept = [f for f in kept if not self._duplicate(f)]
+        if self.profile.name == 'coding' and only_row is None:
+            kept = self._worth_keeping(kept)       # v0.9.1: coding memory keeps only what a later session needs
         seen = []                                  # never store the same claim twice, from any episode or this batch
         kept = [f for f in kept if not (self._restated(f, seen) or seen.append(f['claim']))]
         topic = self._assign_topic(kept, allow_writer=allow_writer_topic) if kept else None
@@ -957,6 +959,27 @@ class Memory:
             if fw and gw and len(fw & gw) / len(fw | gw) >= 0.5:
                 return True
         return False
+
+    def _worth_keeping(self, facts):
+        """Coding sessions produce many facts nobody needs again (one-off steps, a tool's internals, run counts).
+        System One judges each fact; without it, the writer judges the whole batch in one call. Facts the user stated
+        are always kept. If neither answers, everything is kept (never lose memory because a check failed)."""
+        cand = [f for f in facts if f.get('source') != 'user']
+        if not cand:
+            return facts
+        drop = set()
+        if self.jev.enabled and not self.jev.llm and not J.DOWN['reason']:
+            ps = self.jev.verify_many([{'fact': f['claim']} for f in cand], *J.WORTH_KEEPING)
+            drop = {f['id'] for f, p in zip(cand, ps) if p is not None and p < 0.5}
+        if not drop and (not self.jev.enabled or self.jev.llm or J.DOWN['reason']):
+            listing = '\n'.join(f'{k + 1}. {f["claim"][:300]}' for k, f in enumerate(cand))
+            try:
+                m = re.search(r'\[[\d,\s]*\]', self.writer.complete(J.JUNK_PROMPT, [listing]) or '')
+                junk = set(json.loads(m.group(0))) if m else set()
+            except Exception:
+                junk = set()
+            drop = {f['id'] for k, f in enumerate(cand) if k + 1 in junk}
+        return [f for f in facts if f['id'] not in drop]
 
     def _restated(self, f, batch=()) -> bool:
         """The same claim already stored from any episode (or earlier in this batch, a list of claims), worded a little
@@ -1040,11 +1063,14 @@ class Memory:
             c = self.jev.choice({'facts': claims}, 'Which existing memory topic do the facts in `facts` mainly belong to? Pick new_topic if none fits well.', opts)
             if c and c != 'new_topic':
                 return c
-            if c is None:                                                    # no Jev: best keyword overlap
+            if c is None and not allow_writer:                               # no Jev, no writer: a clear keyword match only
                 fw = _words(' '.join(claims))
-                best = max(existing, key=lambda t: len(fw & _words((t['name'] or '') + ' ' + (t['desc'] or '') + ' ' + (t['small'] or ''))))
-                if len(fw & _words((best['name'] or '') + ' ' + (best['desc'] or '') + ' ' + (best['small'] or ''))) >= 3:
+                ov = lambda t: len(fw & _words((t['name'] or '') + ' ' + (t['desc'] or '') + ' ' + (t['small'] or '')))
+                best = max(existing, key=ov)
+                # v0.9.1: was ">= 3 shared words", which filed facts under unrelated topics; now a clear majority only
+                if ov(best) >= 5 and ov(best) >= 0.3 * len(fw):
                     return best['id']
+            # no Jev but a writer: the writer below picks the topic (accurate), instead of a keyword guess
         if not allow_writer:
             return None
         listing = '\n'.join(f'- {t["id"]}: {t["desc"]}' for t in existing[:80]) or '(none yet)'

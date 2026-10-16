@@ -170,6 +170,8 @@ class FakeWriter(Writer):
 
     def complete(self, prompt, attachments=()):
         src = attachments[0] if attachments else ''
+        if 'JSON array of the JUNK numbers' in prompt:       # the keep-it-small check: junk = lines about a temp file
+            return json.dumps([k + 1 for k, l in enumerate(src.splitlines()) if 'tmp_scratch' in l])
         if 'List the facts worth remembering' in prompt:
             out = []
             for line in src.splitlines():

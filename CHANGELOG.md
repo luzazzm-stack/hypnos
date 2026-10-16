@@ -7,6 +7,8 @@
 - **`/memory-cleanup` lists every fact**, numbered under its topic, instead of only topic counts; lines are cut at a word; "show Tn" numbers the older facts too. Facts that differ in a number, name or id are no longer offered as duplicates.
 - **One memory per session.** A session keeps the memory of the folder it started in, even after it changes folder, so logging, recall, the cleanup list and deleting all use the same memory (before, "delete 3" could hit a different list).
 - **No ghost sessions.** Memory-writer calls through `claude -p` no longer appear in the Claude Code session list (`--no-session-persistence`).
+- **Keep memory small.** Coding memory keeps only what a later session needs and cannot read in files (rules, decisions, where things are, outcomes, things written nowhere); one-off steps, a tool's internals, run counts and session titles are dropped before saving. Facts the user states are always kept.
+- **Right topics without System One.** The memory model picks the topic instead of a 3-shared-words guess that filed facts under unrelated topics.
 - **No silent System One failure.** When the System One account refuses (no credits, bad key), Hypnos logs it and says so in the wake note instead of quietly falling back to weaker checks.
 
 ## v0.9 (in progress): memory you can manage, no echo, sooner sleep: 2026-10-13
