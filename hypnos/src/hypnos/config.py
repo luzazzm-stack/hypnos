@@ -30,6 +30,9 @@ class Config:
     # locally with `laya-serve`; same /v1/systemone API). systemone_url overrides where requests go.
     systemone: str = 'jev'
     systemone_url: str = ''
+    # with systemone = "llm": which model answers the checks, as a writer_chain entry such as "claude:haiku"
+    # (empty = the memory model chain itself)
+    systemone_model: str = ''
     jev_credentials: Path = field(default_factory=lambda: Path.home() / '.typesafe' / 'credentials')
     gate_min_probability: float = 0.85
     # local meaning-based search (fastembed bge-small); off keeps RAM low

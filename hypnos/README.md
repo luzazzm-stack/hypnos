@@ -19,6 +19,7 @@ pip install -e ".[all]"                                   # extras: mcp, vectors
 
 ```toml
 systemone = "jev"            # jev (hosted, key in ~/.typesafe/credentials or TYPESAFE_API_KEY) | laya (local laya-serve) | llm
+systemone_model = ""          # with systemone = "llm": the model that makes the checks, e.g. "claude:haiku" (empty = the memory model)
 jev = true                   # use the System One model at all
 writer = "auto"              # auto = the writer_chain below; or opencode | claude | codex | openai | fake
 writer_chain = ["opencode:opencode/some-free-model", "openai:model@https://api.deepseek.com/v1#DEEPSEEK_API_KEY", "claude:haiku"]

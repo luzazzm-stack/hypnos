@@ -75,7 +75,12 @@ class Jev:
         """The same typed questions, answered by an LLM in one call. Returns Jev-shaped answers or None."""
         from .llm import make_writer, parse_json
         if self._writer is None:
-            self._writer = make_writer(self.cfg)
+            spec = getattr(self.cfg, 'systemone_model', '')
+            if spec:                                   # a model of its own for the checks, e.g. "claude:haiku"
+                import dataclasses
+                self._writer = make_writer(dataclasses.replace(self.cfg, writer='auto', writer_chain=[spec]))
+            else:
+                self._writer = make_writer(self.cfg)
         lines = []
         for qid, q in questions.items():
             crit = q.get('criteria')
