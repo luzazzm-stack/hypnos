@@ -110,9 +110,10 @@ class ClaudeWriter(Writer):
 
     def complete(self, prompt, attachments=()):
         body = prompt + ''.join(f'\n\n--- attached file {i + 1} ---\n{a}' for i, a in enumerate(attachments))
-        # --no-session-persistence: writer calls must not show up in the user's Claude Code session list
+        # A writer call is invisible to the user: no entry in the session list (--no-session-persistence) and none of
+        # the user's hooks run for it (sounds, notifications, loggers), while the subscription login still works.
         p = subprocess.run([self.exe, '-p', '--model', self.model, '--output-format', 'json', '--strict-mcp-config',
-                            '--no-session-persistence'], input=body,
+                            '--no-session-persistence', '--settings', '{"disableAllHooks": true}'], input=body,
                            env=_child_env(), capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=300, **hidden())
         try:
             out = json.loads(p.stdout)
