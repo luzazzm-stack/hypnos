@@ -4,12 +4,16 @@ from __future__ import annotations
 import json
 import os
 import threading
+import urllib.error
 import urllib.request
 
 API = 'https://api.typesafe.ai/v1/systemone'
 LAYA_API = 'http://127.0.0.1:8000/v1/systemone'          # v0.9: `laya-serve` on this machine
 # v0.9: many agent sessions share one service; cap the Jev requests in flight across all of them
 IN_FLIGHT = threading.BoundedSemaphore(int(os.environ.get('HYPNOS_JEV_MAX_IN_FLIGHT', '24')))
+
+
+DOWN = {'reason': ''}          # set when the System One account refuses (no credits, bad key)
 
 
 class Jev:
@@ -49,6 +53,17 @@ class Jev:
         try:
             with IN_FLIGHT, urllib.request.urlopen(req, timeout=timeout) as r:
                 answers = json.loads(r.read())['answers']
+        except urllib.error.HTTPError as e:
+            if e.code in (401, 402, 403) and not getattr(self, 'down', ''):
+                try:
+                    detail = json.loads(e.read()).get('detail', {})
+                    detail = detail.get('message', '') if isinstance(detail, dict) else str(detail)
+                except Exception:
+                    detail = ''
+                self.down = f'System One ({self.url}) refused with HTTP {e.code}: {detail or e.reason}'
+                DOWN['reason'] = self.down
+                print('[hypnos] WARNING ' + self.down + ' -- memory falls back to plain-code checks until this is fixed', flush=True)
+            return None
         except Exception:
             return None
         if self.store is not None:

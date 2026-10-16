@@ -23,6 +23,62 @@ from .client import call, ensure_running, session_space
 from .proc import hidden
 
 SKIP_TOOLS = {'TodoWrite', 'TaskCreate', 'TaskUpdate', 'TaskList', 'TaskGet', 'ToolSearch'}
+# Housekeeping commands memory must not learn from: while one runs (and its short follow-up answers like "1-5, T2"),
+# nothing is logged, so no facts are made from it. Add more with HYPNOS_QUIET_COMMANDS="cmd1,cmd2".
+QUIET_COMMANDS = {'memory-cleanup', 'deleate'} | {c.strip().lstrip('/') for c in
+                                                 os.environ.get('HYPNOS_QUIET_COMMANDS', '').split(',') if c.strip()}
+# Hypnos's own output (cleanup lists, wake notes, recalled memory) is never stored again as if it were new.
+OWN_TEXT = ('Long-term memory (hypnos', 'Relevant long-term memory (hypnos)', '[memory topics]',
+            'All facts by topic, newest first', 'Duplicates (the older copy goes)')
+
+
+def _quiet_file(session):
+    from .client import _pin_file
+    f = _pin_file(session)
+    return f.with_suffix('.quiet') if f else None
+
+
+def _quiet(session, on=None):
+    """Is this session running a housekeeping command? With `on`, switch it."""
+    f = _quiet_file(session)
+    if not f:
+        return False
+    try:
+        if on is True:
+            f.parent.mkdir(parents=True, exist_ok=True); f.write_text('1')
+        elif on is False:
+            f.unlink(missing_ok=True)
+        return f.exists()
+    except OSError:
+        return False
+
+
+def _quiet_command(text) -> bool:
+    import re
+    m = re.match(r'\s*(?:<command-name>)?/([\w.:-]+)', str(text or ''))
+    return bool(m and m.group(1).split(':')[-1].lower() in QUIET_COMMANDS)
+
+
+def _selection_reply(text) -> bool:
+    import re
+    words = re.sub(r'\bt\d+\b|[\d,;.\s-]', ' ', str(text or '').lower()).split()
+    allowed = {'all', 'duplicates', 'unused', 'stale', 'purge', 'show', 'list', 'open', 'and', 'yes', 'no', 'ok', 'okay',
+               'keep', 'delete', 'remove', 'them', 'these', 'it', 'fix', 'none', 'cancel', 'next', 'more', 'page', 'done'}
+    return len(str(text or '')) <= 120 and all(w in allowed for w in words)
+
+
+def _own_text(text) -> bool:
+    text = str(text or '')
+    return any(marker in text for marker in OWN_TEXT) or ('Memory for ' in text and ' facts.' in text[:300])
+
+
+def _housekeeping_tool(tool, ti) -> bool:
+    if tool.startswith('mcp__hypnos__') or tool.startswith('hypnos_'):
+        return True
+    if tool == 'Skill' and str(ti.get('skill', '')).split(':')[-1].lower() in QUIET_COMMANDS:
+        return True
+    cmd = str(ti.get('command', ''))
+    return 'hypnos cleanup' in cmd or any(f'skills/{c}' in cmd.replace('\\', '/') for c in QUIET_COMMANDS)
 
 
 def _out(event, context):
@@ -89,7 +145,15 @@ def run(kind: str, d: dict, emit) -> int:
             emit((call('/wake', base, timeout=8) or {}).get('context', ''))
     elif kind == 'prompt':
         prompt = _first(d, 'prompt', 'text', 'message', 'input', default='')
-        if not prompt or not ensure_running(wait=3):
+        if not prompt:
+            return 0
+        if _quiet_command(prompt) or _own_text(prompt):          # /memory-cleanup, /deleate: memory stays out of it
+            _quiet(session, True)
+            return 0
+        if _quiet(session) and _selection_reply(prompt):       # an answer to it ("1-5, T2", "show T3", "yes"): still quiet
+            return 0
+        _quiet(session, False)
+        if not ensure_running(wait=3):
             return 0
         call('/log', {**base, 'role': 'user', 'content': str(prompt), 'meta': {'cwd': cwd}}, timeout=5)
         r = call('/recall', {**base, 'query': str(prompt), 'gate': True, 'budget': 2500}, timeout=20) or {}
@@ -110,6 +174,12 @@ def run(kind: str, d: dict, emit) -> int:
             return 0
         ti = _first(d, 'tool_input', 'input', 'args', 'arguments', default={})
         ti = dict(ti) if isinstance(ti, dict) else {'input': ti}
+        if _housekeeping_tool(tool, ti):
+            if tool == 'Skill':
+                _quiet(session, True)
+            return 0
+        if _quiet(session):
+            return 0
         if d.get('file_path') and 'file_path' not in ti:
             ti['file_path'] = d['file_path']
         resp = _first(d, 'tool_response', 'output', 'result', 'edits', default='')
@@ -129,7 +199,7 @@ def run(kind: str, d: dict, emit) -> int:
         text = _first(d, 'last_assistant_message', 'last-assistant-message', 'response', 'reply', 'text', default='')
         if not text and d.get('transcript_path'):
             text = _last_assistant_text(d['transcript_path'])
-        if text:
+        if text and not _quiet(session) and not _own_text(text):
             call('/log', {**base, 'role': 'agent', 'content': str(text)[:6000], 'meta': {'cwd': cwd}}, timeout=3)
     elif kind in ('compact', 'end'):
         if ensure_running(wait=3):                         # v0.9: after a compaction, older turns may be recalled again

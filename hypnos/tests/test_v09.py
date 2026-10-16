@@ -42,7 +42,9 @@ def test_after_compaction_older_turns_come_back(mem):
     assert 'build_cache_v2' in mem.recall('Where is the cache folder build_cache_v2?', session='now').context
 
 
-def test_review_cleanup_forget_purge(mem):
+def test_review_cleanup_forget_purge(cfg):
+    mem = Memory('test', 'chat', cfg=cfg, writer=FakeWriter())
+    mem._restated = lambda *a: False          # duplicates stored before the no-duplicates rule must still be cleanable
     mem.log('The scheduled task JackMicAutoSwitch switches the default capture device', role='agent', session='s1')
     mem.log('The scheduled task JackMicAutoSwitch switches the default capture device on plug', role='agent', session='s1')
     mem.sleep()
@@ -306,3 +308,51 @@ def test_session_keeps_its_first_folder_space(tmp_path, monkeypatch):
     monkeypatch.setenv('CLAUDE_CODE_SESSION_ID', 'sess-1')
     monkeypatch.delenv('HYPNOS_SPACE', raising=False)
     assert client.current_space(str(b)) == 'code-proj_a'
+
+
+def test_coding_memory_skips_restatements_but_keeps_new_numbers(mem):
+    mem.log('The scheduled task JackMicAutoSwitch switches the default capture device', role='agent', session='s1')
+    mem.sleep()
+    mem.log('The scheduled task JackMicAutoSwitch switches the default capture device on plug', role='agent', session='s2')
+    mem.log('Service svc_a listens on port 8081 in cluster_east', role='agent', session='s2')
+    mem.sleep()
+    mem.log('Service svc_a listens on port 8082 in cluster_east', role='agent', session='s3')
+    mem.sleep()
+    claims = [r['claim'] for r in mem.store.q("SELECT claim FROM facts WHERE status='active'")]
+    assert sum('JackMicAutoSwitch' in c for c in claims) == 1
+    assert any('8082' in c for c in mem.store.q_claims()) if hasattr(mem.store, 'q_claims') else         any('8082' in r['claim'] for r in mem.store.q("SELECT claim FROM facts"))
+
+
+def test_housekeeping_commands_are_not_logged(tmp_path, monkeypatch):
+    from hypnos import hooks
+    monkeypatch.setenv('HYPNOS_HOME', str(tmp_path))
+    logged = []
+    monkeypatch.setattr(hooks, 'call', lambda path, payload=None, timeout=0: logged.append((path, payload)) or {})
+    monkeypatch.setattr(hooks, 'ensure_running', lambda wait=0: True)
+    ev = {'session_id': 'sess-q', 'cwd': str(tmp_path)}
+    hooks.run('prompt', {**ev, 'prompt': '/memory-cleanup'}, print)
+    hooks.run('tool', {**ev, 'tool_name': 'mcp__hypnos__memory_cleanup_apply', 'tool_input': {'selection': '1-5'}}, print)
+    hooks.run('prompt', {**ev, 'prompt': '1-5, T2'}, print)
+    hooks.run('tool', {**ev, 'tool_name': 'Bash', 'tool_input': {'command': 'ls'}, 'tool_response': 'x'}, print)
+    hooks.run('reply', {**ev, 'last_assistant_message': 'Removed 5 facts, 112 remain.'}, print)
+    hooks.run('prompt', {**ev, 'prompt': '/deleate'}, print)
+    assert not [p for p, _ in logged if p == '/log']
+    hooks.run('prompt', {**ev, 'prompt': 'Now please fix the login page redirect bug in the auth module of the web app'}, print)
+    assert [p for p, _ in logged if p == '/log']                    # normal work is remembered again
+
+
+def test_repeat_in_other_words_is_not_stored_without_system_one(mem, monkeypatch):
+    monkeypatch.setattr(mem.vec, 'similarity', lambda text, others: [0.97 for _ in others])
+    mem.log('Deleted Claude sessions are sent to the Recycle_Bin instead of being erased', role='agent', session='s1')
+    mem.sleep()
+    mem.log('Deleted Claude sessions go to the Recycle_Bin rather than being erased for good', role='agent', session='s2')
+    mem.sleep()
+    assert sum('Recycle' in r['claim'] for r in mem.store.q("SELECT claim FROM facts WHERE status='active'")) == 1
+
+
+def test_system_one_account_problem_is_reported(mem, monkeypatch):
+    from hypnos import jev as J
+    monkeypatch.setitem(J.DOWN, 'reason', 'System One refused with HTTP 402: no credits')
+    mem.log('The deploy target is staging_east', role='agent', session='s1')
+    mem.sleep()
+    assert 'HTTP 402' in mem.wake() and mem.status()['systemone_problem']

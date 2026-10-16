@@ -67,3 +67,10 @@ class Vectors:
         mat = np.frombuffer(b''.join(r['vec'] for r in rows), dtype=np.float32).reshape(len(rows), -1)
         sims = mat @ self._embed([query], query=True)[0]
         return [rows[i]['ref'] for i in np.argsort(-sims)[:k]]
+
+    def similarity(self, text, others):
+        """Meaning similarity (cosine, 0-1) of `text` to each of `others`; None when vectors are off."""
+        if not others or not self.enabled or not self._load():
+            return None
+        v = self._embed([text] + list(others))
+        return [float(x) for x in v[1:] @ v[0]]
