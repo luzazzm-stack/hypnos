@@ -4,7 +4,12 @@ __pycache__/
 dist/
 *.egg-info/
 target/
+*.log
 benchmark/locomo/cache/
 benchmark/locomo/locomo10.json
 benchmark/locomo/.agentmem*/
 benchmark/locomo/.hypnos*/
+benchmark/sessions/out/
+benchmark/sessions/cache/
+benchmark/sessions/session-logs/
+benchmark/sessions/logs/

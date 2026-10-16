@@ -1,0 +1,136 @@
+AGENT MEMORY ARCHITECTURE: IMPROVEMENTS TO REVIEW
+Written 29 September 2026 for review tomorrow. Nothing here has been built yet.
+
+Where we are now (v0.8, Python is the main engine):
+  - LoCoMo: 55% with ~600 tokens of context per question (Mem0 51% with ~1,100, GBrain 51% with ~4,000)
+  - One search takes about 3-4 seconds. About 90% of that is waiting for Jev over the internet.
+  - Sleep (building memories) is slow because every fact list and summary is written by an LLM (~20 s per call).
+
+Each item: WHAT to change, WHY (the evidence), EXPECTED GAIN, COST, and EFFORT.
+
+
+==================================================================
+PART A: MAKE SEARCH FASTER (speed; same accuracy)
+==================================================================
+
+A1. Fewer Jev round trips
+  WHAT:   Today v0.8 sends one Jev request per candidate fact or message (about 40-60 requests per question, 12 at a time).
+          Instead, put several candidates into one request, e.g. 10 items per request with one question per item.
+  WHY:    Jev answers all questions in one request in parallel, so 10 questions cost about the same time as 1.
+  GAIN:   Search time roughly halved (about 3.5 s -> 1.5-2 s).
+  COST:   Nothing extra (Jev is free for us).
+  EFFORT: Small. Must first test that Jev judges items just as well when several share one request.
+
+A2. Skip search when the message doesn't need memory
+  WHAT:   Before searching, ask Jev "does this message need earlier memory?" (the check already exists but is off
+          by default). For "hi", "thanks", "run the tests" and similar, skip the search entirely.
+  WHY:    Many chat and coding messages don't need memory at all.
+  GAIN:   Those messages get 0 s instead of ~3.5 s, and 0 tokens of context.
+  COST:   One small Jev check per message (~0.5 s).
+  EFFORT: Very small: switch it on in the Claude Code and opencode integrations, then test it doesn't skip real questions.
+
+A3. Cache repeated work
+  WHAT:   Remember Jev's answers for the same question + same memory item, and reuse the whole search result when the
+          same question comes again before the memory changes.
+  WHY:    Agents often ask the same thing several times in one session.
+  GAIN:   Repeated searches become almost instant.
+  COST:   A little disk space.
+  EFFORT: Small.
+
+A4. Do more work during sleep, less during search
+  WHAT:   During sleep, pre-compute things search needs: which facts belong to which person, lists of items per
+          person + subject, and the dates of events.
+  WHY:    Search then has less to gather and judge live.
+  GAIN:   Faster search, especially for list questions ("what bands has Melanie seen?").
+  COST:   Slightly longer sleep (runs in the background, so you don't wait for it).
+  EFFORT: Medium.
+
+
+==================================================================
+PART B: MAKE MEMORY BUILDING CHEAPER (sleep)
+==================================================================
+
+B1. Write medium and big summaries only when they are needed
+  WHAT:   Sleep always writes all three summary levels for every changed topic. Write small at sleep, and write medium
+          and big only the first time a search actually needs them.
+  WHY:    Search asked for a medium/big summary in only ~1% of LoCoMo questions (overview questions).
+  GAIN:   About 2 of every 3 summary-writing calls saved, so sleep is faster and uses less of the free Muse quota.
+  COST:   The first overview question on a topic waits once for the summary (~20 s).
+  EFFORT: Small.
+
+B2. A cheaper model for fact extraction
+  WHAT:   Use a smaller/faster model for listing facts; keep Jev for checking them.
+  GAIN:   Faster sleep. COST: must check the facts are still as good. EFFORT: Small to test.
+
+
+==================================================================
+PART C: MAKE ANSWERS MORE ACCURATE (the next design version, v0.9)
+==================================================================
+
+C1. Short, self-contained facts (like Mem0)
+  WHAT:   Ask the fact writer for short facts that each hold exactly one thing, with names and dates in them
+          ("Melanie has 3 children (said 2023-10-20)").
+  WHY:    Mem0 still beats us on multi-hop questions (46% vs 42-44%) using about 1,100 tokens; its facts are short and exact.
+  GAIN:   Better multi-hop, even less context.
+  COST:   Memories must be rebuilt (hundreds of Muse calls, run over two days or two laptops).
+  EFFORT: Small change, big test.
+
+C2. Narrower topics for chat
+  WHAT:   Topics per person + subject ("Melanie: family", "John: gaming") instead of one topic for a whole chat.
+  WHY:    In LoCoMo each two-person chat ended up in 1-4 huge topics, so the small/medium/big ladder helped little there.
+  GAIN:   The summary ladder works for chats too; better overview answers.
+  COST:   Part of the same rebuild as C1.
+  EFFORT: Medium.
+
+C3. Turn relative dates into real dates when saving facts
+  WHAT:   When someone says "yesterday" or "last week", save the real date in the fact.
+  WHY:    Many "when" questions depend on it; today the answering model has to work it out.
+  GAIN:   Better "when" answers (currently 72-80%).
+  EFFORT: Small.
+
+C4. Counting and list questions
+  WHAT:   For "how many" and "what kinds of" questions, gather every matching fact and let code count them, instead of
+          hoping the model adds them up.
+  WHY:    Example: "How many children does Melanie have?" is spread over several chats (2 younger kids + a son) and was missed.
+  GAIN:   Better multi-hop.
+  EFFORT: Medium.
+
+C5. Try the query-expansion switch
+  WHAT:   Already built but off: add related words before searching ("musical artists" -> concert, band, show).
+  GAIN:   Unknown: needs a test. COST: one extra LLM call per search.
+
+
+==================================================================
+PART D: TESTING THAT WOULD MAKE THE RESULTS STRONGER
+==================================================================
+
+D1. Mem0 and GBrain on YOUR coding sessions
+  Our design scored 96% there, but Mem0 and GBrain were only compared on LoCoMo (chat). Coding with exact paths and
+  commands is where this design should be strongest.
+
+D2. A second standard benchmark (LongMemEval)
+  One benchmark can be luck. A second one makes the claims much stronger.
+
+D3. Reduce grading noise
+  With 200 questions, results move about +/-3 points by chance. Grade twice, or add more questions, before claiming a win.
+
+
+==================================================================
+PART E: HOUSEKEEPING
+==================================================================
+
+E1. Rust toolchain on this laptop: uninstall it to free several GB? (The frozen Rust code in future/agentmem-rs can
+    be rebuilt later by reinstalling.)
+E2. If Rust is ever revived: port the tests and add automatic builds for Windows and Linux first.
+
+
+==================================================================
+SUGGESTED ORDER
+==================================================================
+  1. A2 + A1 + A3   quick speed wins, no rebuild, no Muse cost
+  2. B1             cheaper sleep
+  3. C3 + C1 + C2   v0.9: one memory rebuild, then rerun LoCoMo (both laptops)
+  4. C4             counting questions
+  5. D1, D2, D3     stronger evidence
+
+© 2026 Luza Maharjan. All rights reserved.

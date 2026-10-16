@@ -37,7 +37,7 @@ Two evaluations, reported separately because they measure different things.
 | Recall enough? | 11.3× faster | 76% |
 | Topic choice | 6.9× faster | 90% |
 
-The session logs are private (they contain real work), so only these results are published.
+The harness is in [`benchmark/sessions`](../benchmark/sessions). The session logs, per-question answers and call cache are private (they contain real work), so only these results are published.
 
 ## 2. LoCoMo (standard benchmark)
 
