@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agent Memory Benchmarks</title>
+<meta name="author" content="Luza Maharjan">
+<meta name="copyright" content="© 2026 Luza Maharjan. All rights reserved.">
+<meta name="description" content="All benchmark reports and results for the agent memory architecture: own coding sessions, LoCoMo, and a head-to-head against Mem0 and GBrain.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #FFFFFF; --panel: #FAFAFA; --panel-2: #F1F1F1;
+  --line: #E4E4E4; --line-strong: #C9C9C9;
+  --text: #000000; --muted: #5A5A5A;
+  --inv-bg: #000000; --inv-text: #FFFFFF; --inv-muted: #B5B5B5; --inv-line: #2E2E2E;
+  --green: #15803D; --green-bg: #DCFCE7; --green-line: #86EFAC;
+  --yellow: #946200; --yellow-bg: #FEF6C3; --yellow-line: #FACC15;
+  --red: #B91C1C; --red-bg: #FEE2E2; --red-line: #FCA5A5;
+  --sans: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --panel: #0B0B0B; --panel-2: #161616;
+    --line: #242424; --line-strong: #3D3D3D;
+    --text: #FFFFFF; --muted: #A6A6A6;
+    --inv-bg: #FFFFFF; --inv-text: #000000; --inv-muted: #525252; --inv-line: #DADADA;
+    --green: #4ADE80; --green-bg: rgba(34,197,94,.13); --green-line: rgba(74,222,128,.45);
+    --yellow: #FACC15; --yellow-bg: rgba(250,204,21,.12); --yellow-line: rgba(250,204,21,.45);
+    --red: #F87171; --red-bg: rgba(239,68,68,.14); --red-line: rgba(248,113,113,.45);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #000000; --panel: #0B0B0B; --panel-2: #161616;
+  --line: #242424; --line-strong: #3D3D3D;
+  --text: #FFFFFF; --muted: #A6A6A6;
+  --inv-bg: #FFFFFF; --inv-text: #000000; --inv-muted: #525252; --inv-line: #DADADA;
+  --green: #4ADE80; --green-bg: rgba(34,197,94,.13); --green-line: rgba(74,222,128,.45);
+  --yellow: #FACC15; --yellow-bg: rgba(250,204,21,.12); --yellow-line: rgba(250,204,21,.45);
+  --red: #F87171; --red-bg: rgba(239,68,68,.14); --red-line: rgba(248,113,113,.45);
+}
+
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 64px); -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+.narrow { max-width: 680px; }
+
+.ic { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.ic.sm { width: 16px; height: 16px; }
+.ic.lg { width: 24px; height: 24px; }
+
+h1 { font-size: clamp(34px, 7.4vw, 60px); line-height: 1.02; font-weight: 700; letter-spacing: -0.035em; margin: 0; }
+h2 { font-size: clamp(24px, 4.4vw, 32px); line-height: 1.15; font-weight: 700; letter-spacing: -0.025em; margin: 0; }
+h3 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 32px 0 0; }
+p { margin: 12px 0 0; }
+.muted { color: var(--muted); }
+a { color: inherit; }
+ul, ol { margin: 12px 0 0; padding-left: 22px; }
+li { margin-top: 6px; }
+code { font-family: var(--mono); font-size: 0.86em; background: var(--panel-2); padding: 2px 6px; border-radius: 5px; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; border-radius: 6px; }
+
+/* top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 16px; height: 56px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.01em; text-decoration: none; white-space: nowrap; }
+.brand .mark { width: 28px; height: 28px; border-radius: 8px; background: var(--text); color: var(--bg); display: grid; place-items: center; }
+.nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a { font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
+.nav a:hover { color: var(--text); background: var(--panel-2); }
+.icon-btn { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); cursor: pointer; }
+.icon-btn:hover { background: var(--panel-2); }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: 15px; font-weight: 600; padding: 11px 18px; border-radius: 12px; border: 1px solid var(--text); background: var(--text); color: var(--bg); text-decoration: none; cursor: pointer; }
+.btn:hover { opacity: .86; }
+.btn.ghost { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn.ghost:hover { opacity: 1; background: var(--panel-2); }
+.btn.small { font-size: 13px; padding: 6px 11px; border-radius: 9px; }
+
+/* hero */
+.hero { padding: 56px 0 24px; display: grid; gap: 40px; align-items: center; }
+@media (min-width: 860px) { .hero { grid-template-columns: 1.25fr 1fr; padding-top: 80px; } }
+.hero .sub { font-size: 19px; line-height: 1.5; color: var(--muted); margin-top: 20px; max-width: 540px; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.cycle { width: 100%; max-width: 320px; margin: 0 auto; display: block; }
+.cycle .ring-base { stroke: var(--line-strong); }
+.cycle .ring-awake { stroke: var(--green); }
+.cycle .knob { fill: var(--bg); stroke: var(--text); }
+.cycle .knob.g { stroke: var(--green); }
+.cycle text { fill: var(--text); font-family: var(--sans); }
+.cycle .t-muted { fill: var(--muted); }
+.cycle .orbit circle { fill: var(--text); }
+@media (prefers-reduced-motion: no-preference) {
+  .cycle .orbit { transform-origin: 130px 130px; animation: orbit 24s linear infinite; }
+  @keyframes orbit { to { transform: rotate(360deg); } }
+}
+.legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); }
+.dot.dash { background: none; border: 2px dashed var(--line-strong); }
+
+.readers { display: grid; gap: 12px; margin: 24px 0 0; }
+@media (min-width: 700px) { .readers { grid-template-columns: 1fr 1fr; } }
+.reader { display: flex; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); font-size: 15px; line-height: 1.5; }
+.reader b { display: block; font-size: 15px; }
+.badge-ic { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--text); color: var(--bg); }
+.badge-ic.g { background: var(--green-bg); color: var(--green); }
+.badge-ic.y { background: var(--yellow-bg); color: var(--yellow); }
+.badge-ic.r { background: var(--red-bg); color: var(--red); }
+.badge-ic.n { background: var(--panel-2); color: var(--text); }
+
+/* sections */
+section.block { padding: 72px 0 0; }
+.sec-head { display: flex; align-items: center; gap: 14px; }
+.sec-head .num { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.sec-intro { color: var(--muted); margin-top: 14px; max-width: 680px; font-size: 17px; }
+
+/* diagram */
+.diagram { margin-top: 28px; }
+.zone { border: 1px solid var(--line-strong); border-radius: 20px; padding: 18px; }
+.zone-title { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; margin: 0 0 14px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line-strong); }
+.pill.g { color: var(--green); background: var(--green-bg); border-color: var(--green-line); }
+.pill.y { color: var(--yellow); background: var(--yellow-bg); border-color: var(--yellow-line); }
+.pill.r { color: var(--red); background: var(--red-bg); border-color: var(--red-line); }
+.zone.awake { border-color: var(--green-line); background: linear-gradient(var(--green-bg), var(--green-bg)) var(--bg); }
+.zone.awake .zone-title { color: var(--green); }
+.zone.asleep { background: var(--inv-bg); color: var(--inv-text); border-color: var(--inv-bg); }
+.cards { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.card { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); font-size: 14px; line-height: 1.4; }
+.card b { display: block; font-weight: 600; font-size: 14.5px; }
+.card span.d { color: var(--muted); font-size: 13px; }
+.card.main { border: 2px solid var(--text); }
+.card.jev { border: 1px dashed var(--yellow-line); background: linear-gradient(var(--yellow-bg), var(--yellow-bg)) var(--bg); }
+.card.jev .ic { color: var(--yellow); }
+.flowline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.flowline .card { flex: 1 1 150px; }
+.flowline > .ic { color: var(--muted); }
+@media (max-width: 620px) { .flowline > .ic { transform: rotate(90deg); margin: -2px auto; flex-basis: 100%; } }
+.connect { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 18px; font-size: 13px; color: var(--muted); }
+.connect div { display: flex; gap: 8px; align-items: center; }
+.connect .ic { color: var(--text); }
+.pipe { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); counter-reset: p; }
+.pipe li { counter-increment: p; margin: 0; display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--inv-line); font-size: 14px; font-weight: 500; }
+.pipe li::before { content: counter(p); font-family: var(--mono); font-size: 12px; color: var(--inv-muted); }
+
+/* tables */
+.scroll { overflow-x: auto; margin-top: 20px; border: 1px solid var(--line); border-radius: 16px; }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 14px; line-height: 1.45; }
+th { text-align: left; font-weight: 600; font-size: 13px; color: var(--muted); background: var(--panel); padding: 12px 16px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 500; }
+td .cell-ic { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; }
+.val { font-family: var(--mono); font-size: 13px; padding: 2px 8px; border-radius: 6px; background: var(--panel-2); white-space: nowrap; }
+
+/* code */
+.code { margin-top: 20px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.code-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; background: var(--panel); border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); font-weight: 500; }
+.code-head .l { display: inline-flex; align-items: center; gap: 8px; }
+.code-head .r { display: inline-flex; gap: 8px; }
+.code pre { margin: 0; padding: 16px; overflow: auto; font-family: var(--mono); font-size: 13px; line-height: 1.6; }
+.code pre.tall { max-height: 460px; }
+.code pre code { background: none; padding: 0; font-size: inherit; }
+
+/* layers */
+.layers { display: grid; gap: 24px; margin-top: 28px; align-items: start; }
+@media (min-width: 860px) { .layers { grid-template-columns: 1.1fr 1fr; } }
+.pyramid { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.layer-btn { font: inherit; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); font-weight: 600; font-size: 15px; cursor: pointer; }
+.layer-btn:hover { background: var(--panel-2); }
+.layer-btn[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.layer-btn.raw { border-style: dashed; }
+.w1 { width: 42%; } .w2 { width: 56%; } .w3 { width: 70%; } .w4 { width: 85%; } .w5 { width: 100%; }
+@media (max-width: 480px) { .w1 { width: 58%; } .w2 { width: 68%; } .w3 { width: 78%; } .w4 { width: 89%; } }
+.axis { display: flex; justify-content: space-between; width: 100%; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.layer-detail { border: 1px solid var(--line); border-radius: 18px; padding: 20px; background: var(--panel); }
+.layer-detail h3 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 19px; }
+.layer-detail dl { margin: 14px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 14.5px; }
+.layer-detail dt { color: var(--muted); }
+.layer-detail dd { margin: 0; }
+
+/* tabs */
+.tabs { display: flex; gap: 6px; overflow-x: auto; margin-top: 28px; padding-bottom: 2px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { font: inherit; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); cursor: pointer; white-space: nowrap; }
+.tab:hover { background: var(--panel-2); }
+.tab[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.panel { margin-top: 20px; }
+.panel > h3:first-child { margin-top: 0; }
+.steps { list-style: none; padding: 0; margin: 16px 0 0; counter-reset: s; max-width: 720px; }
+.steps li { counter-increment: s; position: relative; margin: 0; padding: 0 0 18px 48px; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: -2px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-strong); display: grid; place-items: center; font-family: var(--mono); font-size: 13px; background: var(--bg); }
+.steps li::after { content: ""; position: absolute; left: 15px; top: 30px; bottom: 2px; width: 1px; background: var(--line-strong); }
+.steps li:last-child::after { display: none; }
+
+.sleep-grid { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); counter-reset: z; }
+.sleep-grid li { counter-increment: z; margin: 0; position: relative; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); font-size: 14px; line-height: 1.45; color: var(--muted); }
+.sleep-grid li::after { content: counter(z); position: absolute; top: 14px; right: 16px; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.sleep-grid b { display: block; color: var(--text); font-size: 15px; margin: 12px 0 4px; }
+
+/* jev */
+.jev-hero { margin-top: 28px; display: flex; gap: 16px; align-items: flex-start; padding: 20px; border-radius: 20px; border: 1px solid var(--yellow-line); background: linear-gradient(var(--yellow-bg), var(--yellow-bg)) var(--bg); }
+.jev-hero p { margin-top: 6px; }
+.jev-hero b.t { font-size: 18px; letter-spacing: -0.01em; }
+.yn { display: inline-flex; gap: 4px; }
+.facts { display: grid; gap: 10px; margin-top: 20px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.fact { display: flex; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.fact > div { min-width: 0; overflow-wrap: anywhere; }
+.fact b { display: block; color: var(--text); font-size: 14.5px; margin-bottom: 2px; }
+
+/* rules */
+.rules { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.rules li { margin: 0; padding: 18px; border: 1px solid var(--line); border-radius: 16px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.rules .rh { display: flex; align-items: center; justify-content: space-between; color: var(--red); }
+.rules .rid { font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 6px; background: var(--red-bg); border: 1px solid var(--red-line); }
+.rules b { display: block; color: var(--text); font-size: 15px; margin: 12px 0 4px; }
+
+/* build */
+.build { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); counter-reset: b; }
+.build li { counter-increment: b; margin: 0; padding: 18px; border-radius: 16px; border: 1px solid var(--line); font-size: 14px; line-height: 1.45; color: var(--muted); }
+.build li .bn { display: flex; align-items: center; gap: 10px; }
+.build li .bn::before { content: counter(b); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--text); color: var(--bg); font-family: var(--mono); font-size: 13px; font-weight: 500; }
+.build li.first { border-color: var(--green-line); background: linear-gradient(var(--green-bg), var(--green-bg)) var(--bg); }
+.build li.last { border-style: dashed; border-color: var(--yellow-line); }
+.build b { display: block; color: var(--text); font-size: 15px; margin: 12px 0 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+/* topic zoom: small -> medium -> big -> episodes -> raw */
+.zoom { margin-top: 24px; display: grid; gap: 16px; align-items: stretch; }
+@media (min-width: 860px) { .zoom { grid-template-columns: 1fr 300px; } }
+.zoom-wrap { display: grid; grid-template-columns: 34px 1fr; gap: 12px; }
+.zoom-axis { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0; font-size: 11px; font-family: var(--mono); color: var(--muted); }
+.zoom-axis .bar { flex: 1; width: 2px; border-radius: 2px; background: linear-gradient(var(--green), var(--line-strong)); }
+.zoom-axis span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
+.zoom-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.zoom-list li { margin: 0; display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 10px 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); font-size: 14px; line-height: 1.45; color: var(--muted); }
+.zoom-list li.first { border-color: var(--green-line); background: linear-gradient(var(--green-bg), var(--green-bg)) var(--bg); }
+.zoom-list li.deep { border-style: dashed; border-color: var(--line-strong); background: var(--panel); }
+.zoom-list b { display: block; color: var(--text); font-size: 15px; }
+.zoom-list q { display: block; margin-top: 4px; color: var(--text); quotes: none; font-style: italic; }
+.zoom-list .meter { grid-column: 2 / -1; height: 6px; border-radius: 99px; background: var(--panel-2); overflow: hidden; }
+.zoom-list .meter i { display: block; height: 100%; border-radius: 99px; background: var(--text); }
+.zoom-list li.first .meter i { background: var(--green); }
+.zoom-list li.deep .meter i { background: repeating-linear-gradient(90deg, var(--muted) 0 6px, transparent 6px 10px); }
+@media (max-width: 560px) { .zoom-list li { grid-template-columns: 40px 1fr; } .zoom-list li > .val { grid-column: 2; justify-self: start; } .zoom-list .meter { grid-column: 1 / -1; } }
+.zoom-side { display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--inv-bg); border-radius: 20px; padding: 20px; background: var(--inv-bg); color: var(--inv-muted); font-size: 14px; line-height: 1.5; }
+.zoom-side p { margin: 0; }
+.zoom-side b { color: var(--inv-text); }
+.zoom-side .zt { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: var(--inv-text); }
+.zoom-side .src { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--inv-text); }
+.zoom-side .src span { padding: 8px 4px; border: 1px solid var(--inv-line); border-radius: 10px; }
+.zoom-side .fan { display: block; width: 100%; height: 34px; color: var(--inv-muted); }
+.zoom-side .facts-box { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: 12px; font-weight: 600; background: var(--inv-text); color: var(--inv-bg); }
+.changes { margin-top: 24px; padding: 18px 20px; border: 1px solid var(--green-line); border-radius: 16px; background: linear-gradient(var(--green-bg), var(--green-bg)) var(--bg); font-size: 14.5px; }
+.changes summary { cursor: pointer; font-weight: 600; font-size: 15px; }
+.changes ol { margin-top: 10px; }
+.changes li { color: var(--muted); }
+.changes li b { color: var(--text); }
+
+/* test results */
+.result-grid { display: grid; gap: 12px; margin-top: 24px; }
+@media (min-width: 860px) { .result-grid { grid-template-columns: 1fr 1fr; } }
+.result-card { border: 1px solid var(--line); border-radius: 18px; padding: 20px; background: var(--panel); }
+.rc-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.rc-head b { font-size: 15px; }
+.rc-head span { font-size: 13px; color: var(--muted); }
+.rc-note { font-size: 13px; color: var(--muted); margin-top: 14px; }
+.bars { display: grid; gap: 12px; margin-top: 18px; }
+.bar-row { display: grid; grid-template-columns: 150px 1fr 56px; align-items: center; gap: 12px; font-size: 14px; padding: 4px 0; border-radius: 8px; }
+.bar-row:hover .bar-fill { opacity: .78; }
+.bar-row .bl { color: var(--text); font-weight: 500; }
+.bar-row .bv { font-family: var(--mono); font-size: 13px; text-align: right; color: var(--text); }
+.bar-track { height: 12px; border-radius: 4px; background: var(--panel-2); overflow: hidden; }
+.bar-fill { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--text); min-width: 4px; }
+@media (max-width: 480px) { .bar-row { grid-template-columns: 1fr 52px; } .bar-row .bl { grid-column: 1 / -1; font-size: 13px; } .bar-track { grid-column: 1; } }
+
+footer { margin-top: 88px; border-top: 1px solid var(--line); padding: 24px 0 56px; font-size: 14px; color: var(--muted); }
+
+.sys-grid { display: grid; gap: 12px; margin-top: 24px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.sys { border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; background: var(--panel); }
+.sys.win { border-color: var(--green-line); background: var(--green-bg); }
+.sys .n { font-size: 14px; color: var(--muted); }
+.sys .v { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; margin-top: 6px; }
+.sys.win .v { color: var(--green); }
+.sys .d { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.bar-fill.me { background: var(--green); }
+.pending { border: 1px dashed var(--line-strong); border-radius: 18px; padding: 20px; margin-top: 24px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8M16 17H8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><path d="M15 12H3"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="i-cut" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-rollup" viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><path d="M10 12h4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></symbol>
+  <symbol id="i-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 8V4M8 13v2M16 13v2"/><circle cx="12" cy="3" r="1"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+</svg>
+
+<div class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Back to top">
+      <span class="mark"><svg class="ic sm"><use href="#i-layers"/></svg></span>
+      <span>Agent memory</span>
+    </a>
+    <nav class="nav" aria-label="Contents"><a href="#summary">Summary</a><a href="#opus">Opus 5.5</a><a href="#h2h">Muse Spark</a><a href="#rust">Rust vs Python</a><a href="#own">Coding sessions</a><a href="#locomo-1">LoCoMo v0.6</a><a href="#images">Images</a><a href="#method">Method</a><a href="architecture.html">Architecture</a><a href="blog.html">Blog</a></nav>
+    <button class="icon-btn" id="theme" type="button" aria-label="Switch between black and white theme" title="Switch theme">
+      <svg class="ic"><use href="#i-contrast"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="wrap" id="top">
+
+<header class="hero" style="grid-template-columns:1fr"><div><h1>Benchmark results</h1><p class="sub">Latest (29 September 2026): answered by Claude Opus 5.5, v0.8 scores 73% on LoCoMo with ~610 tokens of context, ahead of Mem0 (70%) and GBrain (67%). Answered by Muse Spark 1.3 (small free model): v0.8 55%, Mem0 51%, GBrain 51%. Earlier tests (own coding sessions, LoCoMo v0.6) follow below.</p></div></header>
+<section class="block" id="summary" aria-labelledby="h-summary">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-grid"/></svg></span><div><div class="num">01</div><h2 id="h-summary">At a glance</h2></div></div>
+<div class="facts"><div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-flag"/></svg></span><div><b>Latest: answered by Claude Opus 5.5</b>My architecture v0.8 73% · Mem0 70% · GBrain 67% · Keyword search 46.5% (LoCoMo, 200 questions, graded by Claude Haiku 4.5).</div></div><div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-flag"/></svg></span><div><b>Answered by Muse Spark 1.3 (small free model)</b>My architecture v0.8 55% · My architecture v0.7 53% · Mem0 51% · GBrain 51% · My architecture v0.6 41% · Keyword search 33.5%.</div></div><div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-zap"/></svg></span><div><b>v0.8: 55% with ~600 tokens</b>LoCoMo 41% (v0.6) → 53% (v0.7) → 55% (v0.8) on the same stored memories. v0.8 sends ~600 tokens per question: 5× less than v0.7, about half of Mem0.</div></div><div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-cpu"/></svg></span><div><b>Rust engine</b>Same accuracy as Python (55%), ~528 tokens of context, median search 3.02 s vs 3.83 s.</div></div><div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-code"/></svg></span><div><b>Own coding sessions (v0.6)</b>96% on 60 questions (keyword search 90%), about 10× fewer tokens than plain opencode.</div></div></div>
+</section>
+<section class="block" id="opus" aria-labelledby="h-opus">
+  <div class="sec-head"><span class="badge-ic g"><svg class="ic"><use href="#i-flag"/></svg></span><div><div class="num">02</div><h2 id="h-opus">Latest: answered by Claude Opus 5.5 <span class="pill g" style="vertical-align:middle">200 questions · 4 systems</span></h2></div></div>
+<p class="sec-intro">The same 200 LoCoMo questions answered by <b>Claude Opus 5.5</b> (medium effort) instead of the small free model, so scores sit on the same scale as published results. Each system context was rebuilt from the same memories; <b>Claude Haiku 4.5</b> graded all four answers to each question blind and side by side.</p><div class="sys-grid"><div class="sys win"><div class="n">My architecture v0.8</div><div class="v">73%</div><div class="d">~613 tokens of context · "Not mentioned" 12×</div></div><div class="sys"><div class="n">Mem0</div><div class="v">70%</div><div class="d">~1,126 tokens of context · "Not mentioned" 16×</div></div><div class="sys"><div class="n">GBrain</div><div class="v">67%</div><div class="d">~3,982 tokens of context · "Not mentioned" 21×</div></div><div class="sys"><div class="n">Keyword search</div><div class="v">46.5%</div><div class="d">~384 tokens of context · "Not mentioned" 59×</div></div></div><div class="result-grid"><div class="result-card"><div class="rc-head"><b>Accuracy</b><span>answered by Claude Opus 5.5</span></div><div class="bars" role="img" aria-label="Accuracy with Claude Opus 5.5: My architecture v0.8 73.0 percent, Mem0 70.0 percent, GBrain 67.0 percent, Keyword search 46.5 percent"><div class="bar-row"><span class="bl">My architecture v0.8</span><span class="bar-track"><span class="bar-fill me" style="width:73.0%"></span></span><span class="bv">73%</span></div><div class="bar-row"><span class="bl">Mem0</span><span class="bar-track"><span class="bar-fill" style="width:70.0%"></span></span><span class="bv">70%</span></div><div class="bar-row"><span class="bl">GBrain</span><span class="bar-track"><span class="bar-fill" style="width:67.0%"></span></span><span class="bv">67%</span></div><div class="bar-row"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:46.5%"></span></span><span class="bv">46.5%</span></div></div></div><div class="result-card"><div class="rc-head"><b>Multi-hop: combining facts</b><span>answered by Claude Opus 5.5</span></div><div class="bars" role="img" aria-label="Multi-hop accuracy with Claude Opus 5.5"><div class="bar-row"><span class="bl">My architecture v0.8</span><span class="bar-track"><span class="bar-fill me" style="width:56.0%"></span></span><span class="bv">56%</span></div><div class="bar-row"><span class="bl">Mem0</span><span class="bar-track"><span class="bar-fill" style="width:48.0%"></span></span><span class="bv">48%</span></div><div class="bar-row"><span class="bl">GBrain</span><span class="bar-track"><span class="bar-fill" style="width:38.0%"></span></span><span class="bv">38%</span></div><div class="bar-row"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:12.0%"></span></span><span class="bv">12%</span></div></div></div></div><h3>By question type</h3><div class="scroll"><table><thead><tr><th>System</th><th>Multi-hop</th><th>Temporal</th><th>Single-hop</th><th>Open-domain</th><th>Overall</th></tr></thead><tbody><tr><td>My architecture v0.8</td><td>56%</td><td>92%</td><td>84%</td><td>60%</td><td><span class="val">73%</span></td></tr><tr><td>Mem0</td><td>48%</td><td>88%</td><td>82%</td><td>62%</td><td><span class="val">70%</span></td></tr><tr><td>GBrain</td><td>38%</td><td>88%</td><td>90%</td><td>52%</td><td><span class="val">67%</span></td></tr><tr><td>Keyword search</td><td>12%</td><td>70%</td><td>62%</td><td>42%</td><td><span class="val">46.5%</span></td></tr></tbody></table></div><p class="narrow muted">Run cost: 796 Claude Opus 5.5 calls, 2.31M tokens ($19.11 at list price).</p>
+</section>
+<section class="block" id="h2h" aria-labelledby="h-h2h">
+  <div class="sec-head"><span class="badge-ic g"><svg class="ic"><use href="#i-flag"/></svg></span><div><div class="num">03</div><h2 id="h-h2h">v0.8 vs Mem0 and GBrain, answered by Muse Spark 1.3 <span class="pill g" style="vertical-align:middle">200 questions · 6 systems</span></h2></div></div>
+<p class="sec-intro">The same 200 LoCoMo questions, now with two popular memory systems added. Every system gets the same answering model (Muse Spark 1.3), the same answer prompt and about the same context budget (~4,000 tokens). Claude Haiku grades all six answers to each question side by side (v0.6, v0.7 and v0.8 of my architecture, Mem0, GBrain, keyword search), without knowing which system wrote which.</p><div class="sys-grid"><div class="sys win"><div class="n">My architecture v0.8</div><div class="v">55%</div><div class="d">~602 tokens of context · "Not mentioned" 46×</div></div><div class="sys"><div class="n">My architecture v0.7</div><div class="v">53%</div><div class="d">~3,114 tokens of context · "Not mentioned" 42×</div></div><div class="sys"><div class="n">Mem0</div><div class="v">51%</div><div class="d">~1,126 tokens of context · "Not mentioned" 44×</div></div><div class="sys"><div class="n">GBrain</div><div class="v">51%</div><div class="d">~3,982 tokens of context · "Not mentioned" 45×</div></div><div class="sys"><div class="n">My architecture v0.6</div><div class="v">41%</div><div class="d">~2,243 tokens of context · "Not mentioned" 64×</div></div><div class="sys"><div class="n">Keyword search</div><div class="v">33.5%</div><div class="d">~384 tokens of context · "Not mentioned" 88×</div></div></div><div class="result-grid"><div class="result-card"><div class="rc-head"><b>Overall accuracy</b><span>200 questions</span></div><div class="bars" role="img" aria-label="Overall accuracy: My architecture v0.8 55.0 percent, My architecture v0.7 53.0 percent, Mem0 51.0 percent, GBrain 51.0 percent, My architecture v0.6 41.0 percent, Keyword search 33.5 percent"><div class="bar-row"><span class="bl">My architecture v0.8</span><span class="bar-track"><span class="bar-fill me" style="width:55.0%"></span></span><span class="bv">55%</span></div><div class="bar-row"><span class="bl">My architecture v0.7</span><span class="bar-track"><span class="bar-fill me" style="width:53.0%"></span></span><span class="bv">53%</span></div><div class="bar-row"><span class="bl">Mem0</span><span class="bar-track"><span class="bar-fill" style="width:51.0%"></span></span><span class="bv">51%</span></div><div class="bar-row"><span class="bl">GBrain</span><span class="bar-track"><span class="bar-fill" style="width:51.0%"></span></span><span class="bv">51%</span></div><div class="bar-row"><span class="bl">My architecture v0.6</span><span class="bar-track"><span class="bar-fill me" style="width:41.0%"></span></span><span class="bv">41%</span></div><div class="bar-row"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:33.5%"></span></span><span class="bv">33.5%</span></div></div></div><div class="result-card"><div class="rc-head"><b>Multi-hop: combining facts</b><span>50 questions</span></div><div class="bars" role="img" aria-label="Multi-hop accuracy: My architecture v0.8 44.0 percent, My architecture v0.7 40.0 percent, Mem0 46.0 percent, GBrain 32.0 percent, My architecture v0.6 28.0 percent, Keyword search 8.0 percent"><div class="bar-row"><span class="bl">Mem0</span><span class="bar-track"><span class="bar-fill" style="width:46.0%"></span></span><span class="bv">46%</span></div><div class="bar-row"><span class="bl">My architecture v0.8</span><span class="bar-track"><span class="bar-fill me" style="width:44.0%"></span></span><span class="bv">44%</span></div><div class="bar-row"><span class="bl">My architecture v0.7</span><span class="bar-track"><span class="bar-fill me" style="width:40.0%"></span></span><span class="bv">40%</span></div><div class="bar-row"><span class="bl">GBrain</span><span class="bar-track"><span class="bar-fill" style="width:32.0%"></span></span><span class="bv">32%</span></div><div class="bar-row"><span class="bl">My architecture v0.6</span><span class="bar-track"><span class="bar-fill me" style="width:28.0%"></span></span><span class="bv">28%</span></div><div class="bar-row"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:8.0%"></span></span><span class="bv">8%</span></div></div></div></div><h3>By question type</h3><div class="scroll"><table><thead><tr><th>System</th><th>Multi-hop</th><th>Temporal</th><th>Single-hop</th><th>Open-domain</th><th>Overall</th></tr></thead><tbody><tr><td>My architecture v0.8</td><td>44%</td><td><b>78%</b></td><td>76%</td><td><b>22%</b></td><td><span class="val">55%</span></td></tr><tr><td>My architecture v0.7</td><td>40%</td><td>74%</td><td><b>80%</b></td><td>18%</td><td><span class="val">53%</span></td></tr><tr><td>Mem0</td><td><b>46%</b></td><td>66%</td><td>72%</td><td>20%</td><td><span class="val">51%</span></td></tr><tr><td>GBrain</td><td>32%</td><td><b>78%</b></td><td>74%</td><td>20%</td><td><span class="val">51%</span></td></tr><tr><td>My architecture v0.6</td><td>28%</td><td>68%</td><td>56%</td><td>12%</td><td><span class="val">41%</span></td></tr><tr><td>Keyword search</td><td>8%</td><td>64%</td><td>50%</td><td>12%</td><td><span class="val">33.5%</span></td></tr></tbody></table></div><h3>How each system was set up</h3><ul class="narrow"><li><b>My architecture v0.6, v0.7 and v0.8</b>: hypnos, the same stored memories (sleep consolidation, Jev decisions, bge-small vectors). v0.7: evidence-first hybrid recall. v0.8: Jev-routed recall: Jev picks the question type, the summary level that answers, and each fact or message that is part of the answer.</li><li><b>Mem0</b>: mem0ai 2.2 open source, its own fact extraction (Muse as its LLM), bge-small embeddings, local Qdrant, with spaCy extras; one add per chat session.</li><li><b>GBrain</b>: gbrain 0.59, PGLite, hybrid search (keyword + vector + RRF) with bge-small, one page per chat session. Its reranker and LLM query expansion were off, because both need paid APIs.</li><li><b>Keyword search</b>: the top 10 raw turns by keyword match.</li></ul>
+</section>
+<section class="block" id="rust" aria-labelledby="h-rust">
+  <div class="sec-head"><span class="badge-ic g"><svg class="ic"><use href="#i-zap"/></svg></span><div><div class="num">04</div><h2 id="h-rust">Rust engine vs Python engine (answered by Muse Spark 1.3) <span class="pill g" style="vertical-align:middle">200 questions · same memories</span></h2></div></div>
+<p class="sec-intro">The same 200 LoCoMo questions with the Rust engine (agentmem-rs, kept for the future) and the Python engine (the main engine), both running architecture v0.8 on the same stored memories. For every question both engines recalled while warm and were timed; answers came from the same model (Muse Spark 1.3) and Claude Haiku graded all answers side by side.</p><div class="sys-grid"><div class="sys win"><div class="n">With Rust</div><div class="v">55%</div><div class="d">~528 tokens · median search 3.02 s</div></div><div class="sys"><div class="n">Without Rust (Python)</div><div class="v">55%</div><div class="d">~602 tokens · median search 3.83 s</div></div></div><div class="scroll"><table><thead><tr><th></th><th>With Rust</th><th>Without Rust (Python)</th></tr></thead><tbody><tr><td>Accuracy (200 questions)</td><td><span class="val">55%</span></td><td>55%</td></tr><tr><td>Context per question</td><td><b>~528 tokens</b></td><td>~602 tokens</td></tr><tr><td>"Not mentioned" answers</td><td><b>38</b></td><td>46</td></tr><tr><td>Search time, median</td><td><b>3.02 s</b></td><td>3.83 s</td></tr><tr><td>Search time, average</td><td><b>3.17 s</b></td><td>4.01 s</td></tr><tr><td>Search time, slowest 10%</td><td><b>3.37 s</b></td><td>4.56 s</td></tr><tr><td>Search time, cold start (process start + model load)</td><td><b>~3.9 s</b></td><td>~7.8 s</td></tr><tr><td>Peak RAM</td><td>~293 MB (service)</td><td>~304 MB (process)</td></tr></tbody></table></div><h3>By question type</h3><div class="scroll"><table><thead><tr><th></th><th>Multi-hop</th><th>Temporal</th><th>Single-hop</th><th>Open-domain</th></tr></thead><tbody><tr><td>With Rust</td><td>46%</td><td>72%</td><td>72%</td><td>30%</td></tr><tr><td>Without Rust (Python)</td><td>42%</td><td>80%</td><td>76%</td><td>22%</td></tr></tbody></table></div>
+</section>
+<section class="block" id="own" aria-labelledby="h-own">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-code"/></svg></span><div><div class="num">05</div><h2 id="h-own">Earlier: own coding sessions (answered and graded by Muse Spark 1.3) <span class="pill g" style="vertical-align:middle">60 questions · v0.3 to v0.6</span></h2></div></div>
+<p class="sec-intro">The first test: 60 questions from 15 real Claude Code sessions, run with versions v0.3 to v0.6 (25–26 September 2026). It has not been rerun with v0.8 yet.</p>
+
+
+  <div class="facts">
+    <div class="fact"><span class="badge-ic n"><svg class="ic"><use href="#i-file"/></svg></span><div><b>Data</b>15 sessions, 59 episodes, 689 extracted claims, 618 verified facts, 36 topics, 604 original-log segments.</div></div>
+    <div class="fact"><span class="badge-ic n"><svg class="ic"><use href="#i-search"/></svg></span><div><b>Questions</b>60, four per session, written from the raw logs. Every answer is proven by an exact quote from the log.</div></div>
+    <div class="fact"><span class="badge-ic n"><svg class="ic"><use href="#i-layers"/></svg></span><div><b>Compared</b>Keyword search, rolling summary, plain opencode, and this architecture at v0.3, v0.4, v0.5 and v0.6.</div></div>
+  </div>
+
+  <div class="result-grid">
+    <div class="result-card">
+      <div class="rc-head"><b>Answer accuracy</b><span>60 questions, graded side by side</span></div>
+      <div class="bars" role="img" aria-label="Accuracy: v0.6 96 percent, keyword search 90, v0.5 90, v0.4 87, v0.3 82, rolling summary 36.">
+        <div class="bar-row" title="v0.6: 57 correct, 1 partial, 0 wrong, 2 don't know"><span class="bl">v0.6</span><span class="bar-track"><span class="bar-fill" style="width:95.8%"></span></span><span class="bv">96%</span></div>
+        <div class="bar-row" title="Keyword search: 53 correct, 2 partial, 1 wrong, 4 don't know"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:90%"></span></span><span class="bv">90%</span></div>
+        <div class="bar-row" title="v0.5: 51 correct, 6 partial, 1 wrong, 2 don't know"><span class="bl">v0.5</span><span class="bar-track"><span class="bar-fill" style="width:90%"></span></span><span class="bv">90%</span></div>
+        <div class="bar-row" title="v0.4: 50 correct, 4 partial, 2 wrong, 4 don't know"><span class="bl">v0.4</span><span class="bar-track"><span class="bar-fill" style="width:86.7%"></span></span><span class="bv">87%</span></div>
+        <div class="bar-row" title="v0.3: 46 correct, 6 partial, 1 wrong, 7 don't know"><span class="bl">v0.3</span><span class="bar-track"><span class="bar-fill" style="width:81.7%"></span></span><span class="bv">82%</span></div>
+        <div class="bar-row" title="Rolling summary: 18 correct, 7 partial, 0 wrong, 35 don't know"><span class="bl">Rolling summary</span><span class="bar-track"><span class="bar-fill" style="width:35.8%"></span></span><span class="bv">36%</span></div>
+      </div>
+      <p class="rc-note">Correct counts 1, partly right 0.5. v0.6 made no confident wrong answers. Re-grading all systems together moves earlier scores by up to 2 points; that is the grading noise.</p>
+    </div>
+    <div class="result-card">
+      <div class="rc-head"><b>Context tokens per answer</b><span>what the answering model had to read</span></div>
+      <div class="bars" role="img" aria-label="Average context tokens per answer: keyword search 2,258; rolling summary 3,185; v0.4 3,457; v0.6 3,531; v0.5 4,070; v0.3 4,276.">
+        <div class="bar-row" title="90% accurate"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:52.8%"></span></span><span class="bv">2,258</span></div>
+        <div class="bar-row" title="36% accurate"><span class="bl">Rolling summary</span><span class="bar-track"><span class="bar-fill" style="width:74.5%"></span></span><span class="bv">3,185</span></div>
+        <div class="bar-row" title="87% accurate"><span class="bl">v0.4</span><span class="bar-track"><span class="bar-fill" style="width:80.8%"></span></span><span class="bv">3,457</span></div>
+        <div class="bar-row" title="96% accurate"><span class="bl">v0.6</span><span class="bar-track"><span class="bar-fill" style="width:82.6%"></span></span><span class="bv">3,531</span></div>
+        <div class="bar-row" title="90% accurate"><span class="bl">v0.5</span><span class="bar-track"><span class="bar-fill" style="width:95.2%"></span></span><span class="bv">4,070</span></div>
+        <div class="bar-row" title="82% accurate"><span class="bl">v0.3</span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bv">4,276</span></div>
+      </div>
+      <p class="rc-note">v0.6 reads 13% less than v0.5 while scoring 6 points higher. Plain opencode read about 35,000 per question on its 24.</p>
+    </div>
+  </div>
+
+  <h3>Against plain opencode (24 questions, 6 oldest sessions)</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>System</th><th>Accuracy</th><th>Confident wrong</th><th>Tokens read / question</th><th>Steps / question</th><th>Time / question</th></tr></thead>
+    <tbody>
+      <tr><td>Plain opencode (greps and reads the logs itself)</td><td>92%</td><td>2</td><td>~35,000</td><td>~7</td><td>~44 s</td></tr>
+      <tr><td>v0.3</td><td>92%</td><td>0</td><td>~4,600</td><td>1</td><td>~12 s</td></tr>
+      <tr><td>v0.5</td><td>90%</td><td>0</td><td>~4,600</td><td>1</td><td>~12 s</td></tr>
+      <tr><td><b>v0.6</b></td><td><span class="val">100%</span></td><td>0</td><td>~3,700</td><td>1</td><td>~12 s</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Accuracy by how old the session is</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>System</th><th>Oldest 5 sessions</th><th>Middle 5</th><th>Newest 5</th><th>All 60</th></tr></thead>
+    <tbody>
+      <tr><td>Keyword search</td><td>88%</td><td>88%</td><td>95%</td><td><span class="val">90%</span></td></tr>
+      <tr><td>Rolling summary</td><td>28%</td><td>10%</td><td>70%</td><td><span class="val">36%</span></td></tr>
+      <tr><td>v0.3</td><td>90%</td><td>80%</td><td>75%</td><td><span class="val">82%</span></td></tr>
+      <tr><td>v0.4</td><td>90%</td><td>90%</td><td>80%</td><td><span class="val">87%</span></td></tr>
+      <tr><td>v0.5</td><td>88%</td><td>100%</td><td>82%</td><td><span class="val">90%</span></td></tr>
+      <tr><td><b>v0.6</b></td><td><b>100%</b></td><td>90%</td><td><b>98%</b></td><td><span class="val">96%</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>v0.6: where recall stopped</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Stopped at</th><th>Questions</th><th>Accuracy</th><th>Context per answer</th></tr></thead>
+    <tbody>
+      <tr><td>Small summaries + facts + original-log snippets</td><td>29 (48%)</td><td><span class="val">100%</span></td><td>~1,590 tokens</td></tr>
+      <tr><td>Topic's original log</td><td>6 (10%)</td><td><span class="val">100%</span></td><td>~3,540 tokens</td></tr>
+      <tr><td>Whole-history search (no big summaries)</td><td>25 (42%)</td><td><span class="val">90%</span></td><td>~5,780 tokens</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="result-grid">
+    <div class="result-card">
+      <div class="rc-head"><b>Muse tokens spent building memory</b><span>all 15 sessions, one time</span></div>
+      <div class="bars" role="img" aria-label="Build cost in Muse tokens: keyword search 0, rolling summary 0.28 million, v0.3 0.66 million, v0.4 to v0.6 0.78 million.">
+        <div class="bar-row" title="Only indexes the log"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:0%;min-width:0"></span></span><span class="bv">0</span></div>
+        <div class="bar-row" title="15 summary rewrites"><span class="bl">Rolling summary</span><span class="bar-track"><span class="bar-fill" style="width:35.7%"></span></span><span class="bv">0.28M</span></div>
+        <div class="bar-row" title="Extract and topic summaries; Jev does verify and topic choice"><span class="bl">v0.3 with Jev</span><span class="bar-track"><span class="bar-fill" style="width:83.9%"></span></span><span class="bv">0.66M</span></div>
+        <div class="bar-row" title="Plus split-topic summaries. Anchors, original log and vector index are built by code, no LLM"><span class="bl">v0.4 – v0.6</span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bv">0.78M</span></div>
+      </div>
+      <p class="rc-note">v0.6's vector index is a small local model (bge-small) on the CPU: no tokens, about 12 minutes once, peak RAM 66%.</p>
+    </div>
+    <div class="result-card">
+      <div class="rc-head"><b>Jev: times faster than Muse Spark</b><span>total seconds for the same work</span></div>
+      <div class="bars" role="img" aria-label="Jev speed-up: verify 15.5 times faster, is-recall-enough 11.3 times faster, topic choice 6.9 times faster.">
+        <div class="bar-row" title="Verify, 689 claims: Muse 1,523 s, Jev 98 s"><span class="bl">Verify (J2)</span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bv">15.5×</span></div>
+        <div class="bar-row" title="Is recall enough, 174 checks: Muse 2,267 s, Jev 200 s"><span class="bl">Recall enough? (G3)</span><span class="bar-track"><span class="bar-fill" style="width:72.9%"></span></span><span class="bv">11.3×</span></div>
+        <div class="bar-row" title="Topic choice, 58 episodes: Muse 729 s, Jev 106 s"><span class="bl">Topic choice (J4)</span><span class="bar-track"><span class="bar-fill" style="width:44.5%"></span></span><span class="bv">6.9×</span></div>
+      </div>
+      <p class="rc-note">Agreement with Muse: verify 86%, topic choice 90%, recall enough 76%. In v0.6 Jev also flagged exact-value questions and judged the evidence.</p>
+    </div>
+  </div>
+
+  
+</section>
+<section class="block" id="locomo-1" aria-labelledby="h-locomo-1">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-search"/></svg></span><div><div class="num">06</div><h2 id="h-locomo-1">Earlier: LoCoMo v0.6 vs keyword search (answered by Muse Spark 1.3) <span class="pill g" style="vertical-align:middle">200 questions</span></h2></div></div>
+
+  <p class="narrow">This test uses data the design was never tuned on: LoCoMo (Maharana et al., 2024), 10 long two-person chats with 50 questions in each of 4 categories. Built with the full engine (hypnos). Muse Spark 1.3 answers every system, and <b>Claude Haiku grades</b>, a different model family. Run 2026-09-28.</p>
+  <div class="result-grid">
+    <div class="result-card">
+      <div class="rc-head"><b>Overall accuracy</b><span>200 questions</span></div>
+      <div class="bars" role="img" aria-label="LoCoMo overall accuracy: hypnos 41.5 percent, keyword search 33.5 percent.">
+        <div class="bar-row" title="83 of 200 correct"><span class="bl">hypnos</span><span class="bar-track"><span class="bar-fill" style="width:41.5%"></span></span><span class="bv">41.5%</span></div>
+        <div class="bar-row" title="67 of 200 correct"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:33.5%"></span></span><span class="bv">33.5%</span></div>
+      </div>
+      <p class="rc-note">Context per question: hypnos ~2,240 tokens, keyword search ~380 tokens.</p>
+    </div>
+    <div class="result-card">
+      <div class="rc-head"><b>Multi-hop: combining facts</b><span>50 questions</span></div>
+      <div class="bars" role="img" aria-label="LoCoMo multi-hop accuracy: hypnos 28 percent, keyword search 8 percent.">
+        <div class="bar-row" title="14 of 50 correct"><span class="bl">hypnos</span><span class="bar-track"><span class="bar-fill" style="width:28%"></span></span><span class="bv">28%</span></div>
+        <div class="bar-row" title="4 of 50 correct"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:8%"></span></span><span class="bv">8%</span></div>
+      </div>
+      <p class="rc-note">The biggest gap, 3.5×: facts linked through the same people and things help most here.</p>
+    </div>
+  </div>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Category (50 Q each)</th><th>hypnos</th><th>Keyword search</th></tr></thead>
+    <tbody>
+      <tr><td><b>Overall (200)</b></td><td><span class="val">41.5%</span></td><td>33.5%</td></tr>
+      <tr><td>Multi-hop</td><td><b>28%</b></td><td>8%</td></tr>
+      <tr><td>Temporal (when)</td><td><b>68%</b></td><td>64%</td></tr>
+      <tr><td>Single-hop</td><td><b>58%</b></td><td>50%</td></tr>
+      <tr><td>Open-domain</td><td>12%</td><td>12%</td></tr>
+    </tbody>
+  </table>
+  </div>
+  
+</section>
+<section class="block" id="images" aria-labelledby="h-images">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-eye"/></svg></span><div><div class="num">07</div><h2 id="h-images">Images</h2></div></div>
+<p class="sec-intro">Share-ready images of these results (in the <code>images</code> folder next to this page).</p>
+<div class="result-grid">
+<a class="result-card" href="images/benchmark-opus-v0.8-vs-mem0-gbrain-1080x1920.png"><div class="rc-head"><b>Answered by Claude Opus 5.5</b><span>latest · story size</span></div><img src="images/benchmark-opus-v0.8-vs-mem0-gbrain-1080x1920.png" alt="LoCoMo with Claude Opus 5.5 answering" style="width:100%;border-radius:12px;margin-top:12px"></a>
+<a class="result-card" href="images/benchmark-v0.8-vs-mem0-gbrain-1080x1920.png"><div class="rc-head"><b>Answered by Muse Spark 1.3</b><span>story size</span></div><img src="images/benchmark-v0.8-vs-mem0-gbrain-1080x1920.png" alt="LoCoMo head-to-head chart" style="width:100%;border-radius:12px;margin-top:12px"></a>
+</div>
+<p class="narrow muted">Earlier images (v0.6, coding sessions, the first LoCoMo run) are in <code>images/old</code>.</p>
+</section>
+<section class="block" id="method" aria-labelledby="h-method">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-sliders"/></svg></span><div><div class="num">08</div><h2 id="h-method">How the tests were run</h2></div></div>
+<ul class="narrow">
+<li><b>Answering model</b>: Claude Opus 5.5 (medium effort) for the latest run; Muse Spark 1.3 through stock opencode for the others. Always the same model for every system in a test.</li>
+<li><b>Grader</b>: Claude Haiku 4.5 for every LoCoMo run.</li>
+<li><b>Grading</b>: own-sessions test, Muse Spark against exact quotes; LoCoMo, Claude Haiku (a different model family), with all answers to a question graded side by side and anonymised.</li>
+<li><b>LoCoMo</b> (Maharana et al., 2024): 10 long two-person chats, 200 questions, 50 in each of 4 categories; the adversarial category is excluded, as in most published results.</li>
+<li>Head-to-head runs were split over two laptops on different internet connections and merged; every question is graded with all systems' answers together.</li>
+<li>Every model call is cached, so each test can be rerun or extended cheaply. Harnesses: <code>benchmark/sessions</code>, <code>benchmark/locomo</code>, <code>benchmark/locomo/compare</code> (<code>run_v07.py</code>, <code>run_v08.py</code>, <code>run_rust.py</code>) in the agent-memory-architecture repo.</li>
+</ul>
+</section>
+<footer>Benchmark report, updated 29 September 2026 (v0.8). Architecture: <a href="architecture.html">architecture.html</a>.<br><br><b>© 2026 Luza Maharjan. All rights reserved.</b> May not be copied, republished or presented as someone else’s work without written permission.</footer>
+</div>
+<script>
+(function () {
+  var root = document.documentElement;
+/* theme */
+  var themeBtn = document.getElementById('theme');
+  try { var saved = localStorage.getItem('arch-theme'); if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved); } catch (e) {}
+  themeBtn.addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme');
+    if (!cur) cur = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('arch-theme', next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>

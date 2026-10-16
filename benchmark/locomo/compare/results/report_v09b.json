@@ -1,0 +1,167 @@
+{
+ "n": 200,
+ "answerer": "muse-spark-1.3",
+ "judge": "claude-haiku-5-5 (both answers graded together, anonymised)",
+ "accuracy": {
+  "v0.8": 60.5,
+  "v0.9": 60.5
+ },
+ "by_category": {
+  "v0.8": {
+   "multi-hop": 52.0,
+   "temporal": 82.0,
+   "open-domain": 24.0,
+   "single-hop": 84.0
+  },
+  "v0.9": {
+   "multi-hop": 48.0,
+   "temporal": 80.0,
+   "open-domain": 32.0,
+   "single-hop": 82.0
+  }
+ },
+ "ctx_tokens": {
+  "v0.8": 602,
+  "v0.9": 611
+ },
+ "not_mentioned": {
+  "v0.8": 46,
+  "v0.9": 43
+ },
+ "memory_v09": {
+  "0": {
+   "space": "locomo-0",
+   "profile": "chat",
+   "db": "~/agent-memory-architecture/benchmark/locomo/.agentmem-v09b/spaces/locomo-0.db",
+   "log_rows": 419,
+   "unconsolidated": 0,
+   "facts": 177,
+   "topics": 1,
+   "jev": true,
+   "vectors": true,
+   "writer": "opencode"
+  },
+  "1": {
+   "space": "locomo-1",
+   "profile": "chat",
+   "db": "~/agent-memory-architecture/benchmark/locomo/.agentmem-v09b/spaces/locomo-1.db",
+   "log_rows": 369,
+   "unconsolidated": 0,
+   "facts": 151,
+   "topics": 2,
+   "jev": true,
+   "vectors": true,
+   "writer": "opencode"
+  },
+  "2": {
+   "space": "locomo-2",
+   "profile": "chat",
+   "db": "~/agent-memory-architecture/benchmark/locomo/.agentmem-v09b/spaces/locomo-2.db",
+   "log_rows": 663,
+   "unconsolidated": 0,
+   "facts": 258,
+   "topics": 5,
+   "jev": true,
+   "vectors": true,
+   "writer": "opencode"
+  },
+  "3": {
+   "space": "locomo-3",
+   "profile": "chat",
+   "db": "~/agent-memory-architecture/benchmark/locomo/.agentmem-v09b/spaces/locomo-3.db",
+   "log_rows": 629,
+   "unconsolidated": 0,
+   "facts": 272,
+   "topics": 1,
+   "jev": true,
+   "vectors": true,
+   "writer": "opencode"
+  },
+  "4": {
+   "space": "locomo-4",
+   "profile": "chat",
+   "db": "~/agent-memory-architecture/benchmark/locomo/.agentmem-v09b/spaces/locomo-4.db",
+   "log_rows": 680,
+   "unconsolidated": 0,
+   "facts": 252,
+   "topics": 3,
+   "jev": true,
+   "vectors": true,
+   "writer": "opencode"
+  },
+  "5": {
+   "space": "locomo-5",
+   "profile": "chat",
+   "db": "~/agent-memory-architecture/benchmark/locomo/.agentmem-v09b/spaces/locomo-5.db",
+   "log_rows": 675,
+   "unconsolidated": 0,
+   "facts": 238,
+   "topics": 2,
+   "jev": true,
+   "vectors": true,
+   "writer": "opencode"
+  },
+  "6": {
+   "space": "locomo-6",
+   "profile": "chat",
+   "db": "~/agent-memory-architecture/benchmark/locomo/.agentmem-v09b/spaces/locomo-6.db",
+   "log_rows": 689,
+   "unconsolidated": 0,
+   "facts": 274,
+   "topics": 2,
+   "jev": true,
+   "vectors": true,
+   "writer": "opencode"
+  },
+  "7": {
+   "space": "locomo-7",
+   "profile": "chat",
+   "db": "~/agent-memory-architecture/benchmark/locomo/.agentmem-v09b/spaces/locomo-7.db",
+   "log_rows": 681,
+   "unconsolidated": 0,
+   "facts": 269,
+   "topics": 2,
+   "jev": true,
+   "vectors": true,
+   "writer": "opencode"
+  },
+  "8": {
+   "space": "locomo-8",
+   "profile": "chat",
+   "db": "~/agent-memory-architecture/benchmark/locomo/.agentmem-v09b/spaces/locomo-8.db",
+   "log_rows": 509,
+   "unconsolidated": 0,
+   "facts": 216,
+   "topics": 2,
+   "jev": true,
+   "vectors": true,
+   "writer": "opencode"
+  },
+  "9": {
+   "space": "locomo-9",
+   "profile": "chat",
+   "db": "~/agent-memory-architecture/benchmark/locomo/.agentmem-v09b/spaces/locomo-9.db",
+   "log_rows": 568,
+   "unconsolidated": 0,
+   "facts": 274,
+   "topics": 1,
+   "jev": true,
+   "vectors": true,
+   "writer": "opencode"
+  }
+ },
+ "levels_v09": {
+  "evidence": 35,
+  "evidence+": 163,
+  "medium": 1,
+  "big": 1
+ },
+ "calls": {
+  "muse:cached": 320,
+  "muse:calls": 230,
+  "muse:in_chars": 852405,
+  "haiku55:cached": 94,
+  "haiku55:calls": 106,
+  "haiku55:in_chars": 59336
+ }
+}

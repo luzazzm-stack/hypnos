@@ -1,0 +1,3802 @@
+[
+ {
+  "conv": 5,
+  "category": "multi-hop",
+  "question": "What does Andrew view his pets as?",
+  "gold": "Family",
+  "answers": {
+   "v0.8": "friends and confidantes",
+   "v0.9": "friends and confidantes"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 535,
+   "v0.9": 591
+  }
+ },
+ {
+  "conv": 7,
+  "category": "multi-hop",
+  "question": "Did Jolene teach herself how to play the console?",
+  "gold": "yes",
+  "answers": {
+   "v0.8": "Yes",
+   "v0.9": "Yes"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 134,
+   "v0.9": 669
+  }
+ },
+ {
+  "conv": 1,
+  "category": "multi-hop",
+  "question": "How did Gina promote her clothes store?",
+  "gold": "worked with an artist to make unique fashion pieces, made limited-edition sweatshirts, got some new offers and promotions for online store, developed a video presentation showing how to style her pieces",
+  "answers": {
+   "v0.8": "Ad campaign, social media and influencers",
+   "v0.9": "Launched an ad campaign"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1332,
+   "v0.9": 1210
+  }
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What people has Maria met and helped while volunteering?",
+  "gold": "David, Jean, Cindy, Laura",
+  "answers": {
+   "v0.8": "David, Jean, Cindy and kids",
+   "v0.9": "Jean, Laura, three children"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1342,
+   "v0.9": 1025
+  }
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "How many children does Melanie have?",
+  "gold": 3,
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "2"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1053,
+   "v0.9": 995
+  }
+ },
+ {
+  "conv": 3,
+  "category": "multi-hop",
+  "question": "What recipes has Nate made?",
+  "gold": "coconut milk icecream, chocolate and vanilla swirl",
+  "answers": {
+   "v0.8": "dairy-free chocolate cake and coconut milk ice cream",
+   "v0.9": "coconut milk ice cream"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1169,
+   "v0.9": 491
+  }
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What type of volunteering have John and Maria both done?",
+  "gold": "Volunteering at a homeless shelter",
+  "answers": {
+   "v0.8": "homeless shelter volunteering",
+   "v0.9": "homeless shelter"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 998,
+   "v0.9": 1048
+  }
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "What kinds of things did Evan have broken?",
+  "gold": "His old Prius and his new Prius.",
+  "answers": {
+   "v0.8": "Old Prius and new Prius",
+   "v0.9": "Old Prius and knee"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 564,
+   "v0.9": 318
+  }
+ },
+ {
+  "conv": 4,
+  "category": "multi-hop",
+  "question": "What similar sports collectible do Tim and John own?",
+  "gold": "signed basketball",
+  "answers": {
+   "v0.8": "signed basketball",
+   "v0.9": "Signed basketball"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 358,
+   "v0.9": 338
+  }
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "How many roadtrips did Evan take in May 2023?",
+  "gold": "two",
+  "answers": {
+   "v0.8": "2",
+   "v0.9": "One"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 397,
+   "v0.9": 283
+  }
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What music events has John attended?",
+  "gold": "Live music event, violin concert",
+  "answers": {
+   "v0.8": "violin concert, live music event",
+   "v0.9": "violin concert and live music event"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 282,
+   "v0.9": 268
+  }
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "What items has Melanie bought?",
+  "gold": "Figurines, shoes",
+  "answers": {
+   "v0.8": "figurines",
+   "v0.9": "figurines"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 576,
+   "v0.9": 222
+  }
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "What are some changes Caroline has faced during her transition journey?",
+  "gold": "Changes to her body, losing unsupportive friends",
+  "answers": {
+   "v0.8": "Changing body, self-acceptance, friendships",
+   "v0.9": "transition and changing body"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1375,
+   "v0.9": 1483
+  }
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "What instruments does Melanie play?",
+  "gold": "clarinet and violin",
+  "answers": {
+   "v0.8": "clarinet, violin",
+   "v0.9": "clarinet and violin"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 351,
+   "v0.9": 445
+  }
+ },
+ {
+  "conv": 5,
+  "category": "multi-hop",
+  "question": "How many times did Audrey and Andew plan to hike together?",
+  "gold": "three times",
+  "answers": {
+   "v0.8": "Twice",
+   "v0.9": "Twice"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 251,
+   "v0.9": 168
+  }
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "Which events in Dave's life inspired him to take up auto engineering?",
+  "gold": "attending a car show with Dad, working on an old car in a neighbor's garage when he was young, spent a summer restoring an old car with Dad",
+  "answers": {
+   "v0.8": "First car show at age 10, fixing neighbor's old car",
+   "v0.9": "Fixing neighbor's old car at age ten"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1234,
+   "v0.9": 1265
+  }
+ },
+ {
+  "conv": 5,
+  "category": "multi-hop",
+  "question": "What has Andrew done with his dogs?",
+  "gold": "Taking walks and hiking",
+  "answers": {
+   "v0.8": "Hiking with a dog",
+   "v0.9": "Walks, hiking, outdoor trips"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 563,
+   "v0.9": 495
+  }
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What damages have happened to John's car?",
+  "gold": "Broken windshield, Car broke down",
+  "answers": {
+   "v0.8": "Broken windshield, broke down",
+   "v0.9": "Broken windshield, broke down"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 538,
+   "v0.9": 347
+  }
+ },
+ {
+  "conv": 6,
+  "category": "multi-hop",
+  "question": "Which of James's family members have visited him in the last year?",
+  "gold": "mother, sister",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 124,
+   "v0.9": 81
+  }
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "What activities has Dave participated in with his friends?",
+  "gold": "weekly visits to local parks, countryside roadtrip, celebration of the opening of his car maintenance shop, card-playing nights",
+  "answers": {
+   "v0.8": "Walks in park, road trip, card-night",
+   "v0.9": "Walks in park, road trip, card-night"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1294,
+   "v0.9": 929
+  }
+ },
+ {
+  "conv": 3,
+  "category": "multi-hop",
+  "question": "How many video game tournaments has Nate participated in?",
+  "gold": "nine",
+  "answers": {
+   "v0.8": "8",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1101,
+   "v0.9": 1009
+  }
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "When Dave was a child, what did he and his father do in the garage?",
+  "gold": "tinkering with car engines, restoration and refurbishing cars",
+  "answers": {
+   "v0.8": "tinkering with engines",
+   "v0.9": "tinkering with engines"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "medium",
+  "ctx_tokens": {
+   "v0.8": 410,
+   "v0.9": 580
+  }
+ },
+ {
+  "conv": 5,
+  "category": "multi-hop",
+  "question": "What are some foods that Audrey likes eating?",
+  "gold": "chicken pot pie, chicken roast, blueberry muffins, sushi",
+  "answers": {
+   "v0.8": "Chicken Pot Pie, Roasted Chicken, sushi",
+   "v0.9": "Sushi, Chicken Pot Pie, Roasted Chicken"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 674,
+   "v0.9": 587
+  }
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "What kind of foods or recipes has Sam recommended to Evan?",
+  "gold": "grilled vegetables, grilled chicken and veggie stir-fry, poutine",
+  "answers": {
+   "v0.8": "tasty and easy roasted vegetable recipe",
+   "v0.9": "roasted vegetables recipe"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 515,
+   "v0.9": 484
+  }
+ },
+ {
+  "conv": 5,
+  "category": "multi-hop",
+  "question": "What is the biggest stressor in Andrew's life besides not being able to hike frequently?",
+  "gold": "work",
+  "answers": {
+   "v0.8": "Stressful work",
+   "v0.9": "Work stress"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1137,
+   "v0.9": 1101
+  }
+ },
+ {
+  "conv": 3,
+  "category": "temporal",
+  "question": "How long has Nate had his first two turtles?",
+  "gold": "three years",
+  "answers": {
+   "v0.8": "3 years",
+   "v0.9": "3 years"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 559,
+   "v0.9": 758
+  }
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When was Jon in Paris?",
+  "gold": "28 January 2023",
+  "answers": {
+   "v0.8": "2023-01-28",
+   "v0.9": "2023-01-28"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 582,
+   "v0.9": 532
+  }
+ },
+ {
+  "conv": 4,
+  "category": "temporal",
+  "question": "Which month was John in Italy?",
+  "gold": "December, 2023",
+  "answers": {
+   "v0.8": "December 2023",
+   "v0.9": "December 2023"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 571,
+   "v0.9": 546
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Jolene and her partner try scuba diving lessons?",
+  "gold": "Friday before 17 September, 2023",
+  "answers": {
+   "v0.8": "September 15, 2023",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 90,
+   "v0.9": 109
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When was the last photo of Deborah and Karlie taken?",
+  "gold": "in summer 2022",
+  "answers": {
+   "v0.8": "Summer 2022",
+   "v0.9": "Summer 2022"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 179,
+   "v0.9": 176
+  }
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When did Calvin plan on travelling to Tokyo the second time?",
+  "gold": "November 2023",
+  "answers": {
+   "v0.8": "2023-10-19",
+   "v0.9": "2023-10-19"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 488,
+   "v0.9": 252
+  }
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When did Jon and Gina decide to collaborate to create dance content?",
+  "gold": "21 July 2023",
+  "answers": {
+   "v0.8": "2023-07-21",
+   "v0.9": "2023-07-21"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 232,
+   "v0.9": 406
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "What kind of project was Jolene working on in the beginning of January 2023?",
+  "gold": "electricity engineering project",
+  "answers": {
+   "v0.8": "electrical engineering project",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 737,
+   "v0.9": 294
+  }
+ },
+ {
+  "conv": 2,
+  "category": "temporal",
+  "question": "When was John's old area hit with a flood?",
+  "gold": "The week before 7 July 2023",
+  "answers": {
+   "v0.8": "2023-06-30",
+   "v0.9": "June 30, 2023"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 150,
+   "v0.9": 271
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Deborah`s mother pass away?",
+  "gold": "a few years before 2023",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 615,
+   "v0.9": 621
+  }
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When is Jon's group performing at a festival?",
+  "gold": "February, 2023",
+  "answers": {
+   "v0.8": "February 2023",
+   "v0.9": "February 2023"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 615,
+   "v0.9": 445
+  }
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When did Calvin's place get flooded in Tokyo?",
+  "gold": "On a week before 16 May, 2023",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 172,
+   "v0.9": 143
+  }
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "How many pets did Andrew have, as of September 2023?",
+  "gold": "one",
+  "answers": {
+   "v0.8": "One",
+   "v0.9": "One"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 957,
+   "v0.9": 992
+  }
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When was Calvin's album released?",
+  "gold": "September 11, 2023",
+  "answers": {
+   "v0.8": "2023-09-11",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 765,
+   "v0.9": 794
+  }
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When did Dave take a trip to mountainous regions?",
+  "gold": "July 2023",
+  "answers": {
+   "v0.8": "July 2023",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 535,
+   "v0.9": 544
+  }
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "When did Caroline pass the adoption interview?",
+  "gold": "The Friday before 22 October 2023",
+  "answers": {
+   "v0.8": "2023-10-20",
+   "v0.9": "2023-10-20"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 681,
+   "v0.9": 691
+  }
+ },
+ {
+  "conv": 4,
+  "category": "temporal",
+  "question": "What month did Tim plan on going to Universal Studios?",
+  "gold": "September, 2023",
+  "answers": {
+   "v0.8": "September 2023",
+   "v0.9": "September 2023"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 115,
+   "v0.9": 111
+  }
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "When did Melanie get hurt?",
+  "gold": "September 2023",
+  "answers": {
+   "v0.8": "September 2023",
+   "v0.9": "September 2023"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 683,
+   "v0.9": 539
+  }
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "When did Audrey make muffins for herself?",
+  "gold": "The week of April 3rd to 9th",
+  "answers": {
+   "v0.8": "2023-04-09",
+   "v0.9": "2023-04-09"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 406,
+   "v0.9": 253
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Jolene have a dinner and drinks with her friends?",
+  "gold": "21 February, 2023",
+  "answers": {
+   "v0.8": "2023-02-21",
+   "v0.9": "2023-02-21"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 184,
+   "v0.9": 223
+  }
+ },
+ {
+  "conv": 6,
+  "category": "temporal",
+  "question": "When did John plan his next meeting with his siblings?",
+  "gold": "In September, 2022",
+  "answers": {
+   "v0.8": "September 2022",
+   "v0.9": "2022-08-21"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 216,
+   "v0.9": 163
+  }
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "When did Caroline have a picnic?",
+  "gold": "The week before 6 July 2023",
+  "answers": {
+   "v0.8": "late June 2023",
+   "v0.9": "2023-06-29"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 606,
+   "v0.9": 476
+  }
+ },
+ {
+  "conv": 6,
+  "category": "temporal",
+  "question": "When did John resume playing drums in his adulthood?",
+  "gold": "February 2022",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 201,
+   "v0.9": 230
+  }
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When did Calvin visit some of the sights in Boston with a former high school friend?",
+  "gold": "October 24, 2023",
+  "answers": {
+   "v0.8": "2023-10-24",
+   "v0.9": "2023-10-24"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 535,
+   "v0.9": 156
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Deborah go to a community meetup?",
+  "gold": "last week of August 2023",
+  "answers": {
+   "v0.8": "2023-09-01",
+   "v0.9": "2023-09-01"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 606,
+   "v0.9": 575
+  }
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "How many hikes has Joanna been on?",
+  "gold": "Four",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 635,
+   "v0.9": 589
+  }
+ },
+ {
+  "conv": 2,
+  "category": "open-domain",
+  "question": "Around which US holiday did Maria get into a car accident?",
+  "gold": "Independence Day",
+  "answers": {
+   "v0.8": "Fourth of July",
+   "v0.9": "Independence Day"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 164,
+   "v0.9": 131
+  }
+ },
+ {
+  "conv": 5,
+  "category": "open-domain",
+  "question": "Which national park could Audrey and Andrew be referring to in their conversations?",
+  "gold": "Voyageurs National Park",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 694,
+   "v0.9": 689
+  }
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "What additional country did James visit during his trip to Canada?",
+  "gold": "Greenland",
+  "answers": {
+   "v0.8": "Nuuk",
+   "v0.9": "Greenland"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": false
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 270,
+   "v0.9": 104
+  }
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "Is it likely that Nate has friends besides Joanna?",
+  "gold": "Yesteammates on hisvideo game team.",
+  "answers": {
+   "v0.8": "Yes",
+   "v0.9": "Yes"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 550,
+   "v0.9": 587
+  }
+ },
+ {
+  "conv": 5,
+  "category": "open-domain",
+  "question": "What is something that Andrew could do to make birdwatching hobby to fit in his city schedule?",
+  "gold": "Install a bird feeder outside where he can see the birds without going outdoors.",
+  "answers": {
+   "v0.8": "Spot birds while hiking",
+   "v0.9": "Go to nearby parks or on hikes"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 750,
+   "v0.9": 639
+  }
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Who is Anthony?",
+  "gold": "likely John's friend, colleague or family",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 155,
+   "v0.9": 224
+  }
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "In which state is the shelter from which James adopted the puppy?",
+  "gold": "Connecticut.",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 116,
+   "v0.9": 93
+  }
+ },
+ {
+  "conv": 8,
+  "category": "open-domain",
+  "question": "How often does Sam get health checkups?",
+  "gold": "every three months",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 460,
+   "v0.9": 512
+  }
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Which Star Wars-related locations would Tim enjoy during his visit to Ireland?",
+  "gold": "Skellig Michael, Malin Head, Loop Head, Ceann Sibéal, and Brow Head because they are Star Wars filming locations.",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 373,
+   "v0.9": 354
+  }
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "Was the first half of September 2022 a good month career-wise for Nate and Joanna? Answer yes or no.",
+  "gold": "No; because both of them faced setbacks in their career",
+  "answers": {
+   "v0.8": "No",
+   "v0.9": "No"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 286,
+   "v0.9": 314
+  }
+ },
+ {
+  "conv": 8,
+  "category": "open-domain",
+  "question": "Which major holiday season conincides with Evan's wedding?",
+  "gold": "Christmas",
+  "answers": {
+   "v0.8": "Christmas",
+   "v0.9": "Christmas"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 236,
+   "v0.9": 93
+  }
+ },
+ {
+  "conv": 7,
+  "category": "open-domain",
+  "question": "Is the friend who wrote Deborah the motivational quote no longer alive?",
+  "gold": "likely yes",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Yes"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 271,
+   "v0.9": 406
+  }
+ },
+ {
+  "conv": 8,
+  "category": "open-domain",
+  "question": "What electronic device could Evan gift Sam to help him keep up with his fitness goals?",
+  "gold": "fitness tracker",
+  "answers": {
+   "v0.8": "fitness watch",
+   "v0.9": "fitness smartwatch"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 304,
+   "v0.9": 863
+  }
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "Did John and James study together?",
+  "gold": "Yes",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 108,
+   "v0.9": 175
+  }
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Based on Tim's collections, what is a shop that he would enjoy visiting in New York city?",
+  "gold": "House of MinaLima",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 999,
+   "v0.9": 959
+  }
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "What fields would Caroline be likely to pursue in her educaton?",
+  "gold": "Psychology, counseling certification",
+  "answers": {
+   "v0.8": "counseling and mental health",
+   "v0.9": "Counseling or mental health"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1665,
+   "v0.9": 1870
+  }
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "What alternative career might Nate consider after gaming?",
+  "gold": "an animalkeeper at a localzoo and workingwith turtles; as heknows a great dealabout turtles andhow to care for them,and he enjoys it.",
+  "answers": {
+   "v0.8": "Writing",
+   "v0.9": "writing"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 924,
+   "v0.9": 773
+  }
+ },
+ {
+  "conv": 7,
+  "category": "open-domain",
+  "question": "In what country did Jolene's mother buy her the pendant?",
+  "gold": "In France",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 108,
+   "v0.9": 135
+  }
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "Who is Jill?",
+  "gold": "Most likely John's partner.",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 89,
+   "v0.9": 109
+  }
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "Would Caroline be considered religious?",
+  "gold": "Somewhat, but not extremely religious",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 658,
+   "v0.9": 796
+  }
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Would Tim enjoy reading books by C. S. Lewis or John Greene?",
+  "gold": "C. S.Lewis",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1070,
+   "v0.9": 1055
+  }
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "What kind of yoga for building core strength might John benefit from?",
+  "gold": "Hatha Yoga",
+  "answers": {
+   "v0.8": "Warrior II",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 600,
+   "v0.9": 573
+  }
+ },
+ {
+  "conv": 5,
+  "category": "open-domain",
+  "question": "Which meat does Audrey prefer eating more than others?",
+  "gold": "chicken",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Chicken"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 156,
+   "v0.9": 153
+  }
+ },
+ {
+  "conv": 7,
+  "category": "open-domain",
+  "question": "Why did Jolene sometimes put off doing yoga?",
+  "gold": "She's more interested in playing video games",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 591,
+   "v0.9": 651
+  }
+ },
+ {
+  "conv": 9,
+  "category": "single-hop",
+  "question": "What is the toughest part of car restoration according to Dave?",
+  "gold": "Paying extra attention to detail",
+  "answers": {
+   "v0.8": "a lot of patience",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 617,
+   "v0.9": 687
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "What is one cause that John supports with his influence and resources?",
+  "gold": "youth sports and fair chances in sports",
+  "answers": {
+   "v0.8": "youth sports for underserved communities",
+   "v0.9": "supporting youth sports"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 619,
+   "v0.9": 784
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "Why does John like Aragorn from Lord of the Rings?",
+  "gold": "brave, selfless, down-to-earth attitude",
+  "answers": {
+   "v0.8": "He grows so much throughout the story",
+   "v0.9": "Brave, selfless, down-to-earth attitude"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 481,
+   "v0.9": 121
+  }
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "How does Gina describe the feeling that dance brings?",
+  "gold": "magical",
+  "answers": {
+   "v0.8": "magical",
+   "v0.9": "joy and thrill — magical"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 798,
+   "v0.9": 708
+  }
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "How did Jolene feel after receiving positive feedback at the virtual conference?",
+  "gold": "thrilled and rewarded",
+  "answers": {
+   "v0.8": "Thrilled",
+   "v0.9": "Thrilled and rewarded"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 715,
+   "v0.9": 322
+  }
+ },
+ {
+  "conv": 0,
+  "category": "single-hop",
+  "question": "How did Melanie feel about her family after the accident?",
+  "gold": "They are important and mean the world to her",
+  "answers": {
+   "v0.8": "Super important, biggest motivation and support",
+   "v0.9": "Family's super important to me"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 426,
+   "v0.9": 446
+  }
+ },
+ {
+  "conv": 0,
+  "category": "single-hop",
+  "question": "How did Melanie feel about her family supporting her?",
+  "gold": "She appreciated them a lot",
+  "answers": {
+   "v0.8": "Really lucky",
+   "v0.9": "Lucky and motivated"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 237,
+   "v0.9": 357
+  }
+ },
+ {
+  "conv": 5,
+  "category": "single-hop",
+  "question": "How often does Audrey take her dogs for walks?",
+  "gold": "Multiple times a day",
+  "answers": {
+   "v0.8": "multiple times a day",
+   "v0.9": "multiple times a day"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 149,
+   "v0.9": 716
+  }
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "What plans does Jon have after receiving advice at the networking event?",
+  "gold": "Sprucing up his business plan, tweaking his pitch to investors, and working on an online platform.",
+  "answers": {
+   "v0.8": "Spruce up plan, tweak investor pitch, build online platform",
+   "v0.9": "Spruce up business plan, tweak pitch, build online platform"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 520,
+   "v0.9": 548
+  }
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "What did Deborah buy to enhance her yoga practice besides the props?",
+  "gold": "candle",
+  "answers": {
+   "v0.8": "candle with rosemary",
+   "v0.9": "a candle"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 683,
+   "v0.9": 698
+  }
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "How does Gina describe the studio that Jon has opened?",
+  "gold": "amazing",
+  "answers": {
+   "v0.8": "looks amazing",
+   "v0.9": "looks amazing"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 767,
+   "v0.9": 734
+  }
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "What are Jolene's favorite books?",
+  "gold": "Sapiens, Avalanche by Neal Stephenson",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 163,
+   "v0.9": 200
+  }
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "What does John feel about starting the journey as a programming mentor for game developers?",
+  "gold": "excited and inspired",
+  "answers": {
+   "v0.8": "Really excited",
+   "v0.9": "Ideal start to career"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": true
+  },
+  "level": "medium",
+  "ctx_tokens": {
+   "v0.8": 381,
+   "v0.9": 622
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "Why do Tim and John find LeBron inspiring?",
+  "gold": "LeBron's determination and the epic block in Game 7 of the '16 Finals",
+  "answers": {
+   "v0.8": "skills and leadership",
+   "v0.9": "skills and leadership"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 422,
+   "v0.9": 525
+  }
+ },
+ {
+  "conv": 0,
+  "category": "single-hop",
+  "question": "What does Melanie say running has been great for?",
+  "gold": "Her mental health",
+  "answers": {
+   "v0.8": "her headspace",
+   "v0.9": "my mental health"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 358,
+   "v0.9": 338
+  }
+ },
+ {
+  "conv": 3,
+  "category": "single-hop",
+  "question": "For how long has Nate had his turtles?",
+  "gold": "3 years",
+  "answers": {
+   "v0.8": "3 years",
+   "v0.9": "3 years"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 540,
+   "v0.9": 643
+  }
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "How long was Max a part of John's family?",
+  "gold": "10 years",
+  "answers": {
+   "v0.8": "10 years",
+   "v0.9": "10 years"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 113,
+   "v0.9": 92
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "How does John describe the game season for his team?",
+  "gold": "intense with tough losses and great wins",
+  "answers": {
+   "v0.8": "intense with tough losses and great wins",
+   "v0.9": "intense with tough losses and great wins"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 466,
+   "v0.9": 359
+  }
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "What instrument is John learning to play as of 27 March, 2022?",
+  "gold": "Drums",
+  "answers": {
+   "v0.8": "drums",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 184,
+   "v0.9": 223
+  }
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "What did Maria donate to a homeless shelter in December 2023?",
+  "gold": "old car",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 591,
+   "v0.9": 284
+  }
+ },
+ {
+  "conv": 5,
+  "category": "single-hop",
+  "question": "What type of activities does Audrey suggest for mental stimulation of the dogs?",
+  "gold": "puzzles, training, hide-and-seek",
+  "answers": {
+   "v0.8": "puzzles, training, hide-and-seek",
+   "v0.9": "puzzles, training, hide-and-seek"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 668,
+   "v0.9": 595
+  }
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "Which country did James visit in 2021?",
+  "gold": "Italy",
+  "answers": {
+   "v0.8": "Italy",
+   "v0.9": "Italy"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 542,
+   "v0.9": 499
+  }
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "How is Gina's store doing?",
+  "gold": "The store is doing great.",
+  "answers": {
+   "v0.8": "Seeing more sales",
+   "v0.9": "doing great"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 2458,
+   "v0.9": 548
+  }
+ },
+ {
+  "conv": 9,
+  "category": "single-hop",
+  "question": "What fuels Calvin's soul?",
+  "gold": "Performing live",
+  "answers": {
+   "v0.8": "Performing live",
+   "v0.9": "Performing live"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1201,
+   "v0.9": 1131
+  }
+ },
+ {
+  "conv": 9,
+  "category": "single-hop",
+  "question": "What is Dave's new business venture as of 1 May, 2023?",
+  "gold": "Car maintenance shop",
+  "answers": {
+   "v0.8": "car maintenance shop",
+   "v0.9": "opening own car maintenance shop"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 572,
+   "v0.9": 664
+  }
+ },
+ {
+  "conv": 3,
+  "category": "multi-hop",
+  "question": "What is Joanna allergic to?",
+  "gold": "Most reptiles,animals with fur,cockroaches, dairy",
+  "answers": {
+   "v0.8": "Most reptiles, furred animals, cockroaches",
+   "v0.9": "most reptiles and animals with fur"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 996,
+   "v0.9": 1127
+  }
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "What musical artists/bands has Melanie seen?",
+  "gold": "Summer Sounds, Matt Patterson",
+  "answers": {
+   "v0.8": "Matt Patterson, Summer Sounds",
+   "v0.9": "Summer Sounds"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 202,
+   "v0.9": 150
+  }
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "What does help Calvin stay connected to the creative process?",
+  "gold": "Calvin stays connected to the creative process by always staying up-to-date on world events and watching documentaries about artists.",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1117,
+   "v0.9": 1143
+  }
+ },
+ {
+  "conv": 6,
+  "category": "multi-hop",
+  "question": "What gaming equipments did John buy or refurbish?",
+  "gold": "Sennheiser headphones, Logitech mouse, gaming desk",
+  "answers": {
+   "v0.8": "New devices, gaming desk, headphones",
+   "v0.9": "new devices, gaming desk, new headphones"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 394,
+   "v0.9": 361
+  }
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "Does Calvin want to expand his brand?",
+  "gold": "yes",
+  "answers": {
+   "v0.8": "Yes",
+   "v0.9": "Yes"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 566,
+   "v0.9": 508
+  }
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "What has Melanie painted?",
+  "gold": "Horse, sunset, sunrise",
+  "answers": {
+   "v0.8": "lake sunrise, horse, and abstract paintings",
+   "v0.9": "lake sunrise, horse, sunset and abstract blue paintings"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 952,
+   "v0.9": 825
+  }
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "What kind of unhealthy snacks does Sam enjoy eating?",
+  "gold": "soda, candy",
+  "answers": {
+   "v0.8": "soda and candy",
+   "v0.9": "sugary drinks and snacks"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 555,
+   "v0.9": 411
+  }
+ },
+ {
+  "conv": 1,
+  "category": "multi-hop",
+  "question": "Why did Gina decide to start her own clothing store?",
+  "gold": "She always loved fashion trends and finding unique pieces and she lost her job so decided it was time to start her own business.",
+  "answers": {
+   "v0.8": "Lost job, blend dance and fashion",
+   "v0.9": "After losing her job"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1060,
+   "v0.9": 1054
+  }
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What items des John mention having as a child?",
+  "gold": "A doll, a film camera",
+  "answers": {
+   "v0.8": "little doll and film camera",
+   "v0.9": "little doll and film camera"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 122,
+   "v0.9": 128
+  }
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "When did Melanie go on a hike after the roadtrip?",
+  "gold": "19 October 2023",
+  "answers": {
+   "v0.8": "2023-10-19",
+   "v0.9": "2023-10-19"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 665,
+   "v0.9": 579
+  }
+ },
+ {
+  "conv": 4,
+  "category": "multi-hop",
+  "question": "What books has Tim read?",
+  "gold": "Harry Potter, Game of Thrones, the Name of the Wind, The Alchemist, The Hobbit, A Dance with Dragons, and the Wheel of Time.",
+  "answers": {
+   "v0.8": "A Dance with Dragons, Game of Thrones, Harry Potter, The Name of the Wind",
+   "v0.9": "A Dance with Dragons"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1265,
+   "v0.9": 1138
+  }
+ },
+ {
+  "conv": 7,
+  "category": "multi-hop",
+  "question": "Where did Jolene and her partner find a cool diving spot?",
+  "gold": "Phuket",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 313,
+   "v0.9": 217
+  }
+ },
+ {
+  "conv": 4,
+  "category": "multi-hop",
+  "question": "What items does John collect?",
+  "gold": "sneakers, fantasy movie DVDs, jerseys",
+  "answers": {
+   "v0.8": "basketball jerseys and sneakers",
+   "v0.9": "basketball jerseys and sneakers"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 778,
+   "v0.9": 871
+  }
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What exercises has John done?",
+  "gold": "Weight training, Circuit training, Kickboxing, yoga",
+  "answers": {
+   "v0.8": "yoga, kickboxing, weight training, boot camps",
+   "v0.9": "yoga, weight training, taekwondo, kickboxing, boot camp"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1766,
+   "v0.9": 1605
+  }
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "How many dogs has Maria adopted from the dog shelter she volunteers at?",
+  "gold": "two",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "One"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 594,
+   "v0.9": 421
+  }
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What outdoor activities has John done with his colleagues?",
+  "gold": "Hiking, mountaineering",
+  "answers": {
+   "v0.8": "Mountaineering and hiking",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 280,
+   "v0.9": 149
+  }
+ },
+ {
+  "conv": 3,
+  "category": "multi-hop",
+  "question": "What animal do both Nate and Joanna like?",
+  "gold": "Turtles.",
+  "answers": {
+   "v0.8": "turtles",
+   "v0.9": "turtles"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 759,
+   "v0.9": 709
+  }
+ },
+ {
+  "conv": 3,
+  "category": "multi-hop",
+  "question": "How many letters has Joanna recieved?",
+  "gold": "Two",
+  "answers": {
+   "v0.8": "2",
+   "v0.9": "Two"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 708,
+   "v0.9": 431
+  }
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What test has John taken multiple times?",
+  "gold": "The military aptitude test",
+  "answers": {
+   "v0.8": "military aptitude test",
+   "v0.9": "military aptitude test"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 559,
+   "v0.9": 550
+  }
+ },
+ {
+  "conv": 1,
+  "category": "multi-hop",
+  "question": "What do Jon and Gina both have in common?",
+  "gold": "They lost their jobs and decided to start their own businesses.",
+  "answers": {
+   "v0.8": "Passion for dance",
+   "v0.9": "Love of dance"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 762,
+   "v0.9": 880
+  }
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "What mishaps has Calvin run into?",
+  "gold": "flooding of his mansion, car accident",
+  "answers": {
+   "v0.8": "Car accident and flooding",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 604,
+   "v0.9": 456
+  }
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "What new hobbies did Sam consider trying?",
+  "gold": "Painting, kayaking, hiking, cooking, running",
+  "answers": {
+   "v0.8": "painting, kayaking, skiing",
+   "v0.9": "Painting, kayaking, skiing"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 798,
+   "v0.9": 905
+  }
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "What kind of hobbies does Evan pursue?",
+  "gold": "painting, hiking, reading books, biking, skiing, snowboarding, ice skating, swimming, camping, kayaking",
+  "answers": {
+   "v0.8": "Painting, hiking, biking, fitness",
+   "v0.9": "hiking, biking and watercolor painting"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1640,
+   "v0.9": 1465
+  }
+ },
+ {
+  "conv": 6,
+  "category": "multi-hop",
+  "question": "What kind of tricks do James's pets know?",
+  "gold": "swimming, catching frisbees, balancing on a skateboard, sit, stay, paw, and rollover",
+  "answers": {
+   "v0.8": "sit, stay, paw, and rollover",
+   "v0.9": "sit, stay, paw, and rollover"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 686,
+   "v0.9": 512
+  }
+ },
+ {
+  "conv": 4,
+  "category": "multi-hop",
+  "question": "What outdoor activities does John enjoy?",
+  "gold": "Hiking, surfing",
+  "answers": {
+   "v0.8": "Camping, basketball, surfing, hiking",
+   "v0.9": "Basketball and hiking"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1369,
+   "v0.9": 1347
+  }
+ },
+ {
+  "conv": 3,
+  "category": "temporal",
+  "question": "When did Joanna plan to go over to Nate's and share recipes?",
+  "gold": "5 November, 2022.",
+  "answers": {
+   "v0.8": "2022-11-05",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 187,
+   "v0.9": 140
+  }
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When was Calvin's concert in Tokyo?",
+  "gold": "last week of May 2023",
+  "answers": {
+   "v0.8": "2023-10-19",
+   "v0.9": "2023-08-14"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 913,
+   "v0.9": 812
+  }
+ },
+ {
+  "conv": 8,
+  "category": "temporal",
+  "question": "When did Evan start taking painting classes?",
+  "gold": "Few days before 19 August, 2023.",
+  "answers": {
+   "v0.8": "A few days before 2023-08-19",
+   "v0.9": "mid-August 2023"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 887,
+   "v0.9": 710
+  }
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "How many months passed between Andrew adopting Buddy and Scout",
+  "gold": "one month",
+  "answers": {
+   "v0.8": "1 month",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 257,
+   "v0.9": 136
+  }
+ },
+ {
+  "conv": 4,
+  "category": "temporal",
+  "question": "When did John take a trip to the Rocky Mountains?",
+  "gold": "2022",
+  "answers": {
+   "v0.8": "2022",
+   "v0.9": "2022"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 533,
+   "v0.9": 596
+  }
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When Jon has lost his job as a banker?",
+  "gold": "19 January, 2023",
+  "answers": {
+   "v0.8": "2023-01-19",
+   "v0.9": "2023-01-19"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1137,
+   "v0.9": 1103
+  }
+ },
+ {
+  "conv": 8,
+  "category": "temporal",
+  "question": "When did Sam start working out at the gym?",
+  "gold": "July 28, 2023",
+  "answers": {
+   "v0.8": "2023-07-28",
+   "v0.9": "2023-07-28"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 794,
+   "v0.9": 704
+  }
+ },
+ {
+  "conv": 2,
+  "category": "temporal",
+  "question": "When did John participate in a 5K charity run?",
+  "gold": "first weekend of August 2023",
+  "answers": {
+   "v0.8": "2023-08-09",
+   "v0.9": "2023-08-09"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 674,
+   "v0.9": 566
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Jolene and her partner return home from Rio de Janeiro?",
+  "gold": "29 August, 2023",
+  "answers": {
+   "v0.8": "2023-08-29",
+   "v0.9": "August 29, 2023"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 280,
+   "v0.9": 219
+  }
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "When did Caroline join a new activist group?",
+  "gold": "The Tuesday before 20 July 2023",
+  "answers": {
+   "v0.8": "2023-07-18",
+   "v0.9": "2023-07-18"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 717,
+   "v0.9": 651
+  }
+ },
+ {
+  "conv": 8,
+  "category": "temporal",
+  "question": "When did Evan announce his marriage to his extended family?",
+  "gold": "January 5, 2024",
+  "answers": {
+   "v0.8": "2024-01-05",
+   "v0.9": "2024-01-05"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 305,
+   "v0.9": 238
+  }
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "When did Audrey adopt Pixie?",
+  "gold": "around April 2, 2023",
+  "answers": {
+   "v0.8": "2023-04-02",
+   "v0.9": "2023-04-02"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 155,
+   "v0.9": 476
+  }
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "How long has it been since Andrew adopted his first pet, as of November 2023?",
+  "gold": "4 months",
+  "answers": {
+   "v0.8": "About 4 months",
+   "v0.9": "About 4 months"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 671,
+   "v0.9": 678
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "Where did Jolene and her partner spend most of September 2023?",
+  "gold": "Phuket",
+  "answers": {
+   "v0.8": "Phuket",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 700,
+   "v0.9": 370
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Jolene take Seraphim to the park?",
+  "gold": "Sunday before 2 March, 2023",
+  "answers": {
+   "v0.8": "2023-02-26",
+   "v0.9": "2023-02-26"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 167,
+   "v0.9": 118
+  }
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When did Jon host a dance competition?",
+  "gold": "May, 2023",
+  "answers": {
+   "v0.8": "May 2023",
+   "v0.9": "May 2023"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 554,
+   "v0.9": 388
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Jolene lose a lot of progress in her work?",
+  "gold": "last week of July 2023",
+  "answers": {
+   "v0.8": "2023-07-25",
+   "v0.9": "2023-08-12"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 550,
+   "v0.9": 434
+  }
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "How long has Melanie been practicing art?",
+  "gold": "Since 2016",
+  "answers": {
+   "v0.8": "Seven years",
+   "v0.9": "Seven years"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 165,
+   "v0.9": 134
+  }
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When did Calvin meet with the creative team for his new album?",
+  "gold": "8 June, 2023",
+  "answers": {
+   "v0.8": "2023-06-08",
+   "v0.9": "2023-06-08"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 637,
+   "v0.9": 457
+  }
+ },
+ {
+  "conv": 4,
+  "category": "temporal",
+  "question": "Where was Tim in the week before 16 November 2023?",
+  "gold": "UK",
+  "answers": {
+   "v0.8": "UK",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 571,
+   "v0.9": 547
+  }
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "When did Andrew adopt Scout?",
+  "gold": "few days before November 2023",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 416,
+   "v0.9": 270
+  }
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Deborah go to an art show with Anna?",
+  "gold": "on 9 April, 2023",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 206,
+   "v0.9": 149
+  }
+ },
+ {
+  "conv": 2,
+  "category": "temporal",
+  "question": "When did John go on a camping trip with Max?",
+  "gold": "The summer of 2022",
+  "answers": {
+   "v0.8": "Summer 2022",
+   "v0.9": "summer 2022"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 272,
+   "v0.9": 294
+  }
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When did Jon start learning marketing and analytics tools?",
+  "gold": "July, 2023",
+  "answers": {
+   "v0.8": "2023-07-09",
+   "v0.9": "2023-07-09"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 189,
+   "v0.9": 178
+  }
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "When did Caroline go biking with friends?",
+  "gold": "The weekend before 13 September 2023",
+  "answers": {
+   "v0.8": "September 9, 2023",
+   "v0.9": "September 9-10, 2023"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 110,
+   "v0.9": 93
+  }
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "What is a prominent charity organization that John might want to work with and why?",
+  "gold": "Good Sports, because they work with Nike, Gatorade, and Under Armour and they aim toprovide youth sports opportunities for kids ages 3-18 in high-need communities.",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1165,
+   "v0.9": 1194
+  }
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "What state did Nate visit?",
+  "gold": "Florida",
+  "answers": {
+   "v0.8": "Florida",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 129,
+   "v0.9": 61
+  }
+ },
+ {
+  "conv": 9,
+  "category": "open-domain",
+  "question": "Would Calvin enjoy performing at the Hollywood Bowl?",
+  "gold": "Yes; because he enjoys the rush of performing onstage to large crowds",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1042,
+   "v0.9": 1051
+  }
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "What personality traits might Melanie say Caroline has?",
+  "gold": "Thoughtful, authentic, driven",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1455,
+   "v0.9": 1665
+  }
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "What is the game with different colored cards that was John talking about with James?",
+  "gold": "UNO",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 319,
+   "v0.9": 150
+  }
+ },
+ {
+  "conv": 7,
+  "category": "open-domain",
+  "question": "In what country was Jolene during summer 2022?",
+  "gold": "Colombia",
+  "answers": {
+   "v0.8": "Colombia",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 531,
+   "v0.9": 548
+  }
+ },
+ {
+  "conv": 2,
+  "category": "open-domain",
+  "question": "Does John live close to a beach or the mountains?",
+  "gold": "beach",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 635,
+   "v0.9": 745
+  }
+ },
+ {
+  "conv": 8,
+  "category": "open-domain",
+  "question": "How do Evan and Sam use creative outlets to cope with life's challenges?",
+  "gold": "Evan and Sam use creative activities, like painting and writing, as therapeutic tools to express themselves and cope with stress.",
+  "answers": {
+   "v0.8": "Evan paints, Sam journals and writes",
+   "v0.9": "Evan paints, Sam journals"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 545,
+   "v0.9": 639
+  }
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "What are John's suspected health problems?",
+  "gold": "Obesity",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 408,
+   "v0.9": 207
+  }
+ },
+ {
+  "conv": 5,
+  "category": "open-domain",
+  "question": "What can Andrew potentially do to improve his stress and accomodate his living situation with his dogs?",
+  "gold": "Change to a hybrid or remote job so he can move away from the city to the suburbs to have a larger living space and be closer to nature.",
+  "answers": {
+   "v0.8": "Find housing near park or woods",
+   "v0.9": "Cooking, doggy daycare, parks and hikes"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1316,
+   "v0.9": 1591
+  }
+ },
+ {
+  "conv": 2,
+  "category": "open-domain",
+  "question": "What attributes describe John?",
+  "gold": "Selfless, family-oriented, passionate, rational",
+  "answers": {
+   "v0.8": "passionate about veterans, family-oriented volunteer",
+   "v0.9": "positive, community-focused, supports veterans"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 2149,
+   "v0.9": 2397
+  }
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "What pets wouldn't cause any discomfort to Joanna?",
+  "gold": "Hairless cats or pigs,since they don't have fur, which is one of the main causes of Joanna's allergy.",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 759,
+   "v0.9": 920
+  }
+ },
+ {
+  "conv": 7,
+  "category": "open-domain",
+  "question": "What card game is Deborah talking about?",
+  "gold": "Exploding Kittens",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 419,
+   "v0.9": 418
+  }
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "Would Caroline still want to pursue counseling as a career if she hadn't received support growing up?",
+  "gold": "Likely no",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1131,
+   "v0.9": 1251
+  }
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "What underlying condition might Joanna have based on her allergies?",
+  "gold": "asthma",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 729,
+   "v0.9": 832
+  }
+ },
+ {
+  "conv": 9,
+  "category": "open-domain",
+  "question": "Would Dave prefer working on a Dodge Charger or a Subaru Forester?",
+  "gold": "Dodge Charger",
+  "answers": {
+   "v0.8": "Dodge Charger",
+   "v0.9": "Dodge Charger"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 724,
+   "v0.9": 824
+  }
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "Would Melanie likely enjoy the song \"The Four Seasons\" by Vivaldi?",
+  "gold": "Yes; it's classical music",
+  "answers": {
+   "v0.8": "Yes",
+   "v0.9": "Yes"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 800,
+   "v0.9": 872
+  }
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Which outdoor gear company likely signed up John for an endorsement deal?",
+  "gold": "Under Armour",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 876,
+   "v0.9": 814
+  }
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Which US states might Tim be in during September 2023 based on his plans of visiting Universal Studios?",
+  "gold": "California or Florida",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 260,
+   "v0.9": 359
+  }
+ },
+ {
+  "conv": 2,
+  "category": "open-domain",
+  "question": "What job might Maria pursue in the future?",
+  "gold": "Shelter coordinator, Counselor",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1008,
+   "v0.9": 1136
+  }
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "What would be a good hobby related to his travel dreams for Tim to pick up?",
+  "gold": "Writing a travel blog.",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1077,
+   "v0.9": 1022
+  }
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "What is the board game where you have to find the imposter that John mentions to James?",
+  "gold": "Mafia",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 388,
+   "v0.9": 283
+  }
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "What is a Star Wars book that Tim might enjoy?",
+  "gold": "Star Wars: Jedi Apprentice by Judy Blundell and David Farland. It is a highly rated and immersive series about his favorite movies.",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 751,
+   "v0.9": 595
+  }
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "Would Caroline pursue writing as a career option?",
+  "gold": "LIkely no; though she likes reading, she wants to be a counselor",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 492,
+   "v0.9": 503
+  }
+ },
+ {
+  "conv": 9,
+  "category": "open-domain",
+  "question": "Does Dave's shop employ a lot of people?",
+  "gold": "Yes",
+  "answers": {
+   "v0.8": "Not mentioned.",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 579,
+   "v0.9": 742
+  }
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "Where did Deborah get her cats?",
+  "gold": "Luna is from the shelter and Max is her mother's cat",
+  "answers": {
+   "v0.8": "From mother and shelter",
+   "v0.9": "Mother and shelter"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 396,
+   "v0.9": 414
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "According to John, who is his favorite character from Lord of the Rings?",
+  "gold": "Aragorn",
+  "answers": {
+   "v0.8": "Aragorn",
+   "v0.9": "Aragorn"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 147,
+   "v0.9": 121
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "Which language is Tim learning?",
+  "gold": "German",
+  "answers": {
+   "v0.8": "German",
+   "v0.9": "German"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 339,
+   "v0.9": 360
+  }
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "Why did James embody the appearance of the game character from the woman he saw during a walk?",
+  "gold": "He found her appearance and eyes amazing.",
+  "answers": {
+   "v0.8": "Fell in love at first sight",
+   "v0.9": "Fell in love at first sight"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 216,
+   "v0.9": 181
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "What is the painting of Aragorn a reminder for John to be in everything he does?",
+  "gold": "be a leader",
+  "answers": {
+   "v0.8": "stay true and be a leader",
+   "v0.9": "stay true and be a leader"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 395,
+   "v0.9": 451
+  }
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "What is the name of Maria's second puppy?",
+  "gold": "Shadow",
+  "answers": {
+   "v0.8": "Shadow",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 98,
+   "v0.9": 148
+  }
+ },
+ {
+  "conv": 3,
+  "category": "single-hop",
+  "question": "What did Nate think of the coconut milk ice cream he made?",
+  "gold": "Super good, rich and creamy",
+  "answers": {
+   "v0.8": "Rich and creamy, potential new favorite",
+   "v0.9": "Rich and creamy, potential new favorite snack"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 535,
+   "v0.9": 522
+  }
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "What inspired John to join the marching event for veterans' rights?",
+  "gold": "Respect for the military and the desire to show support",
+  "answers": {
+   "v0.8": "Stories from Samuel",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 962,
+   "v0.9": 800
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "What does John want to do after his basketball career?",
+  "gold": "positively influence and inspire others, potentially start a foundation and engage in charity work",
+  "answers": {
+   "v0.8": "Start a foundation and do charity work",
+   "v0.9": "Start foundation and do charity work"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1073,
+   "v0.9": 1140
+  }
+ },
+ {
+  "conv": 0,
+  "category": "single-hop",
+  "question": "What setback did Melanie face in October 2023?",
+  "gold": "She got hurt and had to take a break from pottery.",
+  "answers": {
+   "v0.8": "Got hurt, paused pottery",
+   "v0.9": "Son's road-trip car accident"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 616,
+   "v0.9": 587
+  }
+ },
+ {
+  "conv": 0,
+  "category": "single-hop",
+  "question": "What did the charity race raise awareness for?",
+  "gold": "mental health",
+  "answers": {
+   "v0.8": "mental health",
+   "v0.9": "mental health"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 431,
+   "v0.9": 325
+  }
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "What important values does John want to teach his kids through adopting a rescue dog?",
+  "gold": "Responsibility and compassion",
+  "answers": {
+   "v0.8": "responsibility and compassion",
+   "v0.9": "responsibility and compassion"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 456,
+   "v0.9": 460
+  }
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "What is Jon working on opening?",
+  "gold": "a dance studio",
+  "answers": {
+   "v0.8": "dance studio",
+   "v0.9": "dance studio"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 1062,
+   "v0.9": 542
+  }
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "What made being part of the running group easy for Deborah to stay motivated?",
+  "gold": "helping and pushing each other during runs",
+  "answers": {
+   "v0.8": "Help and push each other",
+   "v0.9": "Help and push each other during runs"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 407,
+   "v0.9": 433
+  }
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "What is Gina's favorite style of dance?",
+  "gold": "Contemporary",
+  "answers": {
+   "v0.8": "Contemporary dance",
+   "v0.9": "Contemporary dance"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 79,
+   "v0.9": 168
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "Where was the forest picture shared by John on December 1,2023 taken?",
+  "gold": "near his hometown",
+  "answers": {
+   "v0.8": "Forest near hometown",
+   "v0.9": "forest near my hometown"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 404,
+   "v0.9": 256
+  }
+ },
+ {
+  "conv": 3,
+  "category": "single-hop",
+  "question": "What motivates Joanna to keep writing even on tough days?",
+  "gold": "Knowing that her writing can make a difference",
+  "answers": {
+   "v0.8": "Knowing her writing can make a difference",
+   "v0.9": "Knowing her writing can make a difference"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1106,
+   "v0.9": 1204
+  }
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "What type of music does Deborah find helpful during her yoga practice?",
+  "gold": "instrumental tracks with mellow melodies and rhythms",
+  "answers": {
+   "v0.8": "instrumental tracks with mellow melodies and rhythms",
+   "v0.9": "instrumental tracks with mellow melodies and rhythms"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 269,
+   "v0.9": 311
+  }
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "Why did John decide to run for office again?",
+  "gold": "saw the impact he could make in the community through politics",
+  "answers": {
+   "v0.8": "To make a difference in his community",
+   "v0.9": "To make a difference in community"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 1136,
+   "v0.9": 1322
+  }
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "What type of pizza is James' favorite?",
+  "gold": "Pepperoni",
+  "answers": {
+   "v0.8": "Pepperoni pizza",
+   "v0.9": "Pepperoni with spicy salami and cheese"
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 190,
+   "v0.9": 139
+  }
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "What did James adopt in April 2022?",
+  "gold": "a pup",
+  "answers": {
+   "v0.8": "A pup named Ned",
+   "v0.9": "Not mentioned."
+  },
+  "correct": {
+   "v0.8": true,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 285,
+   "v0.9": 461
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "What kind of deals did John sign with Nike and Gatorade?",
+  "gold": "basketball shoe and gear deal with Nike, potential sponsorship deal with Gatorade",
+  "answers": {
+   "v0.8": "basketball shoe and gear deal and potential sponsorship",
+   "v0.9": "basketball shoe and gear deal"
+  },
+  "correct": {
+   "v0.9": false,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 692,
+   "v0.9": 721
+  }
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "What did John and the veterans do during the small party?",
+  "gold": "share stories and make connections",
+  "answers": {
+   "v0.8": "share stories and make connections",
+   "v0.9": "Shared stories and built camaraderie"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence",
+  "ctx_tokens": {
+   "v0.8": 222,
+   "v0.9": 249
+  }
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "What book recommendation did Tim give to John for the trip?",
+  "gold": "A fantasy novel by Patrick Rothfuss",
+  "answers": {
+   "v0.8": "Not mentioned",
+   "v0.9": "Not mentioned"
+  },
+  "correct": {
+   "v0.8": false,
+   "v0.9": false
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 276,
+   "v0.9": 269
+  }
+ },
+ {
+  "conv": 3,
+  "category": "single-hop",
+  "question": "What two main ingredients are part of the dessert Joanna shared a photo of with blueberries, coconut milk, and a gluten-free crust?",
+  "gold": "blueberries and coconut milk",
+  "answers": {
+   "v0.8": "blueberries and coconut milk",
+   "v0.9": "blueberries, coconut milk"
+  },
+  "correct": {
+   "v0.9": true,
+   "v0.8": true
+  },
+  "level": "evidence+",
+  "ctx_tokens": {
+   "v0.8": 671,
+   "v0.9": 651
+  }
+ }
+]

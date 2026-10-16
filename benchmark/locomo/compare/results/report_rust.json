@@ -1,0 +1,96 @@
+{
+ "n": 200,
+ "judge": "claude haiku (all 7 answers graded together)",
+ "answerer": "muse-spark-1.3",
+ "accuracy": {
+  "agentmem_v08_rust": 55.0,
+  "agentmem_v08": 55.0,
+  "agentmem_v07": 54.0,
+  "mem0": 50.5,
+  "gbrain": 51.5,
+  "agentmem": 41.0,
+  "keyword": 34.0
+ },
+ "by_category": {
+  "agentmem_v08_rust": {
+   "multi-hop": 46.0,
+   "temporal": 72.0,
+   "open-domain": 30.0,
+   "single-hop": 72.0
+  },
+  "agentmem_v08": {
+   "multi-hop": 42.0,
+   "temporal": 80.0,
+   "open-domain": 22.0,
+   "single-hop": 76.0
+  },
+  "agentmem_v07": {
+   "multi-hop": 42.0,
+   "temporal": 76.0,
+   "open-domain": 18.0,
+   "single-hop": 80.0
+  },
+  "mem0": {
+   "multi-hop": 44.0,
+   "temporal": 68.0,
+   "open-domain": 22.0,
+   "single-hop": 68.0
+  },
+  "gbrain": {
+   "multi-hop": 32.0,
+   "temporal": 78.0,
+   "open-domain": 22.0,
+   "single-hop": 74.0
+  },
+  "agentmem": {
+   "multi-hop": 26.0,
+   "temporal": 70.0,
+   "open-domain": 14.0,
+   "single-hop": 54.0
+  },
+  "keyword": {
+   "multi-hop": 10.0,
+   "temporal": 64.0,
+   "open-domain": 14.0,
+   "single-hop": 48.0
+  }
+ },
+ "ctx_tokens": {
+  "agentmem_v08_rust": 528,
+  "agentmem_v08": 602,
+  "agentmem_v07": 3114,
+  "mem0": 1126,
+  "gbrain": 3982,
+  "agentmem": 2243,
+  "keyword": 384
+ },
+ "not_mentioned": {
+  "agentmem_v08_rust": 38,
+  "agentmem_v08": 46,
+  "agentmem_v07": 42,
+  "mem0": 44,
+  "gbrain": 45,
+  "agentmem": 64,
+  "keyword": 88
+ },
+ "recall_seconds_rust": {
+  "mean": 3.17,
+  "median": 3.02,
+  "p90": 3.37
+ },
+ "recall_seconds_python": {
+  "mean": 4.01,
+  "median": 3.83,
+  "p90": 4.56
+ },
+ "ram_mb": [
+  {
+   "rust_service_peak_mb": 289,
+   "python_process_peak_mb": 247
+  },
+  {
+   "rust_service_peak_mb": 293,
+   "python_process_peak_mb": 304
+  }
+ ]
+}

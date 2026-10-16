@@ -1,0 +1,42 @@
+{
+ "n": 200,
+ "judge": "claude haiku",
+ "answerer": "muse-spark-1.3",
+ "accuracy": {
+  "agentmem": 41.5,
+  "keyword": 33.5
+ },
+ "by_category": {
+  "agentmem": {
+   "multi-hop": 28.0,
+   "temporal": 68.0,
+   "open-domain": 12.0,
+   "single-hop": 58.0
+  },
+  "keyword": {
+   "multi-hop": 8.0,
+   "temporal": 64.0,
+   "open-domain": 12.0,
+   "single-hop": 50.0
+  }
+ },
+ "ctx_tokens": {
+  "agentmem": 2243,
+  "keyword": 384
+ },
+ "agentmem_levels": {
+  "big": 34,
+  "whole_log": 129,
+  "small": 30,
+  "topic_log": 5,
+  "medium": 2
+ },
+ "calls": {
+  "muse:cached": 133,
+  "haiku:cached": 76,
+  "muse:calls": 267,
+  "muse:in_chars": 1517464,
+  "haiku:calls": 124,
+  "haiku:in_chars": 67582
+ }
+}

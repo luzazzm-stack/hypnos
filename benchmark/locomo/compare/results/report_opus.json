@@ -1,0 +1,56 @@
+{
+ "n": 200,
+ "answerer": "claude-opus-5-5 (effort medium)",
+ "judge": "claude haiku (all 4 answers graded together)",
+ "accuracy": {
+  "agentmem_v08": 73.0,
+  "mem0": 70.0,
+  "gbrain": 67.0,
+  "keyword": 46.5
+ },
+ "by_category": {
+  "agentmem_v08": {
+   "multi-hop": 56.0,
+   "temporal": 92.0,
+   "open-domain": 60.0,
+   "single-hop": 84.0
+  },
+  "mem0": {
+   "multi-hop": 48.0,
+   "temporal": 88.0,
+   "open-domain": 62.0,
+   "single-hop": 82.0
+  },
+  "gbrain": {
+   "multi-hop": 38.0,
+   "temporal": 88.0,
+   "open-domain": 52.0,
+   "single-hop": 90.0
+  },
+  "keyword": {
+   "multi-hop": 12.0,
+   "temporal": 70.0,
+   "open-domain": 42.0,
+   "single-hop": 62.0
+  }
+ },
+ "ctx_tokens": {
+  "agentmem_v08": 613,
+  "mem0": 1126,
+  "gbrain": 3982,
+  "keyword": 384
+ },
+ "not_mentioned": {
+  "agentmem_v08": 12,
+  "mem0": 16,
+  "gbrain": 21,
+  "keyword": 59
+ },
+ "opus_usage": {
+  "calls": 796,
+  "input_tokens": 2251584,
+  "output_tokens": 56348,
+  "thinking_tokens": 42911,
+  "usd_list_price": 19.11
+ }
+}

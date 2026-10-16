@@ -1,0 +1,3802 @@
+[
+ {
+  "conv": 5,
+  "category": "multi-hop",
+  "question": "What does Andrew view his pets as?",
+  "gold": "Family",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "joy and companionship"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 339
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 3,
+  "category": "multi-hop",
+  "question": "What is Joanna allergic to?",
+  "gold": "Most reptiles,animals with fur,cockroaches, dairy",
+  "answers": {
+   "agentmem": "Most reptiles, furred animals, cockroaches",
+   "keyword": "reptiles, furry animals, cockroaches"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1493,
+   "keyword": 305
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "multi-hop",
+  "question": "Did Jolene teach herself how to play the console?",
+  "gold": "yes",
+  "answers": {
+   "agentmem": "Yes",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 836,
+   "keyword": 298
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "What musical artists/bands has Melanie seen?",
+  "gold": "Summer Sounds, Matt Patterson",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1409,
+   "keyword": 216
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 1,
+  "category": "multi-hop",
+  "question": "How did Gina promote her clothes store?",
+  "gold": "worked with an artist to make unique fashion pieces, made limited-edition sweatshirts, got some new offers and promotions for online store, developed a video presentation showing how to style her pieces",
+  "answers": {
+   "agentmem": "with new offers and promotions",
+   "keyword": "Launched an ad campaign"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 485
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "What does help Calvin stay connected to the creative process?",
+  "gold": "Calvin stays connected to the creative process by always staying up-to-date on world events and watching documentaries about artists.",
+  "answers": {
+   "agentmem": "music videos, concerts, and documentaries",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1955,
+   "keyword": 382
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What people has Maria met and helped while volunteering?",
+  "gold": "David, Jean, Cindy, Laura",
+  "answers": {
+   "agentmem": "Cindy, fellow volunteer",
+   "keyword": "Jean"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 566
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 6,
+  "category": "multi-hop",
+  "question": "What gaming equipments did John buy or refurbish?",
+  "gold": "Sennheiser headphones, Logitech mouse, gaming desk",
+  "answers": {
+   "agentmem": "New devices, refurbished gaming desk, headphones",
+   "keyword": "gaming chair, keyboard, gaming PC, headset"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2339,
+   "keyword": 412
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "How many children does Melanie have?",
+  "gold": 3,
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2166,
+   "keyword": 649
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "Does Calvin want to expand his brand?",
+  "gold": "yes",
+  "answers": {
+   "agentmem": "Yes",
+   "keyword": "Yes"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 743,
+   "keyword": 535
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 3,
+  "category": "multi-hop",
+  "question": "What recipes has Nate made?",
+  "gold": "coconut milk icecream, chocolate and vanilla swirl",
+  "answers": {
+   "agentmem": "coconut milk ice cream, vegan ice cream, dairy-free chocolate cake",
+   "keyword": "vegan ice cream"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2247,
+   "keyword": 391
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "What has Melanie painted?",
+  "gold": "Horse, sunset, sunrise",
+  "answers": {
+   "agentmem": "Lake sunrise, horse, sunset and abstract paintings",
+   "keyword": "lake sunrise, horse painting, abstract painting"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1653,
+   "keyword": 513
+  },
+  "agentmem_level": "topic_log"
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What type of volunteering have John and Maria both done?",
+  "gold": "Volunteering at a homeless shelter",
+  "answers": {
+   "agentmem": "Homeless shelter volunteering",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 320
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "What kind of unhealthy snacks does Sam enjoy eating?",
+  "gold": "soda, candy",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "sodas"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 358
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "What kinds of things did Evan have broken?",
+  "gold": "His old Prius and his new Prius.",
+  "answers": {
+   "agentmem": "new Prius",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 287
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 1,
+  "category": "multi-hop",
+  "question": "Why did Gina decide to start her own clothing store?",
+  "gold": "She always loved fashion trends and finding unique pieces and she lost her job so decided it was time to start her own business.",
+  "answers": {
+   "agentmem": "To blend dance and fashion",
+   "keyword": "She lost her job"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 511
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 4,
+  "category": "multi-hop",
+  "question": "What similar sports collectible do Tim and John own?",
+  "gold": "signed basketball",
+  "answers": {
+   "agentmem": "basketball",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2331,
+   "keyword": 491
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What items des John mention having as a child?",
+  "gold": "A doll, a film camera",
+  "answers": {
+   "agentmem": "little doll, film camera",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 787,
+   "keyword": 365
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "How many roadtrips did Evan take in May 2023?",
+  "gold": "two",
+  "answers": {
+   "agentmem": "1",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1766,
+   "keyword": 212
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "When did Melanie go on a hike after the roadtrip?",
+  "gold": "19 October 2023",
+  "answers": {
+   "agentmem": "2023-10-19",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2457,
+   "keyword": 437
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What music events has John attended?",
+  "gold": "Live music event, violin concert",
+  "answers": {
+   "agentmem": "Live music event, violin concert",
+   "keyword": "violin concert, live music event"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1808,
+   "keyword": 490
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "multi-hop",
+  "question": "What books has Tim read?",
+  "gold": "Harry Potter, Game of Thrones, the Name of the Wind, The Alchemist, The Hobbit, A Dance with Dragons, and the Wheel of Time.",
+  "answers": {
+   "agentmem": "Game of Thrones series, The Name of the Wind, Harry Potter",
+   "keyword": "The Name of the Wind, The Hobbit"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2039,
+   "keyword": 392
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "What items has Melanie bought?",
+  "gold": "Figurines, shoes",
+  "answers": {
+   "agentmem": "figurines",
+   "keyword": "figurines"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1521,
+   "keyword": 261
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "multi-hop",
+  "question": "Where did Jolene and her partner find a cool diving spot?",
+  "gold": "Phuket",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2435,
+   "keyword": 590
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "What are some changes Caroline has faced during her transition journey?",
+  "gold": "Changes to her body, losing unsupportive friends",
+  "answers": {
+   "agentmem": "Changing body, self-acceptance, losing some friends",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 809,
+   "keyword": 478
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 4,
+  "category": "multi-hop",
+  "question": "What items does John collect?",
+  "gold": "sneakers, fantasy movie DVDs, jerseys",
+  "answers": {
+   "agentmem": "basketball jerseys and sneakers",
+   "keyword": "jerseys"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1364,
+   "keyword": 289
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "multi-hop",
+  "question": "What instruments does Melanie play?",
+  "gold": "clarinet and violin",
+  "answers": {
+   "agentmem": "clarinet",
+   "keyword": "clarinet"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1332,
+   "keyword": 250
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What exercises has John done?",
+  "gold": "Weight training, Circuit training, Kickboxing, yoga",
+  "answers": {
+   "agentmem": "weight training and yoga",
+   "keyword": "weight training"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 844,
+   "keyword": 290
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 5,
+  "category": "multi-hop",
+  "question": "How many times did Audrey and Andew plan to hike together?",
+  "gold": "three times",
+  "answers": {
+   "agentmem": "Once",
+   "keyword": "Twice"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2250,
+   "keyword": 385
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "How many dogs has Maria adopted from the dog shelter she volunteers at?",
+  "gold": "two",
+  "answers": {
+   "agentmem": "1",
+   "keyword": "One"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2529,
+   "keyword": 547
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "Which events in Dave's life inspired him to take up auto engineering?",
+  "gold": "attending a car show with Dad, working on an old car in a neighbor's garage when he was young, spent a summer restoring an old car with Dad",
+  "answers": {
+   "agentmem": "Father's car show, garage tinkering, fixing neighbor's car",
+   "keyword": "Went to a car show"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 701,
+   "keyword": 540
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What outdoor activities has John done with his colleagues?",
+  "gold": "Hiking, mountaineering",
+  "answers": {
+   "agentmem": "Hiking trip near a waterfall",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 342
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 5,
+  "category": "multi-hop",
+  "question": "What has Andrew done with his dogs?",
+  "gold": "Taking walks and hiking",
+  "answers": {
+   "agentmem": "Played board games with Toby",
+   "keyword": "Went hiking"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 516
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 3,
+  "category": "multi-hop",
+  "question": "What animal do both Nate and Joanna like?",
+  "gold": "Turtles.",
+  "answers": {
+   "agentmem": "turtles",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1698,
+   "keyword": 291
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What damages have happened to John's car?",
+  "gold": "Broken windshield, Car broke down",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Broke down"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 444
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 3,
+  "category": "multi-hop",
+  "question": "How many letters has Joanna recieved?",
+  "gold": "Two",
+  "answers": {
+   "agentmem": "One",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1280,
+   "keyword": 160
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 6,
+  "category": "multi-hop",
+  "question": "Which of James's family members have visited him in the last year?",
+  "gold": "mother, sister",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2342,
+   "keyword": 372
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "multi-hop",
+  "question": "What test has John taken multiple times?",
+  "gold": "The military aptitude test",
+  "answers": {
+   "agentmem": "military aptitude test",
+   "keyword": "military aptitude test"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2034,
+   "keyword": 352
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "What activities has Dave participated in with his friends?",
+  "gold": "weekly visits to local parks, countryside roadtrip, celebration of the opening of his car maintenance shop, card-playing nights",
+  "answers": {
+   "agentmem": "Park hangouts, walks, card-night, celebration",
+   "keyword": "Park walks, road trip, card-night, celebrating shop opening"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 738,
+   "keyword": 525
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 1,
+  "category": "multi-hop",
+  "question": "What do Jon and Gina both have in common?",
+  "gold": "They lost their jobs and decided to start their own businesses.",
+  "answers": {
+   "agentmem": "Dance as stress relief",
+   "keyword": "Running own businesses"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 763,
+   "keyword": 488
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 3,
+  "category": "multi-hop",
+  "question": "How many video game tournaments has Nate participated in?",
+  "gold": "nine",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "4"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2200,
+   "keyword": 477
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "What mishaps has Calvin run into?",
+  "gold": "flooding of his mansion, car accident",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1326,
+   "keyword": 136
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "multi-hop",
+  "question": "When Dave was a child, what did he and his father do in the garage?",
+  "gold": "tinkering with car engines, restoration and refurbishing cars",
+  "answers": {
+   "agentmem": "restored an old car",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2878,
+   "keyword": 631
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "What new hobbies did Sam consider trying?",
+  "gold": "Painting, kayaking, hiking, cooking, running",
+  "answers": {
+   "agentmem": "Kayaking and painting",
+   "keyword": "painting"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 379
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 5,
+  "category": "multi-hop",
+  "question": "What are some foods that Audrey likes eating?",
+  "gold": "chicken pot pie, chicken roast, blueberry muffins, sushi",
+  "answers": {
+   "agentmem": "Chicken Pot Pie, sushi, California/salmon rolls",
+   "keyword": "sushi, vegetables"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1747,
+   "keyword": 444
+  },
+  "agentmem_level": "medium"
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "What kind of hobbies does Evan pursue?",
+  "gold": "painting, hiking, reading books, biking, skiing, snowboarding, ice skating, swimming, camping, kayaking",
+  "answers": {
+   "agentmem": "Fitness, kayaking, hiking, painting",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 289
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 8,
+  "category": "multi-hop",
+  "question": "What kind of foods or recipes has Sam recommended to Evan?",
+  "gold": "grilled vegetables, grilled chicken and veggie stir-fry, poutine",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 340
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 6,
+  "category": "multi-hop",
+  "question": "What kind of tricks do James's pets know?",
+  "gold": "swimming, catching frisbees, balancing on a skateboard, sit, stay, paw, and rollover",
+  "answers": {
+   "agentmem": "balance on a skateboard",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1568,
+   "keyword": 296
+  },
+  "agentmem_level": "medium"
+ },
+ {
+  "conv": 5,
+  "category": "multi-hop",
+  "question": "What is the biggest stressor in Andrew's life besides not being able to hike frequently?",
+  "gold": "work",
+  "answers": {
+   "agentmem": "Work life balance",
+   "keyword": "finding dog-friendly spots to rent"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 500
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 4,
+  "category": "multi-hop",
+  "question": "What outdoor activities does John enjoy?",
+  "gold": "Hiking, surfing",
+  "answers": {
+   "agentmem": "Hiking, camping, basketball",
+   "keyword": "hiking"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 609,
+   "keyword": 290
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 3,
+  "category": "temporal",
+  "question": "How long has Nate had his first two turtles?",
+  "gold": "three years",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1946,
+   "keyword": 367
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 3,
+  "category": "temporal",
+  "question": "When did Joanna plan to go over to Nate's and share recipes?",
+  "gold": "5 November, 2022.",
+  "answers": {
+   "agentmem": "2022-11-05",
+   "keyword": "2022-11-04"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1989,
+   "keyword": 330
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When was Jon in Paris?",
+  "gold": "28 January 2023",
+  "answers": {
+   "agentmem": "2023-01-28",
+   "keyword": "2023-01-28"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1514,
+   "keyword": 221
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When was Calvin's concert in Tokyo?",
+  "gold": "last week of May 2023",
+  "answers": {
+   "agentmem": "2023-10-19",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2429,
+   "keyword": 312
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "temporal",
+  "question": "Which month was John in Italy?",
+  "gold": "December, 2023",
+  "answers": {
+   "agentmem": "December 2023",
+   "keyword": "December 2023"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1711,
+   "keyword": 498
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 8,
+  "category": "temporal",
+  "question": "When did Evan start taking painting classes?",
+  "gold": "Few days before 19 August, 2023.",
+  "answers": {
+   "agentmem": "few days before 2023-08-19",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2519,
+   "keyword": 508
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Jolene and her partner try scuba diving lessons?",
+  "gold": "Friday before 17 September, 2023",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "2023-09-15"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2111,
+   "keyword": 302
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "How many months passed between Andrew adopting Buddy and Scout",
+  "gold": "one month",
+  "answers": {
+   "agentmem": "1 month",
+   "keyword": "About one month"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2164,
+   "keyword": 367
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When was the last photo of Deborah and Karlie taken?",
+  "gold": "in summer 2022",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Summer 2022"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2850,
+   "keyword": 527
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "temporal",
+  "question": "When did John take a trip to the Rocky Mountains?",
+  "gold": "2022",
+  "answers": {
+   "agentmem": "2022",
+   "keyword": "2022"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1639,
+   "keyword": 269
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When did Calvin plan on travelling to Tokyo the second time?",
+  "gold": "November 2023",
+  "answers": {
+   "agentmem": "2023-11-19",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2202,
+   "keyword": 373
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When Jon has lost his job as a banker?",
+  "gold": "19 January, 2023",
+  "answers": {
+   "agentmem": "2023-01-19",
+   "keyword": "2023-01-19"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2043,
+   "keyword": 461
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When did Jon and Gina decide to collaborate to create dance content?",
+  "gold": "21 July 2023",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "2023-07-21"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2255,
+   "keyword": 500
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 8,
+  "category": "temporal",
+  "question": "When did Sam start working out at the gym?",
+  "gold": "July 28, 2023",
+  "answers": {
+   "agentmem": "2023-07-28",
+   "keyword": "2023-07-28"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2417,
+   "keyword": 538
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "What kind of project was Jolene working on in the beginning of January 2023?",
+  "gold": "electricity engineering project",
+  "answers": {
+   "agentmem": "electrical engineering project",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2279,
+   "keyword": 358
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "temporal",
+  "question": "When did John participate in a 5K charity run?",
+  "gold": "first weekend of August 2023",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "2023-08-09"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2088,
+   "keyword": 622
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "temporal",
+  "question": "When was John's old area hit with a flood?",
+  "gold": "The week before 7 July 2023",
+  "answers": {
+   "agentmem": "2023-06-30",
+   "keyword": "2023-06-30"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1997,
+   "keyword": 491
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Jolene and her partner return home from Rio de Janeiro?",
+  "gold": "29 August, 2023",
+  "answers": {
+   "agentmem": "2023-08-29",
+   "keyword": "2023-08-29"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2433,
+   "keyword": 366
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Deborah`s mother pass away?",
+  "gold": "a few years before 2023",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1763,
+   "keyword": 396
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "When did Caroline join a new activist group?",
+  "gold": "The Tuesday before 20 July 2023",
+  "answers": {
+   "agentmem": "2023-07-18",
+   "keyword": "2023-07-18"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2596,
+   "keyword": 374
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When is Jon's group performing at a festival?",
+  "gold": "February, 2023",
+  "answers": {
+   "agentmem": "February 2023",
+   "keyword": "February 2023"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2619,
+   "keyword": 549
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 8,
+  "category": "temporal",
+  "question": "When did Evan announce his marriage to his extended family?",
+  "gold": "January 5, 2024",
+  "answers": {
+   "agentmem": "2024-01-05",
+   "keyword": "2024-01-05"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2564,
+   "keyword": 391
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When did Calvin's place get flooded in Tokyo?",
+  "gold": "On a week before 16 May, 2023",
+  "answers": {
+   "agentmem": "2023-05-09",
+   "keyword": "2023-05-09"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2028,
+   "keyword": 393
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "When did Audrey adopt Pixie?",
+  "gold": "around April 2, 2023",
+  "answers": {
+   "agentmem": "2023-04-02",
+   "keyword": "2023-04-02"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1515,
+   "keyword": 390
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "How many pets did Andrew have, as of September 2023?",
+  "gold": "one",
+  "answers": {
+   "agentmem": "One dog",
+   "keyword": "No pets"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2523,
+   "keyword": 354
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "How long has it been since Andrew adopted his first pet, as of November 2023?",
+  "gold": "4 months",
+  "answers": {
+   "agentmem": "About 4 months",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2298,
+   "keyword": 369
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When was Calvin's album released?",
+  "gold": "September 11, 2023",
+  "answers": {
+   "agentmem": "2023-09-11",
+   "keyword": "2023-09-11"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1871,
+   "keyword": 519
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "Where did Jolene and her partner spend most of September 2023?",
+  "gold": "Phuket",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2391,
+   "keyword": 324
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When did Dave take a trip to mountainous regions?",
+  "gold": "July 2023",
+  "answers": {
+   "agentmem": "2023-07-09",
+   "keyword": "July 2023"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2146,
+   "keyword": 398
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Jolene take Seraphim to the park?",
+  "gold": "Sunday before 2 March, 2023",
+  "answers": {
+   "agentmem": "2023-02-26",
+   "keyword": "2023-02-26"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2012,
+   "keyword": 287
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "When did Caroline pass the adoption interview?",
+  "gold": "The Friday before 22 October 2023",
+  "answers": {
+   "agentmem": "2023-10-20",
+   "keyword": "2023-10-20"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2319,
+   "keyword": 589
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When did Jon host a dance competition?",
+  "gold": "May, 2023",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "May 2023"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2363,
+   "keyword": 394
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "temporal",
+  "question": "What month did Tim plan on going to Universal Studios?",
+  "gold": "September, 2023",
+  "answers": {
+   "agentmem": "September 2023",
+   "keyword": "September 2023"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1957,
+   "keyword": 372
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Jolene lose a lot of progress in her work?",
+  "gold": "last week of July 2023",
+  "answers": {
+   "agentmem": "2023-07-25",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2000,
+   "keyword": 297
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "When did Melanie get hurt?",
+  "gold": "September 2023",
+  "answers": {
+   "agentmem": "September 2023",
+   "keyword": "September 2023"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2384,
+   "keyword": 528
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "How long has Melanie been practicing art?",
+  "gold": "Since 2016",
+  "answers": {
+   "agentmem": "Seven years",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1528,
+   "keyword": 323
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "When did Audrey make muffins for herself?",
+  "gold": "The week of April 3rd to 9th",
+  "answers": {
+   "agentmem": "2023-04-09",
+   "keyword": "2023-04-09"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1973,
+   "keyword": 295
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When did Calvin meet with the creative team for his new album?",
+  "gold": "8 June, 2023",
+  "answers": {
+   "agentmem": "2023-06-08",
+   "keyword": "2023-06-08"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2527,
+   "keyword": 417
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Jolene have a dinner and drinks with her friends?",
+  "gold": "21 February, 2023",
+  "answers": {
+   "agentmem": "2023-02-21",
+   "keyword": "2023-02-21"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2406,
+   "keyword": 416
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "temporal",
+  "question": "Where was Tim in the week before 16 November 2023?",
+  "gold": "UK",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2718,
+   "keyword": 455
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 6,
+  "category": "temporal",
+  "question": "When did John plan his next meeting with his siblings?",
+  "gold": "In September, 2022",
+  "answers": {
+   "agentmem": "2022-08-21",
+   "keyword": "September 2022"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2156,
+   "keyword": 261
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 5,
+  "category": "temporal",
+  "question": "When did Andrew adopt Scout?",
+  "gold": "few days before November 2023",
+  "answers": {
+   "agentmem": "2023-11-22",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1846,
+   "keyword": 388
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "When did Caroline have a picnic?",
+  "gold": "The week before 6 July 2023",
+  "answers": {
+   "agentmem": "2023-06-29",
+   "keyword": "2023-06-29"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1500,
+   "keyword": 228
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Deborah go to an art show with Anna?",
+  "gold": "on 9 April, 2023",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2297,
+   "keyword": 331
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 6,
+  "category": "temporal",
+  "question": "When did John resume playing drums in his adulthood?",
+  "gold": "February 2022",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2029,
+   "keyword": 302
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "temporal",
+  "question": "When did John go on a camping trip with Max?",
+  "gold": "The summer of 2022",
+  "answers": {
+   "agentmem": "Summer 2022",
+   "keyword": "Summer 2022"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2455,
+   "keyword": 426
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "temporal",
+  "question": "When did Calvin visit some of the sights in Boston with a former high school friend?",
+  "gold": "October 24, 2023",
+  "answers": {
+   "agentmem": "2023-10-24",
+   "keyword": "2023-10-24"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2515,
+   "keyword": 463
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 1,
+  "category": "temporal",
+  "question": "When did Jon start learning marketing and analytics tools?",
+  "gold": "July, 2023",
+  "answers": {
+   "agentmem": "2023-07-09",
+   "keyword": "2023-07-09"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1639,
+   "keyword": 407
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 7,
+  "category": "temporal",
+  "question": "When did Deborah go to a community meetup?",
+  "gold": "last week of August 2023",
+  "answers": {
+   "agentmem": "2023-09-01",
+   "keyword": "2023-09-01"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2226,
+   "keyword": 278
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "temporal",
+  "question": "When did Caroline go biking with friends?",
+  "gold": "The weekend before 13 September 2023",
+  "answers": {
+   "agentmem": "September 9-10, 2023",
+   "keyword": "September 9-10, 2023"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2562,
+   "keyword": 552
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "How many hikes has Joanna been on?",
+  "gold": "Four",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1288,
+   "keyword": 170
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "What is a prominent charity organization that John might want to work with and why?",
+  "gold": "Good Sports, because they work with Nike, Gatorade, and Under Armour and they aim toprovide youth sports opportunities for kids ages 3-18 in high-need communities.",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2381,
+   "keyword": 437
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "open-domain",
+  "question": "Around which US holiday did Maria get into a car accident?",
+  "gold": "Independence Day",
+  "answers": {
+   "agentmem": "Independence Day",
+   "keyword": "Independence Day"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2338,
+   "keyword": 410
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "What state did Nate visit?",
+  "gold": "Florida",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1140,
+   "keyword": 117
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 5,
+  "category": "open-domain",
+  "question": "Which national park could Audrey and Andrew be referring to in their conversations?",
+  "gold": "Voyageurs National Park",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2813,
+   "keyword": 545
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "open-domain",
+  "question": "Would Calvin enjoy performing at the Hollywood Bowl?",
+  "gold": "Yes; because he enjoys the rush of performing onstage to large crowds",
+  "answers": {
+   "agentmem": "Yes",
+   "keyword": "Yes"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2490,
+   "keyword": 374
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "What additional country did James visit during his trip to Canada?",
+  "gold": "Greenland",
+  "answers": {
+   "agentmem": "Nuuk",
+   "keyword": "Nuuk"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1998,
+   "keyword": 294
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "What personality traits might Melanie say Caroline has?",
+  "gold": "Thoughtful, authentic, driven",
+  "answers": {
+   "agentmem": "Passionate about helping people",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1519,
+   "keyword": 185
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "Is it likely that Nate has friends besides Joanna?",
+  "gold": "Yesteammates on hisvideo game team.",
+  "answers": {
+   "agentmem": "Yes",
+   "keyword": "Yes"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1694,
+   "keyword": 286
+  },
+  "agentmem_level": "topic_log"
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "What is the game with different colored cards that was John talking about with James?",
+  "gold": "UNO",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "UNO"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2582,
+   "keyword": 479
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 5,
+  "category": "open-domain",
+  "question": "What is something that Andrew could do to make birdwatching hobby to fit in his city schedule?",
+  "gold": "Install a bird feeder outside where he can see the birds without going outdoors.",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 341
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 7,
+  "category": "open-domain",
+  "question": "In what country was Jolene during summer 2022?",
+  "gold": "Colombia",
+  "answers": {
+   "agentmem": "Colombia",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2119,
+   "keyword": 424
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Who is Anthony?",
+  "gold": "likely John's friend, colleague or family",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 836,
+   "keyword": 91
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "open-domain",
+  "question": "Does John live close to a beach or the mountains?",
+  "gold": "beach",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 527
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "In which state is the shelter from which James adopted the puppy?",
+  "gold": "Connecticut.",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1603,
+   "keyword": 375
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 8,
+  "category": "open-domain",
+  "question": "How do Evan and Sam use creative outlets to cope with life's challenges?",
+  "gold": "Evan and Sam use creative activities, like painting and writing, as therapeutic tools to express themselves and cope with stress.",
+  "answers": {
+   "agentmem": "Sketching and painting",
+   "keyword": "Painting and journaling"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 450
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 8,
+  "category": "open-domain",
+  "question": "How often does Sam get health checkups?",
+  "gold": "every three months",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2034,
+   "keyword": 354
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "What are John's suspected health problems?",
+  "gold": "Obesity",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1236,
+   "keyword": 89
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Which Star Wars-related locations would Tim enjoy during his visit to Ireland?",
+  "gold": "Skellig Michael, Malin Head, Loop Head, Ceann Sibéal, and Brow Head because they are Star Wars filming locations.",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1826,
+   "keyword": 365
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 5,
+  "category": "open-domain",
+  "question": "What can Andrew potentially do to improve his stress and accomodate his living situation with his dogs?",
+  "gold": "Change to a hybrid or remote job so he can move away from the city to the suburbs to have a larger living space and be closer to nature.",
+  "answers": {
+   "agentmem": "Take dogs to nearby park for fresh air",
+   "keyword": "Cooking and nature breaks"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 348
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "Was the first half of September 2022 a good month career-wise for Nate and Joanna? Answer yes or no.",
+  "gold": "No; because both of them faced setbacks in their career",
+  "answers": {
+   "agentmem": "No",
+   "keyword": "No"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1925,
+   "keyword": 367
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "open-domain",
+  "question": "What attributes describe John?",
+  "gold": "Selfless, family-oriented, passionate, rational",
+  "answers": {
+   "agentmem": "Blogger, mentor, firefighter, engineer",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 808,
+   "keyword": 141
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 8,
+  "category": "open-domain",
+  "question": "Which major holiday season conincides with Evan's wedding?",
+  "gold": "Christmas",
+  "answers": {
+   "agentmem": "Christmas",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1416,
+   "keyword": 175
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "What pets wouldn't cause any discomfort to Joanna?",
+  "gold": "Hairless cats or pigs,since they don't have fur, which is one of the main causes of Joanna's allergy.",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1752,
+   "keyword": 313
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "open-domain",
+  "question": "Is the friend who wrote Deborah the motivational quote no longer alive?",
+  "gold": "likely yes",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Yes"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 520
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 7,
+  "category": "open-domain",
+  "question": "What card game is Deborah talking about?",
+  "gold": "Exploding Kittens",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2172,
+   "keyword": 410
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 8,
+  "category": "open-domain",
+  "question": "What electronic device could Evan gift Sam to help him keep up with his fitness goals?",
+  "gold": "fitness tracker",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 448
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "Would Caroline still want to pursue counseling as a career if she hadn't received support growing up?",
+  "gold": "Likely no",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2852,
+   "keyword": 499
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "Did John and James study together?",
+  "gold": "Yes",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2251,
+   "keyword": 232
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "What underlying condition might Joanna have based on her allergies?",
+  "gold": "asthma",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1501,
+   "keyword": 306
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Based on Tim's collections, what is a shop that he would enjoy visiting in New York city?",
+  "gold": "House of MinaLima",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2044,
+   "keyword": 369
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "open-domain",
+  "question": "Would Dave prefer working on a Dodge Charger or a Subaru Forester?",
+  "gold": "Dodge Charger",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2423,
+   "keyword": 360
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "What fields would Caroline be likely to pursue in her educaton?",
+  "gold": "Psychology, counseling certification",
+  "answers": {
+   "agentmem": "counseling",
+   "keyword": "counseling"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1944,
+   "keyword": 438
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "Would Melanie likely enjoy the song \"The Four Seasons\" by Vivaldi?",
+  "gold": "Yes; it's classical music",
+  "answers": {
+   "agentmem": "Yes",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1599,
+   "keyword": 301
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 3,
+  "category": "open-domain",
+  "question": "What alternative career might Nate consider after gaming?",
+  "gold": "an animalkeeper at a localzoo and workingwith turtles; as heknows a great dealabout turtles andhow to care for them,and he enjoys it.",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2259,
+   "keyword": 409
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Which outdoor gear company likely signed up John for an endorsement deal?",
+  "gold": "Under Armour",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2270,
+   "keyword": 512
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "open-domain",
+  "question": "In what country did Jolene's mother buy her the pendant?",
+  "gold": "In France",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2346,
+   "keyword": 383
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Which US states might Tim be in during September 2023 based on his plans of visiting Universal Studios?",
+  "gold": "California or Florida",
+  "answers": {
+   "agentmem": "California, Florida",
+   "keyword": "California or Florida"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2191,
+   "keyword": 405
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "Who is Jill?",
+  "gold": "Most likely John's partner.",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 43
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 2,
+  "category": "open-domain",
+  "question": "What job might Maria pursue in the future?",
+  "gold": "Shelter coordinator, Counselor",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 362
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "Would Caroline be considered religious?",
+  "gold": "Somewhat, but not extremely religious",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "No"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1570,
+   "keyword": 232
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "What would be a good hobby related to his travel dreams for Tim to pick up?",
+  "gold": "Writing a travel blog.",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2034,
+   "keyword": 378
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "Would Tim enjoy reading books by C. S. Lewis or John Greene?",
+  "gold": "C. S.Lewis",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2025,
+   "keyword": 390
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 6,
+  "category": "open-domain",
+  "question": "What is the board game where you have to find the imposter that John mentions to James?",
+  "gold": "Mafia",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2360,
+   "keyword": 403
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "What kind of yoga for building core strength might John benefit from?",
+  "gold": "Hatha Yoga",
+  "answers": {
+   "agentmem": "Warrior II",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2443,
+   "keyword": 387
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "open-domain",
+  "question": "What is a Star Wars book that Tim might enjoy?",
+  "gold": "Star Wars: Jedi Apprentice by Judy Blundell and David Farland. It is a highly rated and immersive series about his favorite movies.",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1912,
+   "keyword": 237
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 5,
+  "category": "open-domain",
+  "question": "Which meat does Audrey prefer eating more than others?",
+  "gold": "chicken",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2403,
+   "keyword": 349
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "open-domain",
+  "question": "Would Caroline pursue writing as a career option?",
+  "gold": "LIkely no; though she likes reading, she wants to be a counselor",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1849,
+   "keyword": 370
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "open-domain",
+  "question": "Why did Jolene sometimes put off doing yoga?",
+  "gold": "She's more interested in playing video games",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 427
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 9,
+  "category": "open-domain",
+  "question": "Does Dave's shop employ a lot of people?",
+  "gold": "Yes",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2334,
+   "keyword": 502
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "single-hop",
+  "question": "What is the toughest part of car restoration according to Dave?",
+  "gold": "Paying extra attention to detail",
+  "answers": {
+   "agentmem": "takes a lot of patience",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2824,
+   "keyword": 563
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "Where did Deborah get her cats?",
+  "gold": "Luna is from the shelter and Max is her mother's cat",
+  "answers": {
+   "agentmem": "Max from mother, Luna from shelter",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2080,
+   "keyword": 325
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "What is one cause that John supports with his influence and resources?",
+  "gold": "youth sports and fair chances in sports",
+  "answers": {
+   "agentmem": "youth sports",
+   "keyword": "making the world a better place"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2272,
+   "keyword": 521
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "According to John, who is his favorite character from Lord of the Rings?",
+  "gold": "Aragorn",
+  "answers": {
+   "agentmem": "Aragorn",
+   "keyword": "Aragorn"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1348,
+   "keyword": 399
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "Why does John like Aragorn from Lord of the Rings?",
+  "gold": "brave, selfless, down-to-earth attitude",
+  "answers": {
+   "agentmem": "Because of character growth",
+   "keyword": "brave, selfless, down-to-earth attitude"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 541,
+   "keyword": 382
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "Which language is Tim learning?",
+  "gold": "German",
+  "answers": {
+   "agentmem": "German",
+   "keyword": "German"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1319,
+   "keyword": 503
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "How does Gina describe the feeling that dance brings?",
+  "gold": "magical",
+  "answers": {
+   "agentmem": "stress relief",
+   "keyword": "joy and thrill, magical"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 555
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "Why did James embody the appearance of the game character from the woman he saw during a walk?",
+  "gold": "He found her appearance and eyes amazing.",
+  "answers": {
+   "agentmem": "Got inspiration for game character",
+   "keyword": "Fell in love at first sight"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 457
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "How did Jolene feel after receiving positive feedback at the virtual conference?",
+  "gold": "thrilled and rewarded",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Thrilled"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 454
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "What is the painting of Aragorn a reminder for John to be in everything he does?",
+  "gold": "be a leader",
+  "answers": {
+   "agentmem": "a leader",
+   "keyword": "stay true and be a leader"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2030,
+   "keyword": 376
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "single-hop",
+  "question": "How did Melanie feel about her family after the accident?",
+  "gold": "They are important and mean the world to her",
+  "answers": {
+   "agentmem": "Thankful, they mean the world",
+   "keyword": "They mean the world to me"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2438,
+   "keyword": 495
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "What is the name of Maria's second puppy?",
+  "gold": "Shadow",
+  "answers": {
+   "agentmem": "Shadow",
+   "keyword": "Shadow"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1741,
+   "keyword": 322
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 0,
+  "category": "single-hop",
+  "question": "How did Melanie feel about her family supporting her?",
+  "gold": "She appreciated them a lot",
+  "answers": {
+   "agentmem": "Helped her through tough times",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 714,
+   "keyword": 477
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 3,
+  "category": "single-hop",
+  "question": "What did Nate think of the coconut milk ice cream he made?",
+  "gold": "Super good, rich and creamy",
+  "answers": {
+   "agentmem": "Actually pretty good",
+   "keyword": "Pretty good, proud of himself"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2412,
+   "keyword": 506
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 5,
+  "category": "single-hop",
+  "question": "How often does Audrey take her dogs for walks?",
+  "gold": "Multiple times a day",
+  "answers": {
+   "agentmem": "Multiple times a day",
+   "keyword": "multiple times a day"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1595,
+   "keyword": 412
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "What inspired John to join the marching event for veterans' rights?",
+  "gold": "Respect for the military and the desire to show support",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 375
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "What plans does Jon have after receiving advice at the networking event?",
+  "gold": "Sprucing up his business plan, tweaking his pitch to investors, and working on an online platform.",
+  "answers": {
+   "agentmem": "Spruce up business plan and tweak investor pitch",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 854,
+   "keyword": 426
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "What does John want to do after his basketball career?",
+  "gold": "positively influence and inspire others, potentially start a foundation and engage in charity work",
+  "answers": {
+   "agentmem": "Endorsements and building brand",
+   "keyword": "More endorsements and building brand"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2176,
+   "keyword": 584
+  },
+  "agentmem_level": "topic_log"
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "What did Deborah buy to enhance her yoga practice besides the props?",
+  "gold": "candle",
+  "answers": {
+   "agentmem": "candle with rosemary",
+   "keyword": "a candle"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1605,
+   "keyword": 505
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 0,
+  "category": "single-hop",
+  "question": "What setback did Melanie face in October 2023?",
+  "gold": "She got hurt and had to take a break from pottery.",
+  "answers": {
+   "agentmem": "Son's roadtrip accident",
+   "keyword": "Got hurt, break from pottery"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1798,
+   "keyword": 378
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "How does Gina describe the studio that Jon has opened?",
+  "gold": "amazing",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 293
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 0,
+  "category": "single-hop",
+  "question": "What did the charity race raise awareness for?",
+  "gold": "mental health",
+  "answers": {
+   "agentmem": "mental health",
+   "keyword": "mental health"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1072,
+   "keyword": 291
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "What are Jolene's favorite books?",
+  "gold": "Sapiens, Avalanche by Neal Stephenson",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2003,
+   "keyword": 235
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "What important values does John want to teach his kids through adopting a rescue dog?",
+  "gold": "Responsibility and compassion",
+  "answers": {
+   "agentmem": "responsibility and compassion",
+   "keyword": "responsibility and compassion"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 766,
+   "keyword": 412
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "What does John feel about starting the journey as a programming mentor for game developers?",
+  "gold": "excited and inspired",
+  "answers": {
+   "agentmem": "Loves sharing knowledge",
+   "keyword": "really excited"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 405
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "What is Jon working on opening?",
+  "gold": "a dance studio",
+  "answers": {
+   "agentmem": "dance studio",
+   "keyword": "a dance studio"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1594,
+   "keyword": 280
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "Why do Tim and John find LeBron inspiring?",
+  "gold": "LeBron's determination and the epic block in Game 7 of the '16 Finals",
+  "answers": {
+   "agentmem": "Skills, leadership, determination and heart",
+   "keyword": "skills and leadership"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2045,
+   "keyword": 268
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "What made being part of the running group easy for Deborah to stay motivated?",
+  "gold": "helping and pushing each other during runs",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "They help and push each other during runs"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 487
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 0,
+  "category": "single-hop",
+  "question": "What does Melanie say running has been great for?",
+  "gold": "Her mental health",
+  "answers": {
+   "agentmem": "my headspace",
+   "keyword": "my headspace"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1468,
+   "keyword": 261
+  },
+  "agentmem_level": "topic_log"
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "What is Gina's favorite style of dance?",
+  "gold": "Contemporary",
+  "answers": {
+   "agentmem": "Contemporary dance",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2022,
+   "keyword": 429
+  },
+  "agentmem_level": "topic_log"
+ },
+ {
+  "conv": 3,
+  "category": "single-hop",
+  "question": "For how long has Nate had his turtles?",
+  "gold": "3 years",
+  "answers": {
+   "agentmem": "3 years",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1338,
+   "keyword": 267
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "Where was the forest picture shared by John on December 1,2023 taken?",
+  "gold": "near his hometown",
+  "answers": {
+   "agentmem": "forest near hometown",
+   "keyword": "forest near hometown"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2210,
+   "keyword": 381
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "How long was Max a part of John's family?",
+  "gold": "10 years",
+  "answers": {
+   "agentmem": "10 years",
+   "keyword": "10 years"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1575,
+   "keyword": 339
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 3,
+  "category": "single-hop",
+  "question": "What motivates Joanna to keep writing even on tough days?",
+  "gold": "Knowing that her writing can make a difference",
+  "answers": {
+   "agentmem": "Her story brought comfort",
+   "keyword": "Knowing her writing can make a difference"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 681,
+   "keyword": 492
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "How does John describe the game season for his team?",
+  "gold": "intense with tough losses and great wins",
+  "answers": {
+   "agentmem": "intense season with tough losses and great wins",
+   "keyword": "Intense, pretty well"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 593,
+   "keyword": 337
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 7,
+  "category": "single-hop",
+  "question": "What type of music does Deborah find helpful during her yoga practice?",
+  "gold": "instrumental tracks with mellow melodies and rhythms",
+  "answers": {
+   "agentmem": "instrumental tracks with mellow melodies and rhythms",
+   "keyword": "instrumental tracks with mellow melodies and rhythms"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 836,
+   "keyword": 476
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "What instrument is John learning to play as of 27 March, 2022?",
+  "gold": "Drums",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2318,
+   "keyword": 307
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "Why did John decide to run for office again?",
+  "gold": "saw the impact he could make in the community through politics",
+  "answers": {
+   "agentmem": "Not mentioned.",
+   "keyword": "saw the impact he could make"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 492
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "What did Maria donate to a homeless shelter in December 2023?",
+  "gold": "old car",
+  "answers": {
+   "agentmem": "Not mentioned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2533,
+   "keyword": 506
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "What type of pizza is James' favorite?",
+  "gold": "Pepperoni",
+  "answers": {
+   "agentmem": "Pepperoni pizza",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1521,
+   "keyword": 326
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 5,
+  "category": "single-hop",
+  "question": "What type of activities does Audrey suggest for mental stimulation of the dogs?",
+  "gold": "puzzles, training, hide-and-seek",
+  "answers": {
+   "agentmem": "puzzle, training, hide-and-seek",
+   "keyword": "puzzles, training, hide-and-seek"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": true
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 480
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "What did James adopt in April 2022?",
+  "gold": "a pup",
+  "answers": {
+   "agentmem": "pup named Ned",
+   "keyword": "Not mentioned."
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1215,
+   "keyword": 101
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 6,
+  "category": "single-hop",
+  "question": "Which country did James visit in 2021?",
+  "gold": "Italy",
+  "answers": {
+   "agentmem": "Italy",
+   "keyword": "Italy"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1530,
+   "keyword": 306
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "What kind of deals did John sign with Nike and Gatorade?",
+  "gold": "basketball shoe and gear deal with Nike, potential sponsorship deal with Gatorade",
+  "answers": {
+   "agentmem": "basketball shoe and gear deal, potential sponsorship",
+   "keyword": "basketball shoe and gear deal"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 1931,
+   "keyword": 361
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 1,
+  "category": "single-hop",
+  "question": "How is Gina's store doing?",
+  "gold": "The store is doing great.",
+  "answers": {
+   "agentmem": "Doing great",
+   "keyword": "Doing great"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 361
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 2,
+  "category": "single-hop",
+  "question": "What did John and the veterans do during the small party?",
+  "gold": "share stories and make connections",
+  "answers": {
+   "agentmem": "share stories and build connections",
+   "keyword": "share their stories"
+  },
+  "correct": {
+   "keyword": false,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 4000,
+   "keyword": 499
+  },
+  "agentmem_level": "big"
+ },
+ {
+  "conv": 9,
+  "category": "single-hop",
+  "question": "What fuels Calvin's soul?",
+  "gold": "Performing live",
+  "answers": {
+   "agentmem": "Performing live",
+   "keyword": "Performing live"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 698,
+   "keyword": 214
+  },
+  "agentmem_level": "small"
+ },
+ {
+  "conv": 4,
+  "category": "single-hop",
+  "question": "What book recommendation did Tim give to John for the trip?",
+  "gold": "A fantasy novel by Patrick Rothfuss",
+  "answers": {
+   "agentmem": "A Dance with Dragons",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": false,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 1889,
+   "keyword": 253
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 9,
+  "category": "single-hop",
+  "question": "What is Dave's new business venture as of 1 May, 2023?",
+  "gold": "Car maintenance shop",
+  "answers": {
+   "agentmem": "teaming up with a local garage",
+   "keyword": "Not mentioned"
+  },
+  "correct": {
+   "agentmem": true,
+   "keyword": false
+  },
+  "ctx_tokens": {
+   "agentmem": 2533,
+   "keyword": 388
+  },
+  "agentmem_level": "whole_log"
+ },
+ {
+  "conv": 3,
+  "category": "single-hop",
+  "question": "What two main ingredients are part of the dessert Joanna shared a photo of with blueberries, coconut milk, and a gluten-free crust?",
+  "gold": "blueberries and coconut milk",
+  "answers": {
+   "agentmem": "blueberries and coconut milk",
+   "keyword": "blueberries and coconut milk"
+  },
+  "correct": {
+   "keyword": true,
+   "agentmem": true
+  },
+  "ctx_tokens": {
+   "agentmem": 2552,
+   "keyword": 507
+  },
+  "agentmem_level": "whole_log"
+ }
+]

@@ -30,6 +30,29 @@ The installer brings everything it needs (uv, and Python through uv), connects t
 
 It never saves an AI model's refusals ("the assistant can't do X"), never blocks your agent, and keeps each project's memory separate. Several sessions can run side by side; each knows what the others are doing and that their tasks are not its own.
 
+## Benchmarks
+
+**LoCoMo** (200 questions over 10 long conversations), answered by Claude Opus 5.5, every system's answers graded together and blind by Claude Haiku 4.5:
+
+| System | Overall | Multi-hop | Temporal | Single-hop | Open-domain | Memory per question |
+|---|---|---|---|---|---|---|
+| **Hypnos v0.8** | **73%** | **56%** | **92%** | 84% | 60% | **~610 tokens** |
+| Mem0 2.2 OSS | 70% | 48% | 88% | 82% | **62%** | ~1,130 tokens |
+| GBrain 0.59 | 67% | 38% | 88% | **90%** | 52% | ~3,980 tokens |
+| Keyword search | 46.5% | 12% | 70% | 62% | 42% | ~380 tokens |
+
+**Version by version**, same 200 questions answered by a small free model (Muse Spark 1.3), graded by Claude Haiku. Compare rows within a run:
+
+| Version | LoCoMo | Memory per question | What changed |
+|---|---|---|---|
+| v0.1, v0.2 | not measured | | designs on paper |
+| v0.3 to v0.6 | v0.6: 41% | ~2,200 tokens | on 60 questions from real coding sessions: v0.3 82%, v0.4 87%, v0.5 90%, v0.6 96% (in-sample) |
+| v0.7 | 53% | ~3,100 tokens | evidence-first recall; ahead of Mem0 (51%) and GBrain (51%) in the same run |
+| v0.8 | 55% | ~600 tokens | System One routes each question to the smallest context that answers |
+| v0.9 | 60.5% (v0.8: 60.5% in the same run) | ~611 tokens | one-line install, any agent, cleanup, runs only while an agent is open. A first try with extra date instructions scored 47% and was reverted. |
+
+Everything, including per-question results and how each run was measured: [docs/RESULTS.md](docs/RESULTS.md), the [benchmark harness](benchmark/), and the [blog post](https://agent-memory-architecture-chi.vercel.app/blog.html). The full architecture spec is in [docs/architecture.html](docs/architecture.html). A Rust version of the v0.8 engine (same accuracy, search 3.0 s vs 3.8 s) is kept in [future/agentmem-rs](future/agentmem-rs).
+
 ## System One model
 
 Hypnos works best with a **System One model**, which answers yes/no and pick-one questions in one fast step instead of writing text. Memory uses it to decide what to keep and what to recall for a tiny fraction of an LLM's cost.

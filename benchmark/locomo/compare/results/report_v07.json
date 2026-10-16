@@ -1,0 +1,70 @@
+{
+ "n": 200,
+ "judge": "claude haiku (all 5 answers graded together)",
+ "answerer": "muse-spark-1.3",
+ "accuracy": {
+  "agentmem_v07": 53.0,
+  "mem0": 50.0,
+  "gbrain": 51.0,
+  "agentmem": 40.5,
+  "keyword": 33.5
+ },
+ "by_category": {
+  "agentmem_v07": {
+   "multi-hop": 38.0,
+   "temporal": 74.0,
+   "open-domain": 18.0,
+   "single-hop": 82.0
+  },
+  "mem0": {
+   "multi-hop": 42.0,
+   "temporal": 66.0,
+   "open-domain": 20.0,
+   "single-hop": 72.0
+  },
+  "gbrain": {
+   "multi-hop": 30.0,
+   "temporal": 78.0,
+   "open-domain": 18.0,
+   "single-hop": 78.0
+  },
+  "agentmem": {
+   "multi-hop": 26.0,
+   "temporal": 68.0,
+   "open-domain": 14.0,
+   "single-hop": 54.0
+  },
+  "keyword": {
+   "multi-hop": 8.0,
+   "temporal": 64.0,
+   "open-domain": 14.0,
+   "single-hop": 48.0
+  }
+ },
+ "ctx_tokens": {
+  "agentmem_v07": 3114,
+  "mem0": 1126,
+  "gbrain": 3982,
+  "agentmem": 2243,
+  "keyword": 384
+ },
+ "not_mentioned": {
+  "agentmem_v07": 42,
+  "mem0": 44,
+  "gbrain": 45,
+  "agentmem": 64,
+  "keyword": 88
+ },
+ "v07_levels": {
+  "deep": 162,
+  "evidence": 38
+ },
+ "calls": {
+  "muse:cached": 28,
+  "haiku:cached": 29,
+  "muse:calls": 172,
+  "muse:in_chars": 2185004,
+  "haiku:calls": 171,
+  "haiku:in_chars": 107055
+ }
+}

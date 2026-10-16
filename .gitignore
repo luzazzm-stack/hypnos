@@ -3,3 +3,8 @@ __pycache__/
 .venv/
 dist/
 *.egg-info/
+target/
+benchmark/locomo/cache/
+benchmark/locomo/locomo10.json
+benchmark/locomo/.agentmem*/
+benchmark/locomo/.hypnos*/

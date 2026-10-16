@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Building Hypnos</title>
+<meta name="author" content="Luza Maharjan">
+<meta name="copyright" content="© 2026 Luza Maharjan. All rights reserved.">
+<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9, with every benchmark against Mem0, GBrain and my own earlier versions.">
+<meta property="og:title" content="Building Hypnos: memory for AI agents that sleeps on it">
+<meta property="og:description" content="Nine versions, every benchmark, including the one where my new version lost by 10 points.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FFFFFF; --panel: #FAFAFA; --panel-2: #F1F1F1; --line: #E4E4E4; --line-strong: #C9C9C9;
+  --text: #000000; --muted: #5A5A5A; --accent: #15803D; --accent-bg: #DCFCE7; --warn: #B91C1C; --warn-bg: #FEE2E2;
+  --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --panel: #0B0B0B; --panel-2: #161616; --line: #242424; --line-strong: #3D3D3D;
+    --text: #FFFFFF; --muted: #A6A6A6; --accent: #4ADE80; --accent-bg: rgba(34,197,94,.13); --warn: #F87171; --warn-bg: rgba(239,68,68,.14);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #000000; --panel: #0B0B0B; --panel-2: #161616; --line: #242424; --line-strong: #3D3D3D;
+  --text: #FFFFFF; --muted: #A6A6A6; --accent: #4ADE80; --accent-bg: rgba(34,197,94,.13); --warn: #F87171; --warn-bg: rgba(239,68,68,.14);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 17px; line-height: 1.7; -webkit-text-size-adjust: 100%; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+nav { border-bottom: 1px solid var(--line); }
+nav .wrap { display: flex; gap: 18px; align-items: center; height: 56px; font-size: 14px; flex-wrap: wrap; }
+nav a { color: var(--muted); text-decoration: none; }
+nav a:hover, nav a.on { color: var(--text); }
+nav b { margin-right: auto; font-weight: 600; }
+header { padding: 56px 0 24px; }
+.kicker { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+h1 { font-size: clamp(32px, 7vw, 48px); line-height: 1.08; letter-spacing: -0.03em; margin: 10px 0 16px; }
+.lede { font-size: 19px; color: var(--muted); margin: 0; }
+h2 { font-size: 26px; letter-spacing: -0.02em; margin: 56px 0 12px; line-height: 1.25; }
+h3 { font-size: 19px; margin: 32px 0 8px; }
+p { margin: 0 0 18px; }
+a { color: var(--text); }
+code { font-family: var(--mono); font-size: 0.88em; background: var(--panel-2); padding: 2px 6px; border-radius: 5px; }
+pre { font-family: var(--mono); font-size: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin: 0 0 18px; }
+pre code { background: none; padding: 0; }
+.scroll { overflow-x: auto; margin: 0 0 22px; border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-weight: 600; background: var(--panel); }
+tr:last-child td { border-bottom: none; }
+tr.me td { background: var(--accent-bg); font-weight: 600; }
+tr.bad td { background: var(--warn-bg); }
+.note { font-size: 14px; color: var(--muted); margin-top: -10px; }
+.bars { margin: 8px 0 26px; }
+.bar { display: grid; grid-template-columns: 150px 1fr 56px; gap: 10px; align-items: center; font-size: 14px; margin: 7px 0; }
+.bar .t { height: 14px; background: var(--panel-2); border-radius: 7px; overflow: hidden; }
+.bar .f { height: 100%; background: var(--line-strong); border-radius: 7px; }
+.bar.me .f { background: var(--accent); }
+.bar.me span:first-child { font-weight: 600; }
+.bar .v { font-family: var(--mono); text-align: right; }
+.box { border: 1px solid var(--line); background: var(--panel); border-radius: 12px; padding: 16px 18px; margin: 0 0 22px; }
+.box p:last-child { margin: 0; }
+footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48px; font-size: 14px; color: var(--muted); }
+@media (max-width: 560px) {
+  .bar { grid-template-columns: 104px 1fr 48px; font-size: 13px; }
+  body { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><b>Hypnos</b><a href="index.html">Architecture</a><a href="benchmarks.html">Benchmarks</a><a class="on" href="blog.html">Blog</a><a href="https://github.com/luzazzm-stack/hypnos">GitHub</a></div></nav>
+<main class="wrap">
+<header>
+  <div class="kicker">October 2026 · Luza Maharjan</div>
+  <h1>Building Hypnos: memory for AI agents that sleeps on it</h1>
+  <p class="lede">Nine versions in three weeks, every benchmark I ran, and the one where my newest version lost by ten points.</p>
+</header>
+
+<p>I run a lot of coding agents, often five or six opencode sessions and a few Claude Code sessions at the same time, on a laptop with 7.5 GB of RAM. Every new session starts knowing nothing about the ones before it, so the same ports, folders and decisions get explained again.</p>
+
+<p>I wanted a memory that saves only what was actually said, with a quote to prove it, hands back as little text as possible, and lets me see where every memory came from. So I started writing my own. It's called Hypnos now. For most of its life it was called agentmem, and you'll see that name in older results.</p>
+
+<h2>The idea: copy how people remember</h2>
+
+<p>People don't save everything they hear as a permanent fact. During the day you notice things. At night, while you sleep, your brain sorts them: what mattered gets kept, what changed gets updated, the rest fades. The next morning you don't replay the whole day. Something reminds you, and the right memory comes back.</p>
+
+<p>Hypnos does the same thing in three steps.</p>
+
+<p><strong>Awake.</strong> Every message, tool call and result goes into a raw log the moment it happens. Nothing waits for the context window to fill. Secrets such as API keys are scrubbed before anything is written.</p>
+
+<p><strong>Asleep.</strong> When a session ends, or goes quiet for ten minutes, a small and cheap model reads the log and writes down short facts. Each fact has to quote the exact line it came from. If the quote can't be found in the log, the fact is thrown away. A System One model (more on that below) then checks every fact against its quote, decides whether it replaces an older fact (you changed the port from 8080 to 7439), and files it under a topic. Each topic gets three summaries: one sentence, one paragraph, one page.</p>
+
+<p><strong>Remembering.</strong> When you send a message, Hypnos picks the smallest piece of memory that answers it. A broad question gets a topic summary. A precise question ("which port does staging use?") gets the exact facts with their quotes. Most messages need nothing at all, and get nothing.</p>
+
+<h3>Why a System One model</h3>
+
+<p>Most of the decisions in a memory system are yes/no or pick-one questions. Does this quote support this claim? Does the new fact replace the old one? Is this memory relevant to the question? Asking a chat model these costs a full LLM call each time. A System One model, like <a href="https://typesafe.ai">Jev</a> or the open-weights <a href="https://laya-ai.com">Laya</a>, answers them in one fast step instead of writing text. In my tests Jev made these calls 7 to 15 times faster than the chat model and agreed with it 76 to 90% of the time. Without one, Hypnos still works. The memory model you pick does those checks while saving, a little more accurately in places, but with more tokens.</p>
+
+<h2>Nine versions</h2>
+
+<div class="scroll"><table>
+<thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
+<tbody>
+<tr><td>v0.1</td><td>Sep 21</td><td>First design: memory linked to evidence, with sleep</td></tr>
+<tr><td>v0.2</td><td>Sep 25</td><td>Fixed 12 design mistakes; small, medium and big summaries per topic</td></tr>
+<tr><td>v0.3</td><td>Sep 25</td><td>System One gate and judge, a trust order, entities, code-aware evidence</td></tr>
+<tr><td>v0.4</td><td>Sep 25</td><td>Keyword search on every layer, anchors, topic splitting</td></tr>
+<tr><td>v0.5</td><td>Sep 25</td><td>Original log kept per topic</td></tr>
+<tr><td>v0.6</td><td>Sep 26</td><td>Exact-value rule, evidence-only gate, local meaning search. First real code.</td></tr>
+<tr><td>v0.7</td><td>Sep 28</td><td>Recall rewritten: evidence first, search facts and raw messages together</td></tr>
+<tr><td>v0.8</td><td>Sep 29</td><td>System One routes each question and picks the smallest context that answers</td></tr>
+<tr class="me"><td>v0.9</td><td>Oct 15</td><td>Usable by anyone: one-line install, works with any coding agent, cleanup, no windows</td></tr>
+</tbody></table></div>
+
+<p>v0.1 and v0.2 were designs on paper, so they have no scores. Everything from v0.3 on was measured.</p>
+
+<h2>Benchmark 1: my own coding sessions</h2>
+
+<p>The first test used my real work. I took 15 Claude Code sessions and wrote 60 questions about them, each answerable by an exact quote, such as "what port did we move the dev server to?" Muse Spark 1.3 built the memory, answered and graded; Muse Spark 1.2 re-checked the grading and agreed on 99% of answers.</p>
+
+<div class="bars" role="img" aria-label="Accuracy on 60 questions from my own sessions">
+  <div class="bar me"><span>Hypnos v0.6</span><div class="t"><div class="f" style="width:96%"></div></div><span class="v">96%</span></div>
+  <div class="bar"><span>Keyword search</span><div class="t"><div class="f" style="width:90%"></div></div><span class="v">90%</span></div>
+  <div class="bar me"><span>Hypnos v0.5</span><div class="t"><div class="f" style="width:90%"></div></div><span class="v">90%</span></div>
+  <div class="bar me"><span>Hypnos v0.4</span><div class="t"><div class="f" style="width:87%"></div></div><span class="v">87%</span></div>
+  <div class="bar me"><span>Hypnos v0.3</span><div class="t"><div class="f" style="width:82%"></div></div><span class="v">82%</span></div>
+  <div class="bar"><span>Rolling summary</span><div class="t"><div class="f" style="width:36%"></div></div><span class="v">36%</span></div>
+</div>
+
+<p>Plain opencode with no memory, searching the logs itself, got 92% on the 24 questions I could afford to run. It read about 35,000 tokens and took about 7 steps per question. Hypnos v0.6 got all 24 right with about 3,700 tokens in one step.</p>
+
+<p class="note">Be careful with this one: I designed v0.4 to v0.6 after seeing where earlier versions failed on these same questions, so these numbers flatter me. That's why the rest of this post uses a public benchmark.</p>
+
+<h2>Benchmark 2: LoCoMo, against Mem0 and GBrain</h2>
+
+<p><a href="https://github.com/snap-research/locomo">LoCoMo</a> is a standard test for long-term memory: ten long conversations between two people, with questions about them. I used 200 questions, 50 in each category: single-hop (one fact), multi-hop (join two facts), temporal (when something happened) and open-domain (needs some reasoning).</p>
+
+<p>Every system got the same conversations and the same answering model. The answers for each question were shown to a grader from a different model family, side by side and without names, so it couldn't favour one system.</p>
+
+<h3>Answered by Claude Opus 5.5</h3>
+
+<p>This run uses a strong answering model, so the scores sit on roughly the same scale as published LoCoMo numbers. Claude Haiku 4.5 graded.</p>
+
+<div class="bars" role="img" aria-label="LoCoMo accuracy answered by Claude Opus 5.5">
+  <div class="bar me"><span>Hypnos v0.8</span><div class="t"><div class="f" style="width:73%"></div></div><span class="v">73%</span></div>
+  <div class="bar"><span>Mem0 2.2</span><div class="t"><div class="f" style="width:70%"></div></div><span class="v">70%</span></div>
+  <div class="bar"><span>GBrain 0.59</span><div class="t"><div class="f" style="width:67%"></div></div><span class="v">67%</span></div>
+  <div class="bar"><span>Keyword search</span><div class="t"><div class="f" style="width:46.5%"></div></div><span class="v">46.5%</span></div>
+</div>
+
+<div class="scroll"><table>
+<thead><tr><th>System</th><th>Overall</th><th>Multi-hop</th><th>Temporal</th><th>Single-hop</th><th>Open-domain</th><th>Memory per question</th></tr></thead>
+<tbody>
+<tr class="me"><td>Hypnos v0.8</td><td>73%</td><td>56%</td><td>92%</td><td>84%</td><td>60%</td><td>~610 tokens</td></tr>
+<tr><td>Mem0 2.2 OSS</td><td>70%</td><td>48%</td><td>88%</td><td>82%</td><td>62%</td><td>~1,130 tokens</td></tr>
+<tr><td>GBrain 0.59</td><td>67%</td><td>38%</td><td>88%</td><td>90%</td><td>52%</td><td>~3,980 tokens</td></tr>
+<tr><td>Keyword search</td><td>46.5%</td><td>12%</td><td>70%</td><td>62%</td><td>42%</td><td>~380 tokens</td></tr>
+</tbody></table></div>
+
+<p>Hypnos came first while giving the model about half the memory text Mem0 did and a sixth of what GBrain did. That matters to me more than the 3 points: every token of memory is paid for on every message.</p>
+
+<h3>Answered by Muse Spark 1.3, version by version</h3>
+
+<p>The rest of my LoCoMo runs used Muse Spark 1.3, a small free model, because I ran them many times. A small model scores lower on everything, so these numbers aren't comparable with the Opus table; compare the rows within each run. Claude Haiku graded.</p>
+
+<div class="bars" role="img" aria-label="LoCoMo accuracy answered by Muse Spark 1.3">
+  <div class="bar me"><span>Hypnos v0.8</span><div class="t"><div class="f" style="width:55%"></div></div><span class="v">55%</span></div>
+  <div class="bar me"><span>Hypnos v0.7</span><div class="t"><div class="f" style="width:53%"></div></div><span class="v">53%</span></div>
+  <div class="bar"><span>Mem0 2.2</span><div class="t"><div class="f" style="width:51%"></div></div><span class="v">51%</span></div>
+  <div class="bar"><span>GBrain 0.59</span><div class="t"><div class="f" style="width:51%"></div></div><span class="v">51%</span></div>
+  <div class="bar me"><span>Hypnos v0.6</span><div class="t"><div class="f" style="width:41%"></div></div><span class="v">41%</span></div>
+  <div class="bar"><span>Keyword search</span><div class="t"><div class="f" style="width:33.5%"></div></div><span class="v">33.5%</span></div>
+</div>
+
+<div class="scroll"><table>
+<thead><tr><th>System</th><th>Overall</th><th>Multi-hop</th><th>Temporal</th><th>Single-hop</th><th>Open-domain</th><th>Memory per question</th></tr></thead>
+<tbody>
+<tr class="me"><td>Hypnos v0.8</td><td>55%</td><td>44%</td><td>78%</td><td>76%</td><td>22%</td><td>~600 tokens</td></tr>
+<tr class="me"><td>Hypnos v0.7</td><td>53%</td><td>40%</td><td>74%</td><td>80%</td><td>18%</td><td>~3,100 tokens</td></tr>
+<tr><td>Mem0 2.2 OSS</td><td>51%</td><td>46%</td><td>66%</td><td>72%</td><td>20%</td><td>~1,100 tokens</td></tr>
+<tr><td>GBrain 0.59</td><td>51%</td><td>32%</td><td>78%</td><td>74%</td><td>20%</td><td>~4,000 tokens</td></tr>
+<tr class="me"><td>Hypnos v0.6</td><td>41%</td><td>28%</td><td>68%</td><td>56%</td><td>12%</td><td>~2,200 tokens</td></tr>
+<tr><td>Keyword search</td><td>33.5%</td><td>8%</td><td>64%</td><td>50%</td><td>12%</td><td>~400 tokens</td></tr>
+</tbody></table></div>
+
+<p>The jump from v0.6 to v0.7 changed only how memory is searched; the stored memory was identical. v0.8 then kept the accuracy and cut the memory text from about 3,100 tokens to about 600 per question.</p>
+
+<h2>The time v0.9 lost by ten points</h2>
+
+<p>For v0.9 I wanted better answers about dates. I changed three things. The model that writes facts would see the date on every line of the log. It would turn "yesterday" and "next Friday" into real dates. And the answering model would be told that a later message overrides an earlier one.</p>
+
+<p>It sounded sensible. It scored 47%, against 57.5% for v0.8 in the same run (Muse Spark 1.3 answering, Claude Haiku 5.5 grading). Dates, the thing I was trying to fix, dropped from 80% to 60%.</p>
+
+<div class="scroll"><table>
+<thead><tr><th>Same 200 questions</th><th>v0.8</th><th>v0.9, first try</th><th>v0.9, fixed</th></tr></thead>
+<tbody>
+<tr><td>Overall</td><td>60.5%</td><td>47.0%</td><td>60.5%</td></tr>
+<tr><td>Single-hop</td><td>84%</td><td>74%</td><td>82%</td></tr>
+<tr><td>Multi-hop</td><td>52%</td><td>32%</td><td>48%</td></tr>
+<tr><td>Temporal</td><td>82%</td><td>60%</td><td>80%</td></tr>
+<tr><td>Open-domain</td><td>24%</td><td>22%</td><td>32%</td></tr>
+<tr><td>"Not mentioned" answers</td><td>46</td><td>61</td><td>43</td></tr>
+<tr><td>Facts saved, first conversation</td><td>160</td><td>93</td><td>177</td></tr>
+</tbody></table></div>
+<p class="note">v0.8's own answers were graded again in each run, and scored 57.5% in the first and 60.5% in the second; only scores from the same run are compared.</p>
+
+<p>I went through the losses one by one. In 14 of the 26 questions v0.9 lost, it answered "not mentioned": the fact had never been saved. With the extra date work in its instructions, the small writing model saved 93 facts from a conversation where v0.8 saved 160. The "later message overrides" line did its own damage: in a chat between two friends, a newer message doesn't cancel an older one, so the answering model threw away correct facts.</p>
+
+<p>I took all three changes out and ran it again. The fixed v0.9 tied v0.8 exactly, 121 correct answers each, and each got 8 questions right that the other missed. The rule I took from it: nothing goes into the instructions of the writing or answering model until it has beaten the previous version on the benchmark.</p>
+
+<h2>What v0.9 adds</h2>
+
+<p>v0.9 doesn't remember better than v0.8. It makes the memory something other people can actually use.</p>
+
+<p><strong>One-line install.</strong> One command on macOS, Linux or Windows. It downloads what it needs, finds Claude Code, opencode, Codex, Gemini CLI, Cursor and Windsurf, and connects to each one. A coding agent can run the install itself: there are exact steps for agents in the install guide.</p>
+
+<p><strong>Your choice of model.</strong> Nothing is tied to one model. Setup lists every model your machine can use, free ones included, and the person or agent installing it picks the best value. If a model goes down or runs out of quota, the next one takes over.</p>
+
+<p><strong>Quiet.</strong> Memory runs only while one of your agents is open, with no windows, and switches itself off about a minute and a half after you close the last one. On machines with less than 12 GB of RAM it saves one model call at a time, so the computer doesn't lag.</p>
+
+<p><strong><code>/memory-cleanup</code></strong> shows duplicates, unused facts and stale facts by topic in under a second. Delete by number or by topic.</p>
+
+<p><strong>Many sessions at once.</strong> Each session is told what the others in the same project are doing, and that their tasks aren't its own. It never hands your own current conversation back to you as a "memory".</p>
+
+<p><strong>It doesn't remember refusals.</strong> "The assistant couldn't do X" is never saved, so a later session won't refuse the same thing because a memory told it to.</p>
+
+<h2>Things I tested and didn't ship</h2>
+
+<p>I rewrote the whole v0.8 engine in Rust to see what it would buy. Same accuracy (55% for both), search 3.0 seconds instead of 3.8, cold start 3.9 seconds instead of 7.8, about the same RAM. Most of the time goes to waiting on models over the network, not to running code, so the faster language doesn't help much. The Rust version is kept for later, once the design stops changing every week.</p>
+
+<h2>What these numbers don't show</h2>
+
+<p>With 200 questions, a grader re-marks a few answers differently between runs; I measured about ±3 points of noise. Published results for Mem0, Zep, Letta and others use different answering models, graders and question sets, so compare them only loosely with mine. Open-domain questions are still weak for every system I tested, and multi-hop is where I'm working next.</p>
+
+<h2>Try it</h2>
+
+<p>macOS and Linux:</p>
+<pre><code>curl -fsSL https://agent-memory-architecture-chi.vercel.app/install.sh | sh</code></pre>
+<p>Windows (PowerShell):</p>
+<pre><code>irm https://agent-memory-architecture-chi.vercel.app/install.ps1 | iex</code></pre>
+
+<p>Restart your agent afterwards and keep working. The code, the install guide and the steps for coding agents are on <a href="https://github.com/luzazzm-stack/hypnos">GitHub</a>. Every benchmark run, with per-question results, is on the <a href="benchmarks.html">benchmarks page</a>.</p>
+
+</main>
+<footer><div class="wrap">© 2026 Luza Maharjan. All rights reserved.</div></footer>
+</body>
+</html>

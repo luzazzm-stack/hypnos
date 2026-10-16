@@ -1,0 +1,2345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Architecture: evidence-linked memory with sleep consolidation</title>
+<meta name="author" content="Luza Maharjan">
+<meta name="copyright" content="© 2026 Luza Maharjan. All rights reserved.">
+<meta name="description" content="Architecture reference v0.8 for a long-running LLM agent with a hierarchical, evidence-linked memory (time layers plus small, medium and big topic summaries), an offline consolidation (sleep) phase, a trust order, code-aware evidence, and Jev as the gate and judge for typed decisions. A machine-readable JSON spec is in the element with id architecture-spec.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #FFFFFF; --panel: #FAFAFA; --panel-2: #F1F1F1;
+  --line: #E4E4E4; --line-strong: #C9C9C9;
+  --text: #000000; --muted: #5A5A5A;
+  --inv-bg: #000000; --inv-text: #FFFFFF; --inv-muted: #B5B5B5; --inv-line: #2E2E2E;
+  --green: #15803D; --green-bg: #DCFCE7; --green-line: #86EFAC;
+  --yellow: #946200; --yellow-bg: #FEF6C3; --yellow-line: #FACC15;
+  --red: #B91C1C; --red-bg: #FEE2E2; --red-line: #FCA5A5;
+  --sans: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --panel: #0B0B0B; --panel-2: #161616;
+    --line: #242424; --line-strong: #3D3D3D;
+    --text: #FFFFFF; --muted: #A6A6A6;
+    --inv-bg: #FFFFFF; --inv-text: #000000; --inv-muted: #525252; --inv-line: #DADADA;
+    --green: #4ADE80; --green-bg: rgba(34,197,94,.13); --green-line: rgba(74,222,128,.45);
+    --yellow: #FACC15; --yellow-bg: rgba(250,204,21,.12); --yellow-line: rgba(250,204,21,.45);
+    --red: #F87171; --red-bg: rgba(239,68,68,.14); --red-line: rgba(248,113,113,.45);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #000000; --panel: #0B0B0B; --panel-2: #161616;
+  --line: #242424; --line-strong: #3D3D3D;
+  --text: #FFFFFF; --muted: #A6A6A6;
+  --inv-bg: #FFFFFF; --inv-text: #000000; --inv-muted: #525252; --inv-line: #DADADA;
+  --green: #4ADE80; --green-bg: rgba(34,197,94,.13); --green-line: rgba(74,222,128,.45);
+  --yellow: #FACC15; --yellow-bg: rgba(250,204,21,.12); --yellow-line: rgba(250,204,21,.45);
+  --red: #F87171; --red-bg: rgba(239,68,68,.14); --red-line: rgba(248,113,113,.45);
+}
+
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 64px); -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+.narrow { max-width: 680px; }
+
+.ic { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.ic.sm { width: 16px; height: 16px; }
+.ic.lg { width: 24px; height: 24px; }
+
+h1 { font-size: clamp(34px, 7.4vw, 60px); line-height: 1.02; font-weight: 700; letter-spacing: -0.035em; margin: 0; }
+h2 { font-size: clamp(24px, 4.4vw, 32px); line-height: 1.15; font-weight: 700; letter-spacing: -0.025em; margin: 0; }
+h3 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 32px 0 0; }
+p { margin: 12px 0 0; }
+.muted { color: var(--muted); }
+a { color: inherit; }
+ul, ol { margin: 12px 0 0; padding-left: 22px; }
+li { margin-top: 6px; }
+code { font-family: var(--mono); font-size: 0.86em; background: var(--panel-2); padding: 2px 6px; border-radius: 5px; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; border-radius: 6px; }
+
+/* top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 16px; height: 56px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.01em; text-decoration: none; white-space: nowrap; }
+.brand .mark { width: 28px; height: 28px; border-radius: 8px; background: var(--text); color: var(--bg); display: grid; place-items: center; }
+.nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a { font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
+.nav a:hover { color: var(--text); background: var(--panel-2); }
+.icon-btn { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); cursor: pointer; }
+.icon-btn:hover { background: var(--panel-2); }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: 15px; font-weight: 600; padding: 11px 18px; border-radius: 12px; border: 1px solid var(--text); background: var(--text); color: var(--bg); text-decoration: none; cursor: pointer; }
+.btn:hover { opacity: .86; }
+.btn.ghost { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn.ghost:hover { opacity: 1; background: var(--panel-2); }
+.btn.small { font-size: 13px; padding: 6px 11px; border-radius: 9px; }
+
+/* hero */
+.hero { padding: 56px 0 24px; display: grid; gap: 40px; align-items: center; }
+@media (min-width: 860px) { .hero { grid-template-columns: 1.25fr 1fr; padding-top: 80px; } }
+.hero .sub { font-size: 19px; line-height: 1.5; color: var(--muted); margin-top: 20px; max-width: 540px; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.cycle { width: 100%; max-width: 320px; margin: 0 auto; display: block; }
+.cycle .ring-base { stroke: var(--line-strong); }
+.cycle .ring-awake { stroke: var(--green); }
+.cycle .knob { fill: var(--bg); stroke: var(--text); }
+.cycle .knob.g { stroke: var(--green); }
+.cycle text { fill: var(--text); font-family: var(--sans); }
+.cycle .t-muted { fill: var(--muted); }
+.cycle .orbit circle { fill: var(--text); }
+@media (prefers-reduced-motion: no-preference) {
+  .cycle .orbit { transform-origin: 130px 130px; animation: orbit 24s linear infinite; }
+  @keyframes orbit { to { transform: rotate(360deg); } }
+}
+.legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); }
+.dot.dash { background: none; border: 2px dashed var(--line-strong); }
+
+.readers { display: grid; gap: 12px; margin: 24px 0 0; }
+@media (min-width: 700px) { .readers { grid-template-columns: 1fr 1fr; } }
+.reader { display: flex; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); font-size: 15px; line-height: 1.5; }
+.reader b { display: block; font-size: 15px; }
+.badge-ic { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--text); color: var(--bg); }
+.badge-ic.g { background: var(--green-bg); color: var(--green); }
+.badge-ic.y { background: var(--yellow-bg); color: var(--yellow); }
+.badge-ic.r { background: var(--red-bg); color: var(--red); }
+.badge-ic.n { background: var(--panel-2); color: var(--text); }
+
+/* sections */
+section.block { padding: 72px 0 0; }
+.sec-head { display: flex; align-items: center; gap: 14px; }
+.sec-head .num { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.sec-intro { color: var(--muted); margin-top: 14px; max-width: 680px; font-size: 17px; }
+
+/* diagram */
+.diagram { margin-top: 28px; }
+.zone { border: 1px solid var(--line-strong); border-radius: 20px; padding: 18px; }
+.zone-title { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; margin: 0 0 14px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line-strong); }
+.pill.g { color: var(--green); background: var(--green-bg); border-color: var(--green-line); }
+.pill.y { color: var(--yellow); background: var(--yellow-bg); border-color: var(--yellow-line); }
+.pill.r { color: var(--red); background: var(--red-bg); border-color: var(--red-line); }
+.zone.awake { border-color: var(--green-line); background: linear-gradient(var(--green-bg), var(--green-bg)) var(--bg); }
+.zone.awake .zone-title { color: var(--green); }
+.zone.asleep { background: var(--inv-bg); color: var(--inv-text); border-color: var(--inv-bg); }
+.cards { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.card { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); font-size: 14px; line-height: 1.4; }
+.card b { display: block; font-weight: 600; font-size: 14.5px; }
+.card span.d { color: var(--muted); font-size: 13px; }
+.card.main { border: 2px solid var(--text); }
+.card.jev { border: 1px dashed var(--yellow-line); background: linear-gradient(var(--yellow-bg), var(--yellow-bg)) var(--bg); }
+.card.jev .ic { color: var(--yellow); }
+.flowline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.flowline .card { flex: 1 1 150px; }
+.flowline > .ic { color: var(--muted); }
+@media (max-width: 620px) { .flowline > .ic { transform: rotate(90deg); margin: -2px auto; flex-basis: 100%; } }
+.connect { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 18px; font-size: 13px; color: var(--muted); }
+.connect div { display: flex; gap: 8px; align-items: center; }
+.connect .ic { color: var(--text); }
+.pipe { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); counter-reset: p; }
+.pipe li { counter-increment: p; margin: 0; display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--inv-line); font-size: 14px; font-weight: 500; }
+.pipe li::before { content: counter(p); font-family: var(--mono); font-size: 12px; color: var(--inv-muted); }
+
+/* tables */
+.scroll { overflow-x: auto; margin-top: 20px; border: 1px solid var(--line); border-radius: 16px; }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 14px; line-height: 1.45; }
+th { text-align: left; font-weight: 600; font-size: 13px; color: var(--muted); background: var(--panel); padding: 12px 16px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 500; }
+td .cell-ic { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; }
+.val { font-family: var(--mono); font-size: 13px; padding: 2px 8px; border-radius: 6px; background: var(--panel-2); white-space: nowrap; }
+
+/* code */
+.code { margin-top: 20px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.code-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; background: var(--panel); border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); font-weight: 500; }
+.code-head .l { display: inline-flex; align-items: center; gap: 8px; }
+.code-head .r { display: inline-flex; gap: 8px; }
+.code pre { margin: 0; padding: 16px; overflow: auto; font-family: var(--mono); font-size: 13px; line-height: 1.6; }
+.code pre.tall { max-height: 460px; }
+.code pre code { background: none; padding: 0; font-size: inherit; }
+
+/* layers */
+.layers { display: grid; gap: 24px; margin-top: 28px; align-items: start; }
+@media (min-width: 860px) { .layers { grid-template-columns: 1.1fr 1fr; } }
+.pyramid { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.layer-btn { font: inherit; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); font-weight: 600; font-size: 15px; cursor: pointer; }
+.layer-btn:hover { background: var(--panel-2); }
+.layer-btn[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.layer-btn.raw { border-style: dashed; }
+.w1 { width: 42%; } .w2 { width: 56%; } .w3 { width: 70%; } .w4 { width: 85%; } .w5 { width: 100%; }
+@media (max-width: 480px) { .w1 { width: 58%; } .w2 { width: 68%; } .w3 { width: 78%; } .w4 { width: 89%; } }
+.axis { display: flex; justify-content: space-between; width: 100%; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.layer-detail { border: 1px solid var(--line); border-radius: 18px; padding: 20px; background: var(--panel); }
+.layer-detail h3 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 19px; }
+.layer-detail dl { margin: 14px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 14.5px; }
+.layer-detail dt { color: var(--muted); }
+.layer-detail dd { margin: 0; }
+
+/* tabs */
+.tabs { display: flex; gap: 6px; overflow-x: auto; margin-top: 28px; padding-bottom: 2px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { font: inherit; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); cursor: pointer; white-space: nowrap; }
+.tab:hover { background: var(--panel-2); }
+.tab[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.panel { margin-top: 20px; }
+.panel > h3:first-child { margin-top: 0; }
+.steps { list-style: none; padding: 0; margin: 16px 0 0; counter-reset: s; max-width: 720px; }
+.steps li { counter-increment: s; position: relative; margin: 0; padding: 0 0 18px 48px; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: -2px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-strong); display: grid; place-items: center; font-family: var(--mono); font-size: 13px; background: var(--bg); }
+.steps li::after { content: ""; position: absolute; left: 15px; top: 30px; bottom: 2px; width: 1px; background: var(--line-strong); }
+.steps li:last-child::after { display: none; }
+
+.sleep-grid { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); counter-reset: z; }
+.sleep-grid li { counter-increment: z; margin: 0; position: relative; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); font-size: 14px; line-height: 1.45; color: var(--muted); }
+.sleep-grid li::after { content: counter(z); position: absolute; top: 14px; right: 16px; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.sleep-grid b { display: block; color: var(--text); font-size: 15px; margin: 12px 0 4px; }
+
+/* jev */
+.jev-hero { margin-top: 28px; display: flex; gap: 16px; align-items: flex-start; padding: 20px; border-radius: 20px; border: 1px solid var(--yellow-line); background: linear-gradient(var(--yellow-bg), var(--yellow-bg)) var(--bg); }
+.jev-hero p { margin-top: 6px; }
+.jev-hero b.t { font-size: 18px; letter-spacing: -0.01em; }
+.yn { display: inline-flex; gap: 4px; }
+.facts { display: grid; gap: 10px; margin-top: 20px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.fact { display: flex; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.fact > div { min-width: 0; overflow-wrap: anywhere; }
+.fact b { display: block; color: var(--text); font-size: 14.5px; margin-bottom: 2px; }
+
+/* rules */
+.rules { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.rules li { margin: 0; padding: 18px; border: 1px solid var(--line); border-radius: 16px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.rules .rh { display: flex; align-items: center; justify-content: space-between; color: var(--red); }
+.rules .rid { font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 6px; background: var(--red-bg); border: 1px solid var(--red-line); }
+.rules b { display: block; color: var(--text); font-size: 15px; margin: 12px 0 4px; }
+
+/* build */
+.build { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); counter-reset: b; }
+.build li { counter-increment: b; margin: 0; padding: 18px; border-radius: 16px; border: 1px solid var(--line); font-size: 14px; line-height: 1.45; color: var(--muted); }
+.build li .bn { display: flex; align-items: center; gap: 10px; }
+.build li .bn::before { content: counter(b); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--text); color: var(--bg); font-family: var(--mono); font-size: 13px; font-weight: 500; }
+.build li.first { border-color: var(--green-line); background: linear-gradient(var(--green-bg), var(--green-bg)) var(--bg); }
+.build li.last { border-style: dashed; border-color: var(--yellow-line); }
+.build b { display: block; color: var(--text); font-size: 15px; margin: 12px 0 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+/* topic zoom: small -> medium -> big -> episodes -> raw */
+.zoom { margin-top: 24px; display: grid; gap: 16px; align-items: stretch; }
+@media (min-width: 860px) { .zoom { grid-template-columns: 1fr 300px; } }
+.zoom-wrap { display: grid; grid-template-columns: 34px 1fr; gap: 12px; }
+.zoom-axis { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 0; font-size: 11px; font-family: var(--mono); color: var(--muted); }
+.zoom-axis .bar { flex: 1; width: 2px; border-radius: 2px; background: linear-gradient(var(--green), var(--line-strong)); }
+.zoom-axis span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
+.zoom-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.zoom-list li { margin: 0; display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 10px 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); font-size: 14px; line-height: 1.45; color: var(--muted); }
+.zoom-list li.first { border-color: var(--green-line); background: linear-gradient(var(--green-bg), var(--green-bg)) var(--bg); }
+.zoom-list li.deep { border-style: dashed; border-color: var(--line-strong); background: var(--panel); }
+.zoom-list b { display: block; color: var(--text); font-size: 15px; }
+.zoom-list q { display: block; margin-top: 4px; color: var(--text); quotes: none; font-style: italic; }
+.zoom-list .meter { grid-column: 2 / -1; height: 6px; border-radius: 99px; background: var(--panel-2); overflow: hidden; }
+.zoom-list .meter i { display: block; height: 100%; border-radius: 99px; background: var(--text); }
+.zoom-list li.first .meter i { background: var(--green); }
+.zoom-list li.deep .meter i { background: repeating-linear-gradient(90deg, var(--muted) 0 6px, transparent 6px 10px); }
+@media (max-width: 560px) { .zoom-list li { grid-template-columns: 40px 1fr; } .zoom-list li > .val { grid-column: 2; justify-self: start; } .zoom-list .meter { grid-column: 1 / -1; } }
+.zoom-side { display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--inv-bg); border-radius: 20px; padding: 20px; background: var(--inv-bg); color: var(--inv-muted); font-size: 14px; line-height: 1.5; }
+.zoom-side p { margin: 0; }
+.zoom-side b { color: var(--inv-text); }
+.zoom-side .zt { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: var(--inv-text); }
+.zoom-side .src { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--inv-text); }
+.zoom-side .src span { padding: 8px 4px; border: 1px solid var(--inv-line); border-radius: 10px; }
+.zoom-side .fan { display: block; width: 100%; height: 34px; color: var(--inv-muted); }
+.zoom-side .facts-box { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: 12px; font-weight: 600; background: var(--inv-text); color: var(--inv-bg); }
+.changes { margin-top: 24px; padding: 18px 20px; border: 1px solid var(--green-line); border-radius: 16px; background: linear-gradient(var(--green-bg), var(--green-bg)) var(--bg); font-size: 14.5px; }
+.changes summary { cursor: pointer; font-weight: 600; font-size: 15px; }
+.changes ol { margin-top: 10px; }
+.changes li { color: var(--muted); }
+.changes li b { color: var(--text); }
+
+/* test results */
+.result-grid { display: grid; gap: 12px; margin-top: 24px; }
+@media (min-width: 860px) { .result-grid { grid-template-columns: 1fr 1fr; } }
+.result-card { border: 1px solid var(--line); border-radius: 18px; padding: 20px; background: var(--panel); }
+.rc-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.rc-head b { font-size: 15px; }
+.rc-head span { font-size: 13px; color: var(--muted); }
+.rc-note { font-size: 13px; color: var(--muted); margin-top: 14px; }
+.bars { display: grid; gap: 12px; margin-top: 18px; }
+.bar-row { display: grid; grid-template-columns: 150px 1fr 56px; align-items: center; gap: 12px; font-size: 14px; padding: 4px 0; border-radius: 8px; }
+.bar-row:hover .bar-fill { opacity: .78; }
+.bar-row .bl { color: var(--text); font-weight: 500; }
+.bar-row .bv { font-family: var(--mono); font-size: 13px; text-align: right; color: var(--text); }
+.bar-track { height: 12px; border-radius: 4px; background: var(--panel-2); overflow: hidden; }
+.bar-fill { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--text); min-width: 4px; }
+@media (max-width: 480px) { .bar-row { grid-template-columns: 1fr 52px; } .bar-row .bl { grid-column: 1 / -1; font-size: 13px; } .bar-track { grid-column: 1; } }
+
+footer { margin-top: 88px; border-top: 1px solid var(--line); padding: 24px 0 56px; font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8M16 17H8"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><path d="M15 12H3"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="i-cut" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-rollup" viewBox="0 0 24 24"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><path d="M10 12h4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></symbol>
+  <symbol id="i-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 8V4M8 13v2M16 13v2"/><circle cx="12" cy="3" r="1"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+</svg>
+
+<div class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Back to top">
+      <span class="mark"><svg class="ic sm"><use href="#i-layers"/></svg></span>
+      <span>Hypnos</span>
+    </a>
+    <nav class="nav" aria-label="Contents">
+      <a href="#install">Install</a>
+      <a href="blog.html">Blog</a>
+      <a href="benchmarks.html">Benchmarks</a>
+      <a href="#overview">Overview</a>
+      <a href="#components">Components</a>
+      <a href="#layers">Layers</a>
+      <a href="#topics">Topics</a>
+      <a href="#data">Data</a>
+      <a href="#flows">Flows</a>
+      <a href="#trust">Trust</a>
+      <a href="#gate">Jev</a>
+      <a href="#rules">Rules</a>
+      <a href="#params">Parameters</a>
+      <a href="#build">Build</a>
+      <a href="#results">Results</a>
+      <a href="#spec">JSON</a>
+    </nav>
+    <button class="icon-btn" id="theme" type="button" aria-label="Switch between black and white theme" title="Switch theme">
+      <svg class="ic"><use href="#i-contrast"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="wrap" id="top">
+
+<header class="hero">
+  <div>
+    <h1>Memory that sleeps and shows its evidence</h1>
+    <p class="sub">Architecture for a long-running LLM agent. It keeps a layered memory, holds every topic at three sizes (small, medium, big), can always open the evidence behind what it remembers, and tidies that memory while it is offline. Jev makes every small typed decision; an LLM does the writing.</p>
+    <div class="actions">
+      <a class="btn" href="#overview"><svg class="ic sm"><use href="#i-down"/></svg>See the architecture</a>
+      <a class="btn ghost" href="#spec"><svg class="ic sm"><use href="#i-code"/></svg>JSON spec for agents</a>
+    </div>
+  </div>
+  <div>
+    <svg class="cycle" viewBox="0 0 260 260" role="img" aria-label="One cycle: a long awake phase shown as a solid green arc, followed by a shorter sleep phase shown as a dashed arc, then wake again.">
+      <circle class="ring-base" cx="130" cy="130" r="96" fill="none" stroke-width="3" stroke-dasharray="3 8" stroke-linecap="round"/>
+      <circle class="ring-awake" cx="130" cy="130" r="96" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="402 603.2" transform="rotate(-90 130 130)"/>
+      <g class="orbit"><circle cx="130" cy="34" r="6"/></g>
+      <circle class="knob g" cx="213.1" cy="178" r="19" stroke-width="2"/>
+      <svg x="203.1" y="168" width="20" height="20" class="ic" style="color:var(--green)"><use href="#i-sun"/></svg>
+      <circle class="knob" cx="46.9" cy="82" r="19" stroke-width="2"/>
+      <svg x="36.9" y="72" width="20" height="20" class="ic"><use href="#i-moon"/></svg>
+      <text x="130" y="122" text-anchor="middle" font-size="22" font-weight="700" letter-spacing="-0.5">one cycle</text>
+      <text class="t-muted" x="130" y="146" text-anchor="middle" font-size="13">wake, work, sleep, repeat</text>
+    </svg>
+    <div class="legend">
+      <span><i class="dot"></i>Awake: work, log, recall</span>
+      <span><i class="dot dash"></i>Asleep: consolidate</span>
+    </div>
+  </div>
+</header>
+
+<section id="install" style="border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:8px 0 32px;background:var(--panel)">
+  <h2 style="margin:0 0 6px">Install Hypnos in one line</h2>
+  <p style="margin:0 0 12px;color:var(--muted)">Connects Claude Code, opencode, Codex, Gemini CLI, Cursor and Windsurf, then runs in the background with no windows. Steps for coding agents are in <a href="https://github.com/luzazzm-stack/hypnos/blob/main/INSTALL.md">INSTALL.md</a>. Read the story in the <a href="blog.html">blog post</a>.</p>
+  <p style="margin:0 0 4px;font-weight:600">macOS / Linux</p>
+  <pre style="overflow-x:auto;margin:0 0 12px"><code>curl -fsSL https://agent-memory-architecture-chi.vercel.app/install.sh | sh</code></pre>
+  <p style="margin:0 0 4px;font-weight:600">Windows (PowerShell)</p>
+  <pre style="overflow-x:auto;margin:0"><code>irm https://agent-memory-architecture-chi.vercel.app/install.ps1 | iex</code></pre>
+</section>
+
+<div class="readers" id="how-to-read">
+  <div class="reader">
+    <span class="badge-ic"><svg class="ic"><use href="#i-user"/></svg></span>
+    <div><b>If you are a person</b>Start with the diagram in section 1, the topic zoom in section 3.2, then the flows in section 5. Tap the memory layers and the flow tabs to explore.</div>
+  </div>
+  <div class="reader">
+    <span class="badge-ic"><svg class="ic"><use href="#i-bot"/></svg></span>
+    <div><b>If you are an AI agent</b>The full architecture is JSON in the element <code>#architecture-spec</code>. Rules R1 to R15 are hard constraints. If prose and JSON disagree, the JSON wins. All tab panels are in the HTML source.</div>
+  </div>
+</div>
+
+<details class="changes" id="changes">
+  <summary>What changed in v0.8, v0.7, v0.6, v0.5, v0.4 and v0.3 (all tested)</summary>
+  <p class="muted" style="margin-top:10px"><b>v0.8</b>, recall redesigned around Jev, tested on LoCoMo in section 10 (55% with ~600 tokens of context, first):</p>
+  <ol>
+    <li><b>Code gathers, Jev decides.</b> Code collects candidates from every layer: the three summary levels, hybrid-ranked facts and raw messages, and all facts about the people named. Jev then answers dozens of typed questions in parallel (free, one round).</li>
+    <li><b>Question routing.</b> Jev classifies each question: overview, single fact, list, when, or exact value.</li>
+    <li><b>The summary ladder is back for overviews.</b> The smallest summary level that answers (small, then medium, then big) is the whole context.</li>
+    <li><b>Per-item evidence gating.</b> For every candidate fact and message, Jev judges whether it is part of the answer; only those are sent. Lists keep every relevant item.</li>
+    <li><b>Answerable check.</b> If the kept evidence does not answer the question yet, on-topic items are added. Result: ~600 tokens per question, 5× less than v0.7.</li>
+  </ol>
+  <p class="muted" style="margin-top:10px"><b>v0.7</b>, recall only, tested on LoCoMo against Mem0 and GBrain in section 10 (53%, first):</p>
+  <ol>
+    <li><b>Evidence first.</b> Hybrid search (keyword + meaning, fused with RRF) over facts and raw messages is the first recall step; topic summaries only orient.</li>
+    <li><b>Meaning search over raw messages.</b> Every message is indexed locally (bge-small), not just facts.</li>
+    <li><b>Entity gather.</b> Every fact about the people and things named in the question is pulled in, most relevant first (list and multi-hop questions).</li>
+    <li><b>Stricter gate.</b> Recall stops early only when the evidence itself answers the question (R15 for every question).</li>
+  </ol>
+  <p class="muted" style="margin-top:10px"><b>v0.6</b>, tested in section 10 (96% on coding sessions):</p>
+  <ol>
+    <li><b>Exact-value rule.</b> Jev flags questions that ask for an exact value; those may only stop on evidence (fact quotes, anchors, original log), never on a summary's wording (R15).</li>
+    <li><b>The gate judges evidence.</b> For exact-value questions the "enough?" check sees only facts and log snippets.</li>
+    <li><b>Log snippets up front.</b> Exact-value questions get the best original-log snippets from the first step.</li>
+    <li><b>Lean deep steps.</b> The original-log and whole-history steps drop the big summaries, cutting the hard questions from ~9,900 to ~5,800 tokens.</li>
+    <li><b>Meaning search.</b> A small local embedding model runs next to keyword search on every layer.</li>
+  </ol>
+  <p class="muted" style="margin-top:12px"><b>v0.5</b>, tested in section 10 (92%, level with keyword search):</p>
+  <ol>
+    <li><b>Original log layer.</b> Each topic zooms small, medium, big, then its own original log before any whole-history search.</li>
+  </ol>
+  <p class="muted" style="margin-top:12px"><b>v0.4</b>, tested in section 10 (88%):</p>
+  <ol>
+    <li><b>Keyword search on every layer.</b> Small, medium, big, facts and the original log are searched at the same time and the rankings fused to pick the topic. In the test this lifted accuracy from 83% to 88%.</li>
+    <li><b>Keyword anchors.</b> Each summary keeps up to 30 exact identifiers from its facts, so an exact value can be found even in a small summary.</li>
+    <li><b>Topic splitting.</b> Topics with more than 24 facts split into chronological parts.</li>
+  </ol>
+  <p class="muted" style="margin-top:12px"><b>v0.3</b>, tested in section 10 (83%):</p>
+  <ol>
+    <li><b>Jev has two roles.</b> The <i>gate</i> advises while awake; the <i>judge</i> answers bounded questions during sleep (verify, link, topic, entity, contradiction type, importance, drift). 17 typed questions in total, section 6.</li>
+    <li><b>Decision log and shadow mode.</b> Every Jev answer is logged. Each question starts in shadow next to the LLM and goes live only after it agrees often enough.</li>
+    <li><b>Facts have a validity window.</b> <code>valid_from</code> and <code>valid_to</code>, so "what was true in March?" has an answer and not every contradiction is a replacement.</li>
+    <li><b>Entities.</b> A table of people, files, symbols, services and configs. Mentions are resolved to entities during sleep.</li>
+    <li><b>Trust order.</b> CLAUDE.md, then what the user said, then what was observed, then what the agent inferred (R11).</li>
+    <li><b>Readable export.</b> <code>memory.md</code> is written every sleep. Your edits to it come back in as user facts.</li>
+    <li><b>Code-aware evidence.</b> Facts can cite <code>code:path@commit#L40-60</code>, are marked stale when that code changes, and there are new kinds: convention, command, gotcha, failed approach.</li>
+    <li><b>Hybrid search.</b> Keyword (BM25), vectors and a path/symbol index, boosted by the files and entities in play.</li>
+    <li><b>Incremental rebuilds.</b> Big is rebuilt only when its facts change; Medium and Small only when that change matters at their size.</li>
+    <li><b>Several sessions at once.</b> Per-session logs and watermarks, one writer at a time on shared memory, facts scoped to a git branch until merge.</li>
+    <li><b>Sleep budget.</b> Must-run steps always finish; deferrable ones move to the next sleep when the budget runs out.</li>
+  </ol>
+  <p class="muted" style="margin-top:12px">v0.2 (25 Sep) fixed 12 design mistakes in v0.1: forgetting, confidence, session ids, core bootstrap, nap duplicates, fact ids, supersession, summary citations, recall start, topic ladder, privacy path, housekeeping.</p>
+</details>
+
+<main>
+
+<!-- 1 -->
+<section class="block" id="overview" aria-labelledby="h-overview">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-grid"/></svg></span><div><div class="num">01</div><h2 id="h-overview">Overview</h2></div></div>
+  <p class="sec-intro">Two modes and one shared store. While <b>awake</b>, the agent works, logs everything, and recalls memories on demand. While <b>asleep</b>, a batch job turns the not-yet-consolidated part of its session's log into checked, linked, layered memories. Jev makes the small typed decisions in both modes; an LLM does everything that needs writing.</p>
+
+  <div class="diagram" role="img" aria-label="Awake zone: input goes to the agent loop, which produces output; the agent loop uses recall, the Jev gate and a redactor. Storage zone: raw log, memory tree, topics, entities, link graph, index, decision log, wake note and memory.md export. Asleep zone: nine consolidation steps, with Jev as judge. Awake appends redacted events and reads nodes and evidence. Asleep reads the log after the watermark and writes nodes, topics, entities, links, the wake note and the export.">
+    <div class="zone awake">
+      <p class="zone-title"><svg class="ic"><use href="#i-sun"/></svg>Awake <span class="pill g">live</span></p>
+      <div class="flowline">
+        <div class="card"><svg class="ic"><use href="#i-in"/></svg><div><b>Input</b><span class="d">user, tools, code, environment</span></div></div>
+        <svg class="ic"><use href="#i-right"/></svg>
+        <div class="card main"><svg class="ic"><use href="#i-cpu"/></svg><div><b>Agent loop</b><span class="d">reasoning LLM doing the task</span></div></div>
+        <svg class="ic"><use href="#i-right"/></svg>
+        <div class="card"><svg class="ic"><use href="#i-send"/></svg><div><b>Output</b><span class="d">replies, actions</span></div></div>
+      </div>
+      <div class="cards" style="margin-top:10px">
+        <div class="card"><svg class="ic"><use href="#i-search"/></svg><div><b>Recall</b><span class="d">hybrid search, zoom in, raw-log fallback</span></div></div>
+        <div class="card jev"><svg class="ic"><use href="#i-zap"/></svg><div><b>Jev gate</b><span class="d">recall? where to start? enough yet?</span></div></div>
+        <div class="card"><svg class="ic"><use href="#i-shield"/></svg><div><b>Redactor</b><span class="d">local only; strips secrets before logging</span></div></div>
+      </div>
+    </div>
+
+    <div class="connect" aria-hidden="true">
+      <div><svg class="ic sm"><use href="#i-down"/></svg>appends every event (redacted)</div>
+      <div><svg class="ic sm"><use href="#i-up"/></svg>returns nodes + evidence, by trust</div>
+    </div>
+
+    <div class="zone">
+      <p class="zone-title"><svg class="ic"><use href="#i-db"/></svg>Storage <span class="pill"><svg class="ic sm"><use href="#i-lock"/></svg>one writer at a time</span></p>
+      <div class="cards">
+        <div class="card"><svg class="ic"><use href="#i-file"/></svg><div><b>Raw log</b><span class="d">per session, append-only</span></div></div>
+        <div class="card"><svg class="ic"><use href="#i-layers"/></svg><div><b>Memory tree</b><span class="d">core, period, session, episode</span></div></div>
+        <div class="card"><svg class="ic"><use href="#i-rollup"/></svg><div><b>Topics</b><span class="d">small, medium, big per topic</span></div></div>
+        <div class="card"><svg class="ic"><use href="#i-user"/></svg><div><b>Entities</b><span class="d">people, files, symbols, services</span></div></div>
+        <div class="card"><svg class="ic"><use href="#i-link"/></svg><div><b>Link graph</b><span class="d">supports, contradicts, supersedes</span></div></div>
+        <div class="card"><svg class="ic"><use href="#i-grid"/></svg><div><b>Index</b><span class="d">BM25 + vectors + paths/symbols</span></div></div>
+        <div class="card jev"><svg class="ic"><use href="#i-flag"/></svg><div><b>Decision log</b><span class="d">every Jev answer and outcome</span></div></div>
+        <div class="card"><svg class="ic"><use href="#i-clip"/></svg><div><b>Wake note</b><span class="d">open problems, next plan</span></div></div>
+        <div class="card"><svg class="ic"><use href="#i-eye"/></svg><div><b>memory.md</b><span class="d">readable export you can edit</span></div></div>
+      </div>
+    </div>
+
+    <div class="connect" aria-hidden="true">
+      <div><svg class="ic sm"><use href="#i-down"/></svg>reads the session's log after its watermark</div>
+      <div><svg class="ic sm"><use href="#i-up"/></svg>writes nodes, topics, entities, links, export</div>
+    </div>
+
+    <div class="zone asleep">
+      <p class="zone-title"><svg class="ic"><use href="#i-moon"/></svg>Asleep: the consolidator <span class="pill y" style="margin-left:auto"><svg class="ic sm"><use href="#i-zap"/></svg>Jev as judge</span></p>
+      <ol class="pipe">
+        <li><svg class="ic sm"><use href="#i-cut"/></svg>Segment</li>
+        <li><svg class="ic sm"><use href="#i-filter"/></svg>Extract</li>
+        <li><svg class="ic sm"><use href="#i-check"/></svg>Verify</li>
+        <li><svg class="ic sm"><use href="#i-link"/></svg>Link</li>
+        <li><svg class="ic sm"><use href="#i-alert"/></svg>Resolve</li>
+        <li><svg class="ic sm"><use href="#i-layers"/></svg>Topics</li>
+        <li><svg class="ic sm"><use href="#i-rollup"/></svg>Roll up</li>
+        <li><svg class="ic sm"><use href="#i-archive"/></svg>Forget</li>
+        <li><svg class="ic sm"><use href="#i-clip"/></svg>Note + export</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="block" id="components" aria-labelledby="h-components">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-cpu"/></svg></span><div><div class="num">02</div><h2 id="h-components">Components</h2></div></div>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Id</th><th>Job</th><th>Reads</th><th>Writes</th></tr></thead>
+    <tbody>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-cpu"/></svg><code>agent_loop</code></span></td><td>Does the task with a reasoning LLM</td><td>wake context, recall results, current code</td><td>raw_log (via redactor)</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-shield"/></svg><code>redactor</code></span></td><td>Removes secrets and private data before anything is logged. Runs locally: pattern rules plus a local model. Never sends text to a hosted API.</td><td>incoming events</td><td>raw_log</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-file"/></svg><code>raw_log</code></span></td><td>Per-session, append-only record of every message, tool call and observation. Each session has its own watermark.</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-layers"/></svg><code>memory_tree</code></span></td><td>Time nodes (core, period, session, episode) and topic nodes (small, medium, big), each tied to children and evidence</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-user"/></svg><code>entities</code></span></td><td>People, files, symbols, services, configs and projects, with aliases. Facts and topics point at them.</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-link"/></svg><code>link_graph</code></span></td><td>Typed links between nodes or single facts</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-grid"/></svg><code>index</code></span></td><td>Hybrid search over active nodes at every level and over raw log chunks: BM25 keywords, vectors, and a path/symbol index</td><td>memory_tree, entities, raw_log</td><td>n/a (built by the consolidator)</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-search"/></svg><code>recall</code></span></td><td>Finds the smallest set of memories that answers a query, checks code evidence, orders by trust</td><td>index, memory_tree, link_graph, raw_log, git</td><td>last_used, recalled_count (bookkeeping only, R9)</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-moon"/></svg><code>consolidator</code></span></td><td>Runs the nine sleep steps for one session, from its watermark, inside the sleep budget, holding the memory lock</td><td>raw_log, memory_tree, entities, link_graph, memory.md</td><td>memory_tree, entities, link_graph, index, wake_note, memory.md, watermark</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm" style="color:var(--yellow)"><use href="#i-zap"/></svg><code>gate</code></span></td><td>Jev while awake. Advises only: recall or not, where to start, enough yet, sleep now.</td><td>current state</td><td>decision_log</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm" style="color:var(--yellow)"><use href="#i-zap"/></svg><code>judge</code></span></td><td>Jev during sleep. Answers bounded questions for verify, link, topic, entity, resolve, importance, drift and rebuilds.</td><td>claim + evidence, candidate lists</td><td>decision_log (the consolidator writes memory)</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm" style="color:var(--yellow)"><use href="#i-flag"/></svg><code>decision_log</code></span></td><td>Every Jev question, answer, probability, mode (shadow or live) and later outcome. Used for calibration and promotion.</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-eye"/></svg><code>exporter</code></span></td><td>Writes <code>memory.md</code> (core, topic smalls, pinned facts, open items) and turns your edits to it into user facts</td><td>memory_tree, memory.md</td><td>memory.md, raw_log (edits as user events)</td></tr>
+      <tr><td><span class="cell-ic"><svg class="ic sm"><use href="#i-clip"/></svg><code>wake_note</code></span></td><td>Carries open problems, plans and topics into the next session</td><td>n/a</td><td>n/a</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="code">
+    <div class="code-head"><span class="l"><svg class="ic sm"><use href="#i-code"/></svg>Interfaces</span></div>
+<pre><code>log_append(session, role, content)       -> seq          # redacted first, no exceptions
+wake(session)                            -> context      # CLAUDE.md, core, sessions, topic smalls, wake note
+recall(query, token_budget, start=None, context=None) -> nodes, evidence_spans
+open_evidence(span)                      -> rows | code  # log:..., code:path@commit#L.., user:...
+pin(claim) / correct(fact_id, claim)     -> fact_id      # user-sourced facts, highest trust after CLAUDE.md
+should_sleep(state)                      -> bool
+consolidate(session, to_seq, mode)       -> report       # from the watermark; mode = "nap" | "full"
+delete_log_rows(span, reason)            -> tombstones   # privacy path only (R1, R5)
+export() / import_edits()                -> memory.md, facts
+gate(state, question, options)           -> answer, probability   # Jev, awake
+judge(state, question, options)          -> answer, probability   # Jev, asleep
+log_decision(question, answer, p, mode)  -> decision_id  # every Jev call
+record_outcome(decision_id, outcome)     -> None         # for calibration and shadow promotion</code></pre>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="block" id="layers" aria-labelledby="h-layers">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-layers"/></svg></span><div><div class="num">03</div><h2 id="h-layers">Memory layers</h2></div></div>
+  <p class="sec-intro">Memory is organised two ways over the same facts. <b>By time</b> answers "what happened, and when". <b>By topic</b> answers "what do I know about X". Both are small at the top and exact at the bottom, and recall goes down only as far as the question needs.</p>
+
+  <h3>3.1 By time. Tap a layer.</h3>
+  <div class="layers">
+    <div>
+      <div class="pyramid" role="group" aria-label="Memory layers">
+        <button class="layer-btn w1" type="button" data-layer="core" aria-pressed="false"><svg class="ic sm"><use href="#i-user"/></svg>Core</button>
+        <button class="layer-btn w2" type="button" data-layer="period" aria-pressed="false"><svg class="ic sm"><use href="#i-cal"/></svg>Period</button>
+        <button class="layer-btn w3" type="button" data-layer="session" aria-pressed="false"><svg class="ic sm"><use href="#i-sun"/></svg>Session</button>
+        <button class="layer-btn w4" type="button" data-layer="episode" aria-pressed="true"><svg class="ic sm"><use href="#i-clip"/></svg>Episode</button>
+        <button class="layer-btn w5 raw" type="button" data-layer="raw" aria-pressed="false"><svg class="ic sm"><use href="#i-file"/></svg>Raw log</button>
+        <div class="axis"><span>top: small, compressed</span><span>bottom: everything, exact</span></div>
+      </div>
+    </div>
+    <div class="layer-detail" id="layer-detail" aria-live="polite">
+      <h3><svg class="ic"><use href="#i-clip"/></svg><span>Episode</span></h3>
+      <dl>
+        <dt>Holds</dt><dd>One task or topic: events, predictions, outcomes, decisions, lessons, conventions, commands, gotchas, failed approaches</dd>
+        <dt>Size</dt><dd>Text plus a list of facts, each with an id, source and validity window</dd>
+        <dt>Written</dt><dd>Every sleep or nap</dd>
+        <dt>Built from</dt><dd>Raw log spans and code evidence</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Level</th><th>Holds</th><th>Size</th><th>Written</th><th>Built from</th></tr></thead>
+    <tbody>
+      <tr><td><code>core</code></td><td>Identity, goals, standing beliefs</td><td>About one page</td><td>First sleep, then every <code>core_regen_days</code></td><td>period nodes plus topic smalls; sessions until the first period exists</td></tr>
+      <tr><td><code>period</code></td><td>What happened in one calendar week</td><td>A few paragraphs each</td><td>When a week with sessions on at least <code>period_min_days</code> dates has closed</td><td>session nodes in that week</td></tr>
+      <tr><td><code>session</code></td><td>Summary of one awake stretch, from one sleep to the next</td><td>One or two paragraphs</td><td>Every full sleep</td><td>episode nodes</td></tr>
+      <tr><td><code>episode</code></td><td>One task or topic, as a list of typed facts</td><td>Text plus facts with ids</td><td>Every sleep or nap</td><td>raw log spans, code evidence</td></tr>
+      <tr><td><code>raw log</code></td><td>Everything, word for word, after redaction</td><td>Unbounded</td><td>Continuously while awake</td><td>n/a</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted">A calendar day can hold several sessions, since sleep also starts at a context threshold, at task end or when idle. Every summary sentence cites the fact or child ids it came from.</p>
+
+  <h3 id="topics">3.2 By topic: small, medium, big, original log</h3>
+  <p class="narrow">Every topic the agent works on (for example "auth", "billing", "deploy") is kept at three summary sizes, with its own original log underneath. Every summary carries <b>keyword anchors</b>, the exact paths, IDs, versions and settings from its facts, and recall <b>keyword-searches small, medium, big and the original log at the same time</b> to find the right topic. It then reads the smallest layer first and zooms in only when that isn't enough; when a summary has paraphrased an exact value away, the next step is the topic's own log, not a search of the whole history. Topics group entities, so "auth" knows it is about <code>src/auth.ts</code>, <code>validateJwt</code> and the auth service.</p>
+
+  <div class="zoom">
+    <div class="zoom-wrap">
+      <div class="zoom-axis" aria-hidden="true"><svg class="ic sm" style="color:var(--green)"><use href="#i-search"/></svg><div class="bar"></div><span>recall zooms in only if needed</span><svg class="ic sm"><use href="#i-down"/></svg></div>
+      <ol class="zoom-list" aria-label="Topic zoom levels, from smallest to exact">
+        <li class="first"><span class="badge-ic g"><svg class="ic"><use href="#i-zap"/></svg></span><div><b>Small</b>Quick orientation. Read first.<q>"Auth uses JWT; tokens expire after 24 h."<br>anchors: src/auth.ts, validateJwt, 24h, HS256</q></div><span class="val">~60 tok</span><span class="meter"><i style="width:4%"></i></span></li>
+        <li><span class="badge-ic n"><svg class="ic"><use href="#i-clip"/></svg></span><div><b>Medium</b>Working context: chosen design, main decisions, conventions, commands, constraints, current state, key files.</div><span class="val">~300 tok</span><span class="meter"><i style="width:20%"></i></span></li>
+        <li><span class="badge-ic"><svg class="ic"><use href="#i-file"/></svg></span><div><b>Big</b>Full picture: why it was built this way, failed approaches, gotchas, open questions, history.</div><span class="val">~1,500 tok</span><span class="meter"><i style="width:100%"></i></span></li>
+        <li class="deep"><span class="badge-ic n"><svg class="ic"><use href="#i-eye"/></svg></span><div><b>Original log <span class="pill g">new</span></b>This topic's own log segments, word for word: every span its episodes came from, plus the current code at cited lines. Only the best-matching segments are loaded, up to the budget.<q>[tool_result] USB\VID_2CA3&amp;PID_4008&amp;MI_00\7&amp;3840BAA2&amp;0&amp;0000</q></div><span class="val">≤3,000 tok</span><span class="meter"><i style="width:100%"></i></span></li>
+      </ol>
+    </div>
+    <aside class="zoom-side">
+      <div class="zt"><svg class="ic"><use href="#i-layers"/></svg>How the four steps are built</div>
+      <div class="src" aria-hidden="true"><span>Small</span><span>Medium</span><span>Big</span></div>
+      <svg class="fan" viewBox="0 0 240 34" preserveAspectRatio="none" aria-hidden="true"><path d="M40 0 L120 32 M120 0 L120 32 M200 0 L120 32" stroke="currentColor" stroke-width="1.5" fill="none" vector-effect="non-scaling-stroke"/></svg>
+      <div class="facts-box"><svg class="ic sm"><use href="#i-check"/></svg>The topic's verified facts</div>
+      <svg class="fan" viewBox="0 0 240 34" preserveAspectRatio="none" aria-hidden="true"><path d="M120 0 L120 32" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/></svg>
+      <div class="facts-box" style="background:transparent;color:var(--inv-text);border:1px dashed var(--inv-line)"><svg class="ic sm"><use href="#i-eye"/></svg>The topic's original log</div>
+      <p>All three summaries are written <b>from the same facts</b>, each with its own token budget, so a mistake in Big cannot flow into Medium or Small.</p>
+      <p><b>The original log is never rewritten.</b> It is the source every fact was checked against, and each fact points to its exact span in it.</p>
+      <p><b>Rebuilt only when needed.</b> Big is rewritten when one of its facts changes. Medium and Small are rewritten only when a fact they cite changed, or Jev judges the change matters at their size.</p>
+    </aside>
+  </div>
+
+  <h3 id="trust">3.3 Trust order</h3>
+  <p class="narrow">Every fact records where it came from. When two facts disagree, the more trusted source wins, and a less trusted fact can never silently replace a more trusted one (R11).</p>
+  <div class="flowline" style="margin-top:16px" role="img" aria-label="Trust order from highest to lowest: CLAUDE.md, user, observed, inferred.">
+    <div class="card main"><svg class="ic"><use href="#i-file"/></svg><div><b>1. CLAUDE.md</b><span class="d">human-authored project rules; read first on wake</span></div></div>
+    <svg class="ic"><use href="#i-right"/></svg>
+    <div class="card"><svg class="ic"><use href="#i-user"/></svg><div><b>2. User</b><span class="d">what the user said, pinned or corrected, incl. memory.md edits</span></div></div>
+    <svg class="ic"><use href="#i-right"/></svg>
+    <div class="card"><svg class="ic"><use href="#i-eye"/></svg><div><b>3. Observed</b><span class="d">tool output, test results, code</span></div></div>
+    <svg class="ic"><use href="#i-right"/></svg>
+    <div class="card"><svg class="ic"><use href="#i-cpu"/></svg><div><b>4. Inferred</b><span class="d">the agent's own reasoning and predictions</span></div></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="block" id="data" aria-labelledby="h-data">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-db"/></svg></span><div><div class="num">04</div><h2 id="h-data">Data model</h2></div></div>
+  <div class="code">
+    <div class="code-head"><span class="l"><svg class="ic sm"><use href="#i-layers"/></svg>episode node</span></div>
+<pre><code>{
+  "id": "ep_s000412_03",
+  "level": "episode",
+  "session": "ses_000412",
+  "scope": { "repo": "shop-api", "branch": "feat/jwt-refresh", "merged": false },
+  "topics": ["topic_auth"],
+  "entities": ["ent_file_src_auth_ts", "ent_sym_validateJwt"],
+  "text": "Moved token expiry check after decoding. Tests pass.",
+  "facts": [
+    {
+      "id": "ep_s000412_03#f2",
+      "claim": "validateJwt checks expiry after decoding the token",
+      "kind": "convention",
+      "source": "observed",
+      "evidence": ["code:src/auth.ts@a1b2c3#L40-60", "log:48211-48390"],
+      "evidence_status": "ok",
+      "valid_from": "2026-09-21T15:43:10Z",
+      "valid_to": null,
+      "superseded_by": null
+    }
+  ],
+  "claims_extracted": 11,
+  "claims_rejected": 2,
+  "confidence": 0.82,
+  "parents": ["ses_000412"],
+  "importance": 4,
+  "created": "2026-09-21T23:04:00Z",
+  "last_used": "2026-10-02T09:15:00Z",
+  "recalled_count": 4,
+  "useful_count": 3,
+  "status": "active"
+}</code></pre>
+  </div>
+
+  <div class="code">
+    <div class="code-head"><span class="l"><svg class="ic sm"><use href="#i-rollup"/></svg>summary node (session, period, core, topic)</span></div>
+<pre><code>{
+  "id": "topic_auth.medium",
+  "level": "topic",
+  "resolution": "medium",
+  "entities": ["ent_file_src_auth_ts", "ent_sym_validateJwt", "ent_svc_auth"],
+  "sentences": [
+    { "text": "validateJwt decodes the token before checking expiry.",
+      "cites": ["ep_s000412_03#f2"] }
+  ],
+  "children": ["ep_s000412_03", "ep_s000398_01"],
+  "log_spans": ["log:48211-48390", "log:47102-47260", "code:src/auth.ts@a1b2c3#L40-60"],
+  "anchors": ["src/auth.ts", "validateJwt", "HS256", "24h", "a1b2c3"],
+  "dirty": false,
+  "confidence": 1.0,
+  "status": "active"
+}</code></pre>
+  </div>
+
+  <div class="code">
+    <div class="code-head"><span class="l"><svg class="ic sm"><use href="#i-user"/></svg>entity, link, decision, log row, watermark</span></div>
+<pre><code>{ "id": "ent_sym_validateJwt", "type": "symbol", "names": ["validateJwt", "JWT validator"],
+  "path": "src/auth.ts", "topics": ["topic_auth"] }
+
+{ "from": "ep_s000412_03#f2", "to": "ep_s000121_01#f4", "type": "contradicts", "note": "expiry used to be checked first" }
+
+{ "id": "dec_88213", "ts": "2026-09-21T23:05:02Z", "role": "judge", "question": "verify",
+  "primitive": "noul", "answer": true, "probability": 0.93, "mode": "shadow",
+  "llm_answer": true, "outcome": null, "model": "jev-latest" }
+
+{ "session": "ses_000412", "seq": 48211, "ts": "2026-09-21T15:43:10Z", "role": "tool", "content": "...", "redacted": ["api_key"] }
+{ "session": "ses_000412", "consolidated_upto": 48390 }</code></pre>
+  </div>
+  <ul class="narrow">
+    <li><code>kind</code>: <code>event</code>, <code>prediction</code>, <code>outcome</code>, <code>decision</code>, <code>lesson</code>, <code>belief_revision</code>, and for code work <code>convention</code>, <code>command</code>, <code>gotcha</code>, <code>failed_approach</code>.</li>
+    <li><code>source</code>: <code>user</code>, <code>observed</code> or <code>inferred</code>. CLAUDE.md is read directly and sits above all of them.</li>
+    <li><code>evidence</code>: <code>log:a-b</code>, <code>code:path@commit#La-b</code> or <code>user:memory.md@hash</code>. <code>evidence_status</code>: <code>ok</code>, <code>stale</code> (the cited code changed) or <code>deleted</code> (privacy path).</li>
+    <li><code>valid_from</code> / <code>valid_to</code>: when the fact was true. A replaced fact gets a <code>valid_to</code>; a fact that is only true in some contexts gets a narrower <code>scope</code> instead.</li>
+    <li><code>scope</code>: repo and branch. Facts from an unmerged branch are only recalled on that branch.</li>
+    <li><code>importance</code>: Jev score level 1 to 5 (trivial, minor, useful, important, critical).</li>
+    <li><code>confidence</code> on an episode: <code>(claims_extracted − claims_rejected) / claims_extracted</code>. On a summary: share of sentences whose citations pass the drift check.</li>
+    <li><code>status</code>: <span class="pill g">active</span> in the index, <span class="pill">archived</span> out of the index but reachable through its parent, <span class="pill y">superseded</span> replaced by a newer fact.</li>
+  </ul>
+  <p>Link types: <code>same_entity</code>, <code>supports</code>, <code>contradicts</code>, <code>supersedes</code>, <code>about_topic</code>. Entity types: <code>person</code>, <code>file</code>, <code>symbol</code>, <code>service</code>, <code>config</code>, <code>project</code>, <code>other</code>.</p>
+</section>
+
+<!-- 5 -->
+<section class="block" id="flows" aria-labelledby="h-flows">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-repeat"/></svg></span><div><div class="num">05</div><h2 id="h-flows">Flows</h2></div></div>
+  <p class="sec-intro">Six procedures make up the whole life of the agent. <span class="pill y">J</span> marks a step where Jev answers.</p>
+
+  <div class="tabs" role="tablist" aria-label="Flows">
+    <button class="tab" role="tab" type="button" id="tab-wake" aria-controls="flow-wake" aria-selected="true"><svg class="ic sm"><use href="#i-sun"/></svg>Wake</button>
+    <button class="tab" role="tab" type="button" id="tab-awake" aria-controls="flow-awake" aria-selected="false"><svg class="ic sm"><use href="#i-cpu"/></svg>Awake loop</button>
+    <button class="tab" role="tab" type="button" id="tab-recall" aria-controls="flow-recall" aria-selected="false"><svg class="ic sm"><use href="#i-search"/></svg>Recall</button>
+    <button class="tab" role="tab" type="button" id="tab-sleep" aria-controls="flow-sleep" aria-selected="false"><svg class="ic sm"><use href="#i-moon"/></svg>Sleep</button>
+    <button class="tab" role="tab" type="button" id="tab-nap" aria-controls="flow-nap" aria-selected="false"><svg class="ic sm"><use href="#i-zap"/></svg>Nap</button>
+    <button class="tab" role="tab" type="button" id="tab-sessions" aria-controls="flow-sessions" aria-selected="false"><svg class="ic sm"><use href="#i-branch"/></svg>Sessions</button>
+  </div>
+
+  <div class="panel" role="tabpanel" id="flow-wake" aria-labelledby="tab-wake">
+    <h3>5.1 Wake</h3>
+    <ol class="steps">
+      <li>Read <code>CLAUDE.md</code> (or the project's equivalent). It is the top of the trust order.</li>
+      <li>Import edits the user made to <code>memory.md</code> since the last export; each becomes a <code>user</code> fact.</li>
+      <li>Load the <code>core</code> node and the last <code>wake_session_summaries</code> (3) session summaries.</li>
+      <li>Load the <b>small</b> summary of each topic the wake note names, plus any other topic Jev judges relevant to the plan. <span class="pill y">J</span></li>
+      <li>Load the latest wake note last. Stable parts come first so the prompt prefix stays cacheable.</li>
+      <li>Start the agent loop with only this context. Everything else comes through recall.</li>
+    </ol>
+  </div>
+
+  <div class="panel" role="tabpanel" id="flow-awake" aria-labelledby="tab-awake">
+    <h3>5.2 Awake loop</h3>
+    <ol class="steps">
+      <li>Receive input, redact it locally, and append it to the session's raw log.</li>
+      <li>Ask the gate whether memory is needed and where to start. If yes, call <code>recall</code> with that start level and the current files, entities and branch. <span class="pill y">J</span></li>
+      <li>If a recalled fact will drive a decision, open its evidence first (R7). For <code>code:</code> evidence that means reading the current lines (R13).</li>
+      <li>Act, and append the redacted action and result to the raw log.</li>
+      <li>Afterwards and off the main path, the gate judges which recalled memories changed what the agent did; those get <code>useful_count</code> + 1. <span class="pill y">J</span></li>
+      <li>Check <code>should_sleep</code>: hard thresholds in code, "is this a task boundary?" from the gate. If true, finish the step cleanly and hand over to the consolidator. <span class="pill y">J</span></li>
+    </ol>
+  </div>
+
+  <div class="panel" role="tabpanel" id="flow-recall" aria-labelledby="tab-recall">
+    <h3>5.3 Recall</h3>
+    <div class="code">
+      <div class="code-head"><span class="l"><svg class="ic sm"><use href="#i-search"/></svg>Pseudocode</span></div>
+<pre><code>def recall(query, token_budget, context=None):          # v0.8: code gathers, Jev decides
+    # 1. gather candidates from every layer (code only, milliseconds)
+    facts   = rrf(bm25(query, layer="facts", k=30), vectors(query, layer="facts", k=30))[:25]
+    msgs    = rrf(bm25(query, layer="original_log", k=30), vectors(query, layer="original_log", k=30))[:15]
+    people  = entities_named_in(query)                    # "Melanie", "the router", "app.py"
+    about   = rank_by_meaning(query, facts_about(people))[:30]   # everything about them (lists, multi-hop)
+    topic   = best_topic(query, facts)                    # with its small, medium and big summaries
+
+    # 2. ONE round of Jev questions, all in parallel (free, ~1-3 s)
+    intent  = jev.choice(query, ["overview", "single_fact", "list", "when", "exact_value"])      # G9
+    enough  = {lvl: jev.noul("does this summary alone answer?", query, topic[lvl])            # G10
+               for lvl in ("small", "medium", "big")}
+    for item in facts + about + msgs:                                                          # G11
+        item.relevant = jev.noul("is this memory about the question's subject?", query, item)
+        item.usable   = jev.noul("is this memory part of the answer?", query, item)
+
+    # 3. the smallest context that answers
+    if intent == "overview":                              # the small -> medium -> big ladder
+        for lvl in ("small", "medium", "big"):
+            if enough[lvl] >= summary_min_probability:
+                return topic[lvl]
+    cap  = 40 if intent == "list" else 12                 # lists keep every useful item
+    kept = sorted([i for i in candidates if i.usable >= item_min_probability], key=usable)[:cap]
+    if intent != "overview" and jev.noul("does the evidence answer completely?", query, kept) < gate_min_probability:
+        kept += on_topic_backups(candidates)[:12]         # G3: expand only when needed
+    context = render(kept)                                # facts with quotes + original messages, dated
+    if intent != "exact_value" and enough["small"] >= 0.3:
+        context = one_line(topic["small"]) + context      # a line of orientation (R15: never for exact values)
+    mark_stale_facts(kept); attach_replacements(kept)     # R13, R6
+    return trim(context, token_budget)                    # LoCoMo average: ~600 tokens</code></pre>
+    </div>
+    <p class="narrow muted">Code finds candidates cheaply; Jev, free and fast, decides which of them belong in the context. Overview questions get the smallest summary that answers (the small, medium, big ladder); every other question gets only the facts and original messages Jev judged to be part of the answer. Stale facts are still returned, marked stale, and replaced facts show what replaced them. Earlier versions (v0.6 search-then-zoom, v0.7 evidence-first) are kept in the engine as <code>recall_v06</code> and <code>recall_v07</code>.</p>
+  </div>
+
+  <div class="panel" role="tabpanel" id="flow-sleep" aria-labelledby="tab-sleep">
+    <h3>5.4 Sleep</h3>
+    <p class="narrow">Runs for one session, from that session's watermark, while holding the memory lock. <span class="pill g">must</span> steps always finish. <span class="pill">defer</span> steps stop when <code>sleep_token_budget</code> runs out and resume at the next sleep.</p>
+    <ol class="sleep-grid">
+      <li><span class="badge-ic n"><svg class="ic"><use href="#i-cut"/></svg></span><b>Segment <span class="pill g">must</span></b>Split the log from the watermark into episodes. Jev answers "boundary here?" for each pair of neighbouring windows. <span class="pill y">J</span></li>
+      <li><span class="badge-ic n"><svg class="ic"><use href="#i-filter"/></svg></span><b>Extract <span class="pill g">must</span></b>An LLM lists the facts in each episode, with kind, source, evidence (log or code spans), entity mentions and validity start. Every claim is counted.</li>
+      <li><span class="badge-ic g"><svg class="ic"><use href="#i-check"/></svg></span><b>Verify <span class="pill g">must</span></b>Jev sees only the claim and its cited span: "does this support it?" Below <code>judge_min_probability</code> the question goes to an LLM. Failures are dropped and counted. <span class="pill y">J</span></li>
+      <li><span class="badge-ic n"><svg class="ic"><use href="#i-link"/></svg></span><b>Link <span class="pill g">must</span></b>Resolve each entity mention to an entity or a new one; attach each episode to a topic or a new one; label each new fact against its nearest neighbours. <span class="pill y">J</span></li>
+      <li><span class="badge-ic y"><svg class="ic"><use href="#i-alert"/></svg></span><b>Resolve <span class="pill g">must</span></b>For each contradiction Jev chooses: newer replaces older (set <code>valid_to</code>), both true in different scopes (narrow the scopes), or older still valid (reject the new fact). Trust order decides ties. <span class="pill y">J</span></li>
+      <li><span class="badge-ic g"><svg class="ic"><use href="#i-layers"/></svg></span><b>Update topics <span class="pill">defer</span></b>Mark touched topics dirty. Split a topic into chronological parts once it has more than <code>topic_split_facts</code> facts. Refresh each summary's keyword anchors from its facts (code, no LLM). Rebuild Big if any of its facts changed; Medium and Small only if a cited fact changed or Jev says the change matters at their size. Every sentence cites fact ids. <span class="pill y">J</span></li>
+      <li><span class="badge-ic n"><svg class="ic"><use href="#i-rollup"/></svg></span><b>Roll up <span class="pill g">must</span> / <span class="pill">defer</span></b>Session node: must. Periods for closed weeks, and core when due or on the first sleep: defer.</li>
+      <li><span class="badge-ic r"><svg class="ic"><use href="#i-archive"/></svg></span><b>Forget <span class="pill">defer</span></b>Score active nodes with the retention formula, using Jev's importance and surprise levels. Archive those under the threshold; parents keep their links. Never archive core, the latest period or user facts. <span class="pill y">J</span></li>
+      <li><span class="badge-ic n"><svg class="ic"><use href="#i-clip"/></svg></span><b>Wake note and export <span class="pill g">must</span></b>Write open problems, plan and topics for the next session. Write <code>memory.md</code>. Release the lock.</li>
+    </ol>
+
+    <div class="code">
+      <div class="code-head"><span class="l"><svg class="ic sm"><use href="#i-archive"/></svg>Retention score</span></div>
+<pre><code>score = 0.35 * (importance - 1) / 4                # Jev score level 1..5
+      + 0.25 * exp(-days_since(last_used) / 30)
+      + 0.20 * min(1, log(1 + useful_count) / 3)   # usefulness, not raw recalls
+      + 0.20 * (surprise - 1) / 3                  # Jev score level 1..4
+
+archive if score < archive_threshold               # parents keep their links
+never archive: core, latest period, source = user
+unarchive on any recall hit</code></pre>
+    </div>
+  </div>
+
+  <div class="panel" role="tabpanel" id="flow-nap" aria-labelledby="tab-nap">
+    <h3>5.5 Nap</h3>
+    <p class="narrow">If context fills in the middle of a task, run steps 1 to 4 on the oldest <code>nap_fraction</code> of the context only, from the session's watermark. Move the watermark, replace that part of the context with the resulting episode text, and continue. The next full sleep starts from the watermark, so it never re-segments what the nap covered, and runs steps 5 to 9 over every episode made since the last full sleep.</p>
+  </div>
+
+  <div class="panel" role="tabpanel" id="flow-sessions" aria-labelledby="tab-sessions">
+    <h3>5.6 Several sessions at once</h3>
+    <ol class="steps">
+      <li>Each running session (terminal, worktree, agent) has its own <code>session</code> id, its own log stream and its own watermark.</li>
+      <li>A session consolidates only its own log, when it sleeps. It takes the memory lock for the write part of sleep; other sessions keep reading.</li>
+      <li>Facts carry <code>scope.branch</code>. Recall on another branch skips them until they are merged.</li>
+      <li>When a branch merges, its facts are promoted to the main scope at the next sleep. When a branch is deleted unmerged, its facts are archived.</li>
+      <li>If two sessions wrote contradicting facts, the next sleep's resolve step handles them like any other contradiction.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="block" id="gate" aria-labelledby="h-gate">
+  <div class="sec-head"><span class="badge-ic y"><svg class="ic"><use href="#i-zap"/></svg></span><div><div class="num">06</div><h2 id="h-gate">Jev: the fast decision layer</h2></div></div>
+
+  <div class="jev-hero">
+    <span class="badge-ic y"><svg class="ic lg"><use href="#i-zap"/></svg></span>
+    <div>
+      <b class="t">Decisions go to Jev. Writing goes to an LLM.</b>
+      <p>Jev from TypeSafe AI takes a block of state plus typed questions and returns a probability (<code>noul</code>), a pick from a list (<code>choice</code>) or an ordered level (<code>score</code>, 2 to 10 levels). It does not write text. Any step whose answer is one of a small, known set goes to Jev: as the <b>gate</b> while awake, and as the <b>judge</b> during sleep. Neither role writes memory; the consolidator does.</p>
+    </div>
+  </div>
+
+  <h3>Gate questions (awake)</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Id</th><th>Question</th><th>Type</th><th>Replaces</th></tr></thead>
+    <tbody>
+      <tr><td><code>G1</code></td><td>Does this input need a memory lookup?</td><td><span class="pill">noul</span></td><td>main-model reasoning about memory</td></tr>
+      <tr><td><code>G2</code></td><td>Which level should recall start at?</td><td><span class="pill">choice</span> core, topic small, medium, big, session, episode</td><td>always starting at the top</td></tr>
+      <tr><td><code>G3</code></td><td>Do these recalled memories answer the query?</td><td><span class="pill">noul</span></td><td>LLM call inside <code>sufficient()</code>, once per zoom step</td></tr>
+      <tr><td><code>G4</code></td><td>Is this unusual enough to interrupt the reasoning model?</td><td><span class="pill">noul</span></td><td>n/a (new)</td></tr>
+      <tr><td><code>G5</code></td><td>Is this a task boundary, so sleep now?</td><td><span class="pill">noul</span></td><td>guessing task ends; hard thresholds stay in code</td></tr>
+      <tr><td><code>G6</code></td><td>Did recalled memory X change what the agent did?</td><td><span class="pill">noul</span></td><td>the main agent self-reporting usefulness</td></tr>
+      <tr><td><code>G8</code></td><td>Does the question ask for an exact value (name, path, number, ID, setting, version, command, output)?</td><td><span class="pill">noul</span></td><td>trusting a fluent summary for exact values</td></tr>
+      <tr><td><code>G9</code> <span class="pill g">v0.8</span></td><td>What kind of answer does the question need: overview, single fact, list, when, or exact value?</td><td><span class="pill">choice</span></td><td>one fixed recall recipe for every question</td></tr>
+      <tr><td><code>G10</code> <span class="pill g">v0.8</span></td><td>Does this summary level (small, medium, big) alone answer the question?</td><td><span class="pill">noul</span></td><td>always sending summaries, or never using medium and big</td></tr>
+      <tr><td><code>G11</code> <span class="pill g">v0.8</span></td><td>Is this fact or message about the question's subject? Is it part of the answer? (one request per candidate, all in parallel)</td><td><span class="pill">noul</span></td><td>sending every search hit (bloated context)</td></tr>
+      <tr><td><code>G7</code></td><td>Is topic T relevant to the next session's plan?</td><td><span class="pill">noul</span></td><td>loading only the topics the wake note names</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Judge questions (asleep)</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Id</th><th>Question</th><th>Type</th><th>Replaces</th></tr></thead>
+    <tbody>
+      <tr><td><code>J1</code></td><td>Is there a task boundary between these two windows?</td><td><span class="pill">noul</span></td><td>LLM segmentation of the whole log</td></tr>
+      <tr><td><code>J2</code></td><td>Does this span support this claim?</td><td><span class="pill">noul</span></td><td>LLM verify, once per claim (the biggest sleep cost)</td></tr>
+      <tr><td><code>J3</code></td><td>How does this fact relate to that one?</td><td><span class="pill">choice</span> same entity, supports, contradicts, unrelated</td><td>LLM link labelling</td></tr>
+      <tr><td><code>J4</code></td><td>Which topic does this episode belong to?</td><td><span class="pill">choice</span> 5 nearest topics + new</td><td>LLM topic assignment</td></tr>
+      <tr><td><code>J5</code></td><td>Which entity is this mention?</td><td><span class="pill">choice</span> nearest entities + new</td><td>string matching and alias rules</td></tr>
+      <tr><td><code>J6</code></td><td>What kind of contradiction is this?</td><td><span class="pill">choice</span> newer replaces, both true in different scopes, older still valid</td><td>"newer always wins"</td></tr>
+      <tr><td><code>J7</code></td><td>How important is this fact?</td><td><span class="pill y">score</span> 1 to 5</td><td>an unspecified 0..1 number</td></tr>
+      <tr><td><code>J8</code></td><td>How much did this change what the agent believed?</td><td><span class="pill y">score</span> 1 to 4</td><td>the 0/1 surprise flag</td></tr>
+      <tr><td><code>J9</code></td><td>Do the cited facts support this summary sentence?</td><td><span class="pill">noul</span></td><td>LLM drift check</td></tr>
+      <tr><td><code>J10</code></td><td>Does this change matter at this summary size?</td><td><span class="pill">noul</span></td><td>rewriting all three sizes every time</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="facts">
+    <div class="fact"><span class="badge-ic y"><svg class="ic"><use href="#i-flag"/></svg></span><div><b>Shadow first</b>Each question starts in <code>shadow</code> mode: the LLM (or old rule) decides and Jev's answer is only logged. It goes <code>live</code> once it agrees on at least <code>jev_promote_agreement</code> of <code>jev_promote_min_samples</code> cases.</div></div>
+    <div class="fact"><span class="badge-ic y"><svg class="ic"><use href="#i-sliders"/></svg></span><div><b>Calibration</b>Outcomes are recorded later (was the recall enough, did the verified fact hold up). Weekly, each question's threshold is tuned from its decision log.</div></div>
+    <div class="fact"><span class="badge-ic y"><svg class="ic"><use href="#i-up"/></svg></span><div><b>Fallback</b>Below <code>gate_min_probability</code> (awake) or <code>judge_min_probability</code> (asleep), or after <code>jev_timeout_ms</code>, the question goes to an LLM. Awake defaults if that is too slow: recall yes, start at topic small.</div></div>
+    <div class="fact"><span class="badge-ic r"><svg class="ic"><use href="#i-alert"/></svg></span><div><b>Limits</b>Hosted API only, a few hundred ms per call, text state only. Fine for routing and judging, not motor reflexes.</div></div>
+  </div>
+
+  <h3>Not for Jev</h3>
+  <div class="facts">
+    <div class="fact"><span class="badge-ic n"><svg class="ic"><use href="#i-file"/></svg></span><div><b>Anything that writes text</b>Extract, topic and time summaries, and the wake note stay with an LLM.</div></div>
+    <div class="fact"><span class="badge-ic r"><svg class="ic"><use href="#i-shield"/></svg></span><div><b>The redactor</b>Asking a hosted API "is this a secret?" sends the secret out. Redaction stays local.</div></div>
+    <div class="fact"><span class="badge-ic n"><svg class="ic"><use href="#i-sliders"/></svg></span><div><b>Hard thresholds and formulas</b>Context share, idle time, token caps and the retention formula stay in code. Jev only feeds importance and surprise into the formula.</div></div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="block" id="rules" aria-labelledby="h-rules">
+  <div class="sec-head"><span class="badge-ic r"><svg class="ic"><use href="#i-shield"/></svg></span><div><div class="num">07</div><h2 id="h-rules">Rules</h2></div></div>
+  <p class="sec-intro">These hold at all times. An implementation that breaks one is a different architecture.</p>
+  <ol class="rules">
+    <li><div class="rh"><svg class="ic"><use href="#i-lock"/></svg><span class="rid">R1</span></div><b>The raw log is append-only.</b>Rows are redacted locally before they are written, then never edited or reordered. The one exception is a privacy delete, which replaces a row's content with a tombstone and keeps its <code>seq</code>.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-link"/></svg><span class="rid">R2</span></div><b>Every fact cites evidence.</b>Each fact has an id and at least one log, code or user span.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-check"/></svg><span class="rid">R3</span></div><b>Only verified facts are stored as facts.</b>A claim that fails verification is dropped and counted, not kept at low confidence.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-refresh"/></svg><span class="rid">R4</span></div><b>Summaries are regenerated from their sources.</b>Time nodes from their children, topic sizes from the topic's facts. Never by editing earlier text or shrinking a sibling size.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-archive"/></svg><span class="rid">R5</span></div><b>Forgetting is not deleting.</b>Archived nodes leave the index, stay in storage and stay reachable through their parents. The only true delete is the privacy path (R1).</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-repeat"/></svg><span class="rid">R6</span></div><b>Superseded facts never surface alone.</b>Recall returns the old fact together with the fact that replaced it, marked as superseded.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-eye"/></svg><span class="rid">R7</span></div><b>Check evidence before acting.</b>If a remembered fact will drive a decision, open its evidence first. If it was not checked, say so.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-branch"/></svg><span class="rid">R8</span></div><b>Verify is independent of extract.</b>A different model from the extractor (Jev qualifies), or at minimum a different prompt with no access to the extractor's reasoning.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-moon"/></svg><span class="rid">R9</span></div><b>No consolidation while awake.</b>Each session consolidates only its own log, only while it sleeps or naps. Recall bookkeeping is allowed while awake.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-link"/></svg><span class="rid">R10</span></div><b>Every summary sentence cites its sources.</b>A sentence without fact or child ids fails the drift check.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-user"/></svg><span class="rid">R11</span></div><b>Trust order holds.</b>CLAUDE.md, then user, then observed, then inferred. A lower-trust fact never silently replaces a higher-trust one; the conflict is flagged instead.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-flag"/></svg><span class="rid">R12</span></div><b>Every Jev decision is logged.</b>No Jev question goes live without passing shadow mode, and Jev never writes memory itself.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-code"/></svg><span class="rid">R13</span></div><b>Stale code evidence cannot drive a decision.</b>If the cited code changed since its commit, read the current code first.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-lock"/></svg><span class="rid">R14</span></div><b>One writer at a time.</b>Shared memory is written only under the lock. Branch facts stay in their branch scope until merged.</li>
+    <li><div class="rh"><svg class="ic"><use href="#i-eye"/></svg><span class="rid">R15</span></div><b>Exact values come from evidence.</b>When a question asks for an exact value, recall may stop, and the answer may quote, only from fact evidence, anchors or the original log, never from a summary's wording.</li>
+  </ol>
+</section>
+
+<!-- 8 -->
+<section class="block" id="params" aria-labelledby="h-params">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-sliders"/></svg></span><div><div class="num">08</div><h2 id="h-params">Parameters</h2></div></div>
+  <p class="sec-intro">Starting values. Tune them from experiment results and the decision log.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Name</th><th>Default</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>sleep_context_threshold</code></td><td><span class="val">0.75</span></td><td>Sleep when this share of the context window is used</td></tr>
+      <tr><td><code>sleep_on_task_end</code></td><td><span class="val">true</span></td><td>Sleep when a task finishes and nothing is queued</td></tr>
+      <tr><td><code>idle_timeout_minutes</code></td><td><span class="val">30</span></td><td>Sleep after this long with no input</td></tr>
+      <tr><td><code>max_awake_tokens</code></td><td><span class="val">2,000,000</span></td><td>Hard cap on tokens processed between sleeps</td></tr>
+      <tr><td><code>nap_fraction</code></td><td><span class="val">0.33</span></td><td>Share of oldest context consolidated in a nap</td></tr>
+      <tr><td><code>sleep_token_budget</code></td><td><span class="val">400,000</span></td><td>LLM tokens one sleep may spend before deferrable steps stop</td></tr>
+      <tr><td><code>wake_session_summaries</code></td><td><span class="val">3</span></td><td>Recent session nodes loaded on wake</td></tr>
+      <tr><td><code>topic_small_tokens</code></td><td><span class="val">60</span></td><td>Budget for a topic's small summary</td></tr>
+      <tr><td><code>topic_medium_tokens</code></td><td><span class="val">300</span></td><td>Budget for a topic's medium summary</td></tr>
+      <tr><td><code>topic_big_tokens</code></td><td><span class="val">1,500</span></td><td>Budget for a topic's big summary</td></tr>
+      <tr><td><code>topic_anchors_max</code></td><td><span class="val">30</span></td><td>Exact identifiers kept as keyword anchors on each topic summary</td></tr>
+      <tr><td><code>topic_split_facts</code></td><td><span class="val">24</span></td><td>A topic with more facts than this is split into chronological parts</td></tr>
+      <tr><td><code>exact_snippet_tokens</code></td><td><span class="val">800</span></td><td>Original-log snippets attached from the first step to exact-value questions</td></tr>
+      <tr><td><code>topic_log_tokens</code></td><td><span class="val">3,000</span></td><td>Budget for the topic's original-log step: best-matching segments of its own log</td></tr>
+      <tr><td><code>recall_k</code></td><td><span class="val">5</span></td><td>Nodes taken from the first search</td></tr>
+      <tr><td><code>fallback_k</code></td><td><span class="val">5</span></td><td>Raw log chunks taken by the fallback search</td></tr>
+      <tr><td><code>bm25_weight</code></td><td><span class="val">0.4</span></td><td>Keyword share of the hybrid score (vectors get the rest)</td></tr>
+      <tr><td><code>context_boost</code></td><td><span class="val">1.5</span></td><td>Score multiplier for memories tied to the files and entities in play</td></tr>
+      <tr><td><code>archive_threshold</code></td><td><span class="val">0.25</span></td><td>Retention score below which a node is archived</td></tr>
+      <tr><td><code>period_min_days</code></td><td><span class="val">3</span></td><td>Distinct dates with sessions needed before a closed week gets a period node</td></tr>
+      <tr><td><code>core_regen_days</code></td><td><span class="val">7</span></td><td>How often the core is regenerated</td></tr>
+      <tr><td><code>gate_min_probability</code></td><td><span class="val">0.80</span></td><td>Awake: below this, the gate's question goes to the reasoning model</td></tr>
+      <tr><td><code>judge_min_probability</code></td><td><span class="val">0.85</span></td><td>Asleep: below this, the judge's question goes to an LLM</td></tr>
+      <tr><td><code>jev_timeout_ms</code></td><td><span class="val">800</span></td><td>After this, fall back as if the probability were low</td></tr>
+      <tr><td><code>jev_promote_agreement</code></td><td><span class="val">0.90</span></td><td>Agreement with the LLM needed to take a question live</td></tr>
+      <tr><td><code>jev_promote_min_samples</code></td><td><span class="val">200</span></td><td>Shadow decisions needed before promotion is considered</td></tr>
+      <tr><td><code>export_path</code></td><td><span class="val">memory.md</span></td><td>Where the readable export is written</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="block" id="build" aria-labelledby="h-build">
+  <div class="sec-head"><span class="badge-ic n"><svg class="ic"><use href="#i-flag"/></svg></span><div><div class="num">09</div><h2 id="h-build">Build order</h2></div></div>
+  <ol class="build">
+    <li class="first"><div class="bn"><span class="pill g">start here</span></div><b>Log and baselines</b>Local redactor, per-session raw log with watermarks, decision log, a test environment with known ground truth, flat-search and rolling-summary baselines.</li>
+    <li><div class="bn"></div><b>Tree, topics, entities</b>Episodes with typed, sourced facts; sessions; the topic ladder; entities; hybrid search; recall with fallback and trust order.</li>
+    <li><div class="bn"></div><b>Full sleep</b>Verify, link, resolve with validity windows, incremental topic rebuilds, forget, sleep budget, memory.md export. Compare against the baselines.</li>
+    <li class="last"><div class="bn"><span class="pill y">Jev</span></div><b>Jev, shadow to live</b>Run all 17 questions in shadow. Promote them one by one. Start with J2 (verify) and G3 (sufficient), which save the most.</li>
+    <li><div class="bn"><span class="pill">coding</span></div><b>Code-aware and multi-session</b>Code evidence and staleness checks, coding fact kinds, CLAUDE.md on wake, the memory lock and branch scopes.</li>
+  </ol>
+  <h3>Out of scope for this version</h3>
+  <div class="chips">
+    <span class="pill r"><svg class="ic sm"><use href="#i-x"/></svg>weight updates from memory</span>
+    <span class="pill r"><svg class="ic sm"><use href="#i-x"/></svg>robot bodies</span>
+    <span class="pill r"><svg class="ic sm"><use href="#i-x"/></svg>multiple cooperating agents</span>
+  </div>
+  <p class="narrow">Suggested stack: Python, SQLite (with FTS5 for BM25), <code>sqlite-vec</code> or FAISS, git for code evidence, any LLM API for writing, Jev for the gate and judge. A cheaper model can run extract.</p>
+</section>
+
+<!-- 10 -->
+<section class="block" id="results" aria-labelledby="h-results">
+  <div class="sec-head"><span class="badge-ic g"><svg class="ic"><use href="#i-check"/></svg></span><div><div class="num">10</div><h2 id="h-results">Test results <span class="pill g" style="vertical-align:middle">latest: v0.8 · LoCoMo 73% with Opus 5.5 · ~610 tokens</span></h2></div></div>
+  <p class="sec-intro"><b>Latest (v0.8, 29 September 2026):</b> on LoCoMo, a standard benchmark of 200 questions over long chats, v0.8 scores <b>73% with Claude Opus 5.5 answering</b>, ahead of Mem0 (70%) and GBrain (67%), while sending the least context: <b>~610 tokens per question</b> (Mem0 ~1,130, GBrain ~3,980). With Muse Spark 1.3, a small free model, answering, the order is the same: v0.8 55%, Mem0 51%, GBrain 51%. Grading was done by Claude Haiku 4.5 in both runs. The results below go from newest to oldest; the first test on 15 real coding sessions (v0.3 to v0.6) has not been rerun with v0.8 yet.</p>
+<!-- bench:opus:start -->
+  <h3 id="opus">Latest: answered by Claude Opus 5.5 (medium effort), graded by Claude Haiku 4.5</h3>
+  <p class="narrow">The same 200 LoCoMo questions, answered by Claude Opus 5.5 (medium effort) instead of the small free model, so the scores sit on the same scale as published results. Each system's context was rebuilt; Claude Haiku graded all four answers to each question blind and side by side (29 September 2026).</p>
+  <div class="result-grid">
+    <div class="result-card">
+      <div class="rc-head"><b>Accuracy</b><span>200 questions · answered by Claude Opus 5.5</span></div>
+      <div class="bars" role="img" aria-label="Accuracy with Claude Opus 5.5 answering: v0.8 73 percent, Mem0 70, GBrain 67, keyword search 46.5.">
+        <div class="bar-row"><span class="bl">v0.8</span><span class="bar-track"><span class="bar-fill" style="width:73%"></span></span><span class="bv">73%</span></div>
+        <div class="bar-row"><span class="bl">Mem0</span><span class="bar-track"><span class="bar-fill" style="width:70%"></span></span><span class="bv">70%</span></div>
+        <div class="bar-row"><span class="bl">GBrain</span><span class="bar-track"><span class="bar-fill" style="width:67%"></span></span><span class="bv">67%</span></div>
+        <div class="bar-row"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:46.5%"></span></span><span class="bv">46.5%</span></div>
+      </div>
+    </div>
+    <div class="result-card">
+      <div class="rc-head"><b>Context per question</b><span>tokens</span></div>
+      <div class="bars" role="img" aria-label="Context per question: v0.8 about 610 tokens, Mem0 1,130, GBrain 3,980.">
+        <div class="bar-row"><span class="bl">v0.8</span><span class="bar-track"><span class="bar-fill" style="width:15.4%"></span></span><span class="bv">~610</span></div>
+        <div class="bar-row"><span class="bl">Mem0</span><span class="bar-track"><span class="bar-fill" style="width:28.4%"></span></span><span class="bv">~1.1k</span></div>
+        <div class="bar-row"><span class="bl">GBrain</span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bv">~4.0k</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>System</th><th>Multi-hop</th><th>Temporal</th><th>Single-hop</th><th>Open-domain</th><th>Overall</th><th>Context / question</th><th>"Not mentioned"</th></tr></thead>
+    <tbody>
+      <tr><td><b>v0.8</b></td><td><b>56%</b></td><td><b>92%</b></td><td>84%</td><td>60%</td><td><span class="val">73%</span></td><td><b>~610 tokens</b></td><td><b>12</b></td></tr>
+      <tr><td>Mem0</td><td>48%</td><td>88%</td><td>82%</td><td><b>62%</b></td><td>70%</td><td>~1,130 tokens</td><td>16</td></tr>
+      <tr><td>GBrain</td><td>38%</td><td>88%</td><td><b>90%</b></td><td>52%</td><td>67%</td><td>~3,980 tokens</td><td>21</td></tr>
+      <tr><td>Keyword search</td><td>12%</td><td>70%</td><td>62%</td><td>42%</td><td>46.5%</td><td>~380 tokens</td><td>59</td></tr>
+    </tbody>
+  </table>
+  </div>
+<!-- bench:opus:end -->
+<!-- bench:v08:start -->
+<h3 id="v08">v0.8 answered by Muse Spark 1.3 (small free model), graded by Claude Haiku 4.5</h3>
+  <p class="narrow">v0.8 keeps the same stored memories and lets Jev decide what goes into the context: the question type, which summary level answers, and which facts and messages are part of the answer. All six answers to each question were graded blind and side by side by Claude Haiku (29 September 2026). The run was split over two machines.</p>
+  <div class="result-grid">
+    <div class="result-card">
+      <div class="rc-head"><b>Accuracy</b><span>200 questions</span></div>
+      <div class="bars" role="img" aria-label="LoCoMo accuracy: v0.8 55 percent, v0.7 53, Mem0 51, GBrain 51, v0.6 41, keyword search 33.5.">
+        <div class="bar-row"><span class="bl">v0.8</span><span class="bar-track"><span class="bar-fill" style="width:55%"></span></span><span class="bv">55%</span></div>
+        <div class="bar-row"><span class="bl">v0.7</span><span class="bar-track"><span class="bar-fill" style="width:53%"></span></span><span class="bv">53%</span></div>
+        <div class="bar-row"><span class="bl">Mem0</span><span class="bar-track"><span class="bar-fill" style="width:51%"></span></span><span class="bv">51%</span></div>
+        <div class="bar-row"><span class="bl">GBrain</span><span class="bar-track"><span class="bar-fill" style="width:51%"></span></span><span class="bv">51%</span></div>
+        <div class="bar-row"><span class="bl">v0.6</span><span class="bar-track"><span class="bar-fill" style="width:41%"></span></span><span class="bv">41%</span></div>
+        <div class="bar-row"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:33.5%"></span></span><span class="bv">33.5%</span></div>
+      </div>
+    </div>
+    <div class="result-card">
+      <div class="rc-head"><b>Context per question</b><span>tokens</span></div>
+      <div class="bars" role="img" aria-label="Context per question: v0.8 about 600 tokens, Mem0 1,100, v0.6 2,200, v0.7 3,100, GBrain 4,000.">
+        <div class="bar-row"><span class="bl">v0.8</span><span class="bar-track"><span class="bar-fill" style="width:15%"></span></span><span class="bv">~600</span></div>
+        <div class="bar-row"><span class="bl">Mem0</span><span class="bar-track"><span class="bar-fill" style="width:28%"></span></span><span class="bv">~1.1k</span></div>
+        <div class="bar-row"><span class="bl">v0.6</span><span class="bar-track"><span class="bar-fill" style="width:56%"></span></span><span class="bv">~2.2k</span></div>
+        <div class="bar-row"><span class="bl">v0.7</span><span class="bar-track"><span class="bar-fill" style="width:78%"></span></span><span class="bv">~3.1k</span></div>
+        <div class="bar-row"><span class="bl">GBrain</span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bv">~4.0k</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>System</th><th>Multi-hop</th><th>Temporal</th><th>Single-hop</th><th>Open-domain</th><th>Overall</th><th>Context / question</th></tr></thead>
+    <tbody>
+      <tr><td><b>v0.8</b></td><td>44%</td><td><b>78%</b></td><td>76%</td><td><b>22%</b></td><td><span class="val">55%</span></td><td><b>~600 tokens</b></td></tr>
+      <tr><td>v0.7</td><td>40%</td><td>74%</td><td><b>80%</b></td><td>18%</td><td>53%</td><td>~3,100 tokens</td></tr>
+      <tr><td>Mem0</td><td><b>46%</b></td><td>66%</td><td>72%</td><td>20%</td><td>51%</td><td>~1,100 tokens</td></tr>
+      <tr><td>GBrain</td><td>32%</td><td><b>78%</b></td><td>74%</td><td>20%</td><td>51%</td><td>~4,000 tokens</td></tr>
+      <tr><td>v0.6</td><td>28%</td><td>68%</td><td>56%</td><td>12%</td><td>41%</td><td>~2,200 tokens</td></tr>
+      <tr><td>Keyword search</td><td>8%</td><td>64%</td><td>50%</td><td>12%</td><td>33.5%</td><td>~400 tokens</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <!-- bench:v08:end -->
+<!-- bench:v07:start -->
+<h3 id="v07">v0.7 against Mem0 and GBrain (LoCoMo, answered by Muse Spark 1.3)</h3>
+  <p class="narrow">Mem0 (2.2, open source) and GBrain (0.59, hybrid search) were run on the same questions with the same answering model and about the same context budget. v0.7 changed recall only, on the same stored memories as v0.6: hybrid search (keyword + meaning, fused) over facts <b>and</b> raw messages comes first, summaries only orient, every fact about the people named in the question is gathered, and the gate stops only when the evidence itself answers. Claude Haiku graded all five answers to each question blind and side by side (29 September 2026).</p>
+  <div class="result-grid">
+    <div class="result-card">
+      <div class="rc-head"><b>Overall accuracy</b><span>200 questions, 5 systems</span></div>
+      <div class="bars" role="img" aria-label="LoCoMo accuracy: v0.7 53 percent, GBrain 51, Mem0 50, v0.6 40.5, keyword search 33.5.">
+        <div class="bar-row"><span class="bl">v0.7</span><span class="bar-track"><span class="bar-fill" style="width:53%"></span></span><span class="bv">53%</span></div>
+        <div class="bar-row"><span class="bl">GBrain</span><span class="bar-track"><span class="bar-fill" style="width:51%"></span></span><span class="bv">51%</span></div>
+        <div class="bar-row"><span class="bl">Mem0</span><span class="bar-track"><span class="bar-fill" style="width:50%"></span></span><span class="bv">50%</span></div>
+        <div class="bar-row"><span class="bl">v0.6</span><span class="bar-track"><span class="bar-fill" style="width:40.5%"></span></span><span class="bv">40.5%</span></div>
+        <div class="bar-row"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:33.5%"></span></span><span class="bv">33.5%</span></div>
+      </div>
+      <p class="rc-note">With 200 questions the grading noise is about ±3 points: a tie for first, slightly ahead.</p>
+    </div>
+    <div class="result-card">
+      <div class="rc-head"><b>"Not mentioned" when the answer existed</b><span>fewer is better</span></div>
+      <div class="bars" role="img" aria-label="Not mentioned answers: v0.7 42, Mem0 44, GBrain 45, v0.6 64, keyword search 88.">
+        <div class="bar-row"><span class="bl">v0.7</span><span class="bar-track"><span class="bar-fill" style="width:47.7%"></span></span><span class="bv">42</span></div>
+        <div class="bar-row"><span class="bl">Mem0</span><span class="bar-track"><span class="bar-fill" style="width:50%"></span></span><span class="bv">44</span></div>
+        <div class="bar-row"><span class="bl">GBrain</span><span class="bar-track"><span class="bar-fill" style="width:51.1%"></span></span><span class="bv">45</span></div>
+        <div class="bar-row"><span class="bl">v0.6</span><span class="bar-track"><span class="bar-fill" style="width:72.7%"></span></span><span class="bv">64</span></div>
+        <div class="bar-row"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bv">88</span></div>
+      </div>
+      <p class="rc-note">The v0.6 weak spot, finding the right memory, is largely fixed.</p>
+    </div>
+  </div>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>System</th><th>Multi-hop</th><th>Temporal</th><th>Single-hop</th><th>Open-domain</th><th>Overall</th><th>Context / question</th></tr></thead>
+    <tbody>
+      <tr><td><b>v0.7</b></td><td>38%</td><td>74%</td><td><b>82%</b></td><td>18%</td><td><span class="val">53%</span></td><td>~3,100 tokens</td></tr>
+      <tr><td>GBrain</td><td>30%</td><td><b>78%</b></td><td>78%</td><td>18%</td><td>51%</td><td>~4,000 tokens</td></tr>
+      <tr><td>Mem0</td><td><b>42%</b></td><td>66%</td><td>72%</td><td><b>20%</b></td><td>50%</td><td>~1,100 tokens</td></tr>
+      <tr><td>v0.6</td><td>26%</td><td>68%</td><td>54%</td><td>14%</td><td>40.5%</td><td>~2,200 tokens</td></tr>
+      <tr><td>Keyword search</td><td>8%</td><td>64%</td><td>48%</td><td>14%</td><td>33.5%</td><td>~400 tokens</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="facts">
+    <div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-check"/></svg></span><div><b>+12.5 points from search alone</b>Same stored memories as v0.6; only recall changed.</div></div>
+    <div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-search"/></svg></span><div><b>Best on single-hop</b>82%, and the fewest "Not mentioned" answers of all systems.</div></div>
+    <div class="fact"><span class="badge-ic y"><svg class="ic"><use href="#i-alert"/></svg></span><div><b>Mem0 still leads multi-hop</b>42% against 38%, with about a third of the context.</div></div>
+  </div>
+  <!-- bench:v07:end -->
+<!-- bench:locomo06:start -->
+<h3 id="locomo">First LoCoMo run: v0.6 vs keyword search (answered by Muse Spark 1.3)</h3>
+  <p class="narrow">This test uses data the design was never tuned on: LoCoMo (Maharana et al., 2024), 10 long two-person chats with 50 questions in each of 4 categories. Built with the full engine (hypnos). Muse Spark 1.3 answers every system, and <b>Claude Haiku grades</b>, a different model family. Run 2026-09-28.</p>
+  <div class="result-grid">
+    <div class="result-card">
+      <div class="rc-head"><b>Overall accuracy</b><span>200 questions</span></div>
+      <div class="bars" role="img" aria-label="LoCoMo overall accuracy: hypnos 41.5 percent, keyword search 33.5 percent.">
+        <div class="bar-row" title="83 of 200 correct"><span class="bl">hypnos</span><span class="bar-track"><span class="bar-fill" style="width:41.5%"></span></span><span class="bv">41.5%</span></div>
+        <div class="bar-row" title="67 of 200 correct"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:33.5%"></span></span><span class="bv">33.5%</span></div>
+      </div>
+      <p class="rc-note">Context per question: hypnos ~2,240 tokens, keyword search ~380 tokens.</p>
+    </div>
+    <div class="result-card">
+      <div class="rc-head"><b>Multi-hop: combining facts</b><span>50 questions</span></div>
+      <div class="bars" role="img" aria-label="LoCoMo multi-hop accuracy: hypnos 28 percent, keyword search 8 percent.">
+        <div class="bar-row" title="14 of 50 correct"><span class="bl">hypnos</span><span class="bar-track"><span class="bar-fill" style="width:28%"></span></span><span class="bv">28%</span></div>
+        <div class="bar-row" title="4 of 50 correct"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:8%"></span></span><span class="bv">8%</span></div>
+      </div>
+      <p class="rc-note">The biggest gap, 3.5×: facts linked through the same people and things help most here.</p>
+    </div>
+  </div>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Category (50 Q each)</th><th>hypnos</th><th>Keyword search</th></tr></thead>
+    <tbody>
+      <tr><td><b>Overall (200)</b></td><td><span class="val">41.5%</span></td><td>33.5%</td></tr>
+      <tr><td>Multi-hop</td><td><b>28%</b></td><td>8%</td></tr>
+      <tr><td>Temporal (when)</td><td><b>68%</b></td><td>64%</td></tr>
+      <tr><td>Single-hop</td><td><b>58%</b></td><td>50%</td></tr>
+      <tr><td>Open-domain</td><td>12%</td><td>12%</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="facts">
+    <div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-check"/></svg></span><div><b>Ahead on fresh data</b>8 points above keyword search on a standard benchmark it was never tuned on, and ahead or level in every category.</div></div>
+    <div class="fact"><span class="badge-ic r"><svg class="ic"><use href="#i-alert"/></svg></span><div><b>Retrieval is the weak spot</b>hypnos answered "Not mentioned" 64 times (keyword: 88); 129 of 200 recalls fell through to whole-history search.</div></div>
+    <div class="fact"><span class="badge-ic y"><svg class="ic"><use href="#i-layers"/></svg></span><div><b>Chat topics are too broad</b>In two-person chats almost everything landed in 1–4 topics, so the small/medium/big ladder helped less than on coding sessions.</div></div>
+  </div>
+  <!-- bench:locomo06:end -->
+<!-- bench:own:start -->
+<h3 id="own-sessions">Earlier: own coding sessions (v0.3 to v0.6, 60 questions)</h3>
+
+
+  <div class="facts">
+    <div class="fact"><span class="badge-ic n"><svg class="ic"><use href="#i-file"/></svg></span><div><b>Data</b>15 sessions, 59 episodes, 689 extracted claims, 618 verified facts, 36 topics, 604 original-log segments.</div></div>
+    <div class="fact"><span class="badge-ic n"><svg class="ic"><use href="#i-search"/></svg></span><div><b>Questions</b>60, four per session, written from the raw logs. Every answer is proven by an exact quote from the log.</div></div>
+    <div class="fact"><span class="badge-ic n"><svg class="ic"><use href="#i-layers"/></svg></span><div><b>Compared</b>Keyword search, rolling summary, plain opencode, and this architecture at v0.3, v0.4, v0.5 and v0.6.</div></div>
+  </div>
+
+  <div class="result-grid">
+    <div class="result-card">
+      <div class="rc-head"><b>Answer accuracy</b><span>60 questions, graded side by side</span></div>
+      <div class="bars" role="img" aria-label="Accuracy: v0.6 96 percent, keyword search 90, v0.5 90, v0.4 87, v0.3 82, rolling summary 36.">
+        <div class="bar-row" title="v0.6: 57 correct, 1 partial, 0 wrong, 2 don't know"><span class="bl">v0.6</span><span class="bar-track"><span class="bar-fill" style="width:95.8%"></span></span><span class="bv">96%</span></div>
+        <div class="bar-row" title="Keyword search: 53 correct, 2 partial, 1 wrong, 4 don't know"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:90%"></span></span><span class="bv">90%</span></div>
+        <div class="bar-row" title="v0.5: 51 correct, 6 partial, 1 wrong, 2 don't know"><span class="bl">v0.5</span><span class="bar-track"><span class="bar-fill" style="width:90%"></span></span><span class="bv">90%</span></div>
+        <div class="bar-row" title="v0.4: 50 correct, 4 partial, 2 wrong, 4 don't know"><span class="bl">v0.4</span><span class="bar-track"><span class="bar-fill" style="width:86.7%"></span></span><span class="bv">87%</span></div>
+        <div class="bar-row" title="v0.3: 46 correct, 6 partial, 1 wrong, 7 don't know"><span class="bl">v0.3</span><span class="bar-track"><span class="bar-fill" style="width:81.7%"></span></span><span class="bv">82%</span></div>
+        <div class="bar-row" title="Rolling summary: 18 correct, 7 partial, 0 wrong, 35 don't know"><span class="bl">Rolling summary</span><span class="bar-track"><span class="bar-fill" style="width:35.8%"></span></span><span class="bv">36%</span></div>
+      </div>
+      <p class="rc-note">Correct counts 1, partly right 0.5. v0.6 made no confident wrong answers. Re-grading all systems together moves earlier scores by up to 2 points; that is the grading noise.</p>
+    </div>
+    <div class="result-card">
+      <div class="rc-head"><b>Context tokens per answer</b><span>what the answering model had to read</span></div>
+      <div class="bars" role="img" aria-label="Average context tokens per answer: keyword search 2,258; rolling summary 3,185; v0.4 3,457; v0.6 3,531; v0.5 4,070; v0.3 4,276.">
+        <div class="bar-row" title="90% accurate"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:52.8%"></span></span><span class="bv">2,258</span></div>
+        <div class="bar-row" title="36% accurate"><span class="bl">Rolling summary</span><span class="bar-track"><span class="bar-fill" style="width:74.5%"></span></span><span class="bv">3,185</span></div>
+        <div class="bar-row" title="87% accurate"><span class="bl">v0.4</span><span class="bar-track"><span class="bar-fill" style="width:80.8%"></span></span><span class="bv">3,457</span></div>
+        <div class="bar-row" title="96% accurate"><span class="bl">v0.6</span><span class="bar-track"><span class="bar-fill" style="width:82.6%"></span></span><span class="bv">3,531</span></div>
+        <div class="bar-row" title="90% accurate"><span class="bl">v0.5</span><span class="bar-track"><span class="bar-fill" style="width:95.2%"></span></span><span class="bv">4,070</span></div>
+        <div class="bar-row" title="82% accurate"><span class="bl">v0.3</span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bv">4,276</span></div>
+      </div>
+      <p class="rc-note">v0.6 reads 13% less than v0.5 while scoring 6 points higher. Plain opencode read about 35,000 per question on its 24.</p>
+    </div>
+  </div>
+
+  <h3>Against plain opencode (24 questions, 6 oldest sessions)</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>System</th><th>Accuracy</th><th>Confident wrong</th><th>Tokens read / question</th><th>Steps / question</th><th>Time / question</th></tr></thead>
+    <tbody>
+      <tr><td>Plain opencode (greps and reads the logs itself)</td><td>92%</td><td>2</td><td>~35,000</td><td>~7</td><td>~44 s</td></tr>
+      <tr><td>v0.3</td><td>92%</td><td>0</td><td>~4,600</td><td>1</td><td>~12 s</td></tr>
+      <tr><td>v0.5</td><td>90%</td><td>0</td><td>~4,600</td><td>1</td><td>~12 s</td></tr>
+      <tr><td><b>v0.6</b></td><td><span class="val">100%</span></td><td>0</td><td>~3,700</td><td>1</td><td>~12 s</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Accuracy by how old the session is</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>System</th><th>Oldest 5 sessions</th><th>Middle 5</th><th>Newest 5</th><th>All 60</th></tr></thead>
+    <tbody>
+      <tr><td>Keyword search</td><td>88%</td><td>88%</td><td>95%</td><td><span class="val">90%</span></td></tr>
+      <tr><td>Rolling summary</td><td>28%</td><td>10%</td><td>70%</td><td><span class="val">36%</span></td></tr>
+      <tr><td>v0.3</td><td>90%</td><td>80%</td><td>75%</td><td><span class="val">82%</span></td></tr>
+      <tr><td>v0.4</td><td>90%</td><td>90%</td><td>80%</td><td><span class="val">87%</span></td></tr>
+      <tr><td>v0.5</td><td>88%</td><td>100%</td><td>82%</td><td><span class="val">90%</span></td></tr>
+      <tr><td><b>v0.6</b></td><td><b>100%</b></td><td>90%</td><td><b>98%</b></td><td><span class="val">96%</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>v0.6: where recall stopped</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Stopped at</th><th>Questions</th><th>Accuracy</th><th>Context per answer</th></tr></thead>
+    <tbody>
+      <tr><td>Small summaries + facts + original-log snippets</td><td>29 (48%)</td><td><span class="val">100%</span></td><td>~1,590 tokens</td></tr>
+      <tr><td>Topic's original log</td><td>6 (10%)</td><td><span class="val">100%</span></td><td>~3,540 tokens</td></tr>
+      <tr><td>Whole-history search (no big summaries)</td><td>25 (42%)</td><td><span class="val">90%</span></td><td>~5,780 tokens</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="result-grid">
+    <div class="result-card">
+      <div class="rc-head"><b>Muse tokens spent building memory</b><span>all 15 sessions, one time</span></div>
+      <div class="bars" role="img" aria-label="Build cost in Muse tokens: keyword search 0, rolling summary 0.28 million, v0.3 0.66 million, v0.4 to v0.6 0.78 million.">
+        <div class="bar-row" title="Only indexes the log"><span class="bl">Keyword search</span><span class="bar-track"><span class="bar-fill" style="width:0%;min-width:0"></span></span><span class="bv">0</span></div>
+        <div class="bar-row" title="15 summary rewrites"><span class="bl">Rolling summary</span><span class="bar-track"><span class="bar-fill" style="width:35.7%"></span></span><span class="bv">0.28M</span></div>
+        <div class="bar-row" title="Extract and topic summaries; Jev does verify and topic choice"><span class="bl">v0.3 with Jev</span><span class="bar-track"><span class="bar-fill" style="width:83.9%"></span></span><span class="bv">0.66M</span></div>
+        <div class="bar-row" title="Plus split-topic summaries. Anchors, original log and vector index are built by code, no LLM"><span class="bl">v0.4 – v0.6</span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bv">0.78M</span></div>
+      </div>
+      <p class="rc-note">v0.6's vector index is a small local model (bge-small) on the CPU: no tokens, about 12 minutes once, peak RAM 66%.</p>
+    </div>
+    <div class="result-card">
+      <div class="rc-head"><b>Jev: times faster than Muse Spark</b><span>total seconds for the same work</span></div>
+      <div class="bars" role="img" aria-label="Jev speed-up: verify 15.5 times faster, is-recall-enough 11.3 times faster, topic choice 6.9 times faster.">
+        <div class="bar-row" title="Verify, 689 claims: Muse 1,523 s, Jev 98 s"><span class="bl">Verify (J2)</span><span class="bar-track"><span class="bar-fill" style="width:100%"></span></span><span class="bv">15.5×</span></div>
+        <div class="bar-row" title="Is recall enough, 174 checks: Muse 2,267 s, Jev 200 s"><span class="bl">Recall enough? (G3)</span><span class="bar-track"><span class="bar-fill" style="width:72.9%"></span></span><span class="bv">11.3×</span></div>
+        <div class="bar-row" title="Topic choice, 58 episodes: Muse 729 s, Jev 106 s"><span class="bl">Topic choice (J4)</span><span class="bar-track"><span class="bar-fill" style="width:44.5%"></span></span><span class="bv">6.9×</span></div>
+      </div>
+      <p class="rc-note">Agreement with Muse: verify 86%, topic choice 90%, recall enough 76%. In v0.6 Jev also flagged exact-value questions and judged the evidence.</p>
+    </div>
+  </div>
+
+  <h3>What it showed at the time (v0.6)</h3>
+  <div class="facts">
+    <div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-check"/></svg></span><div><b>v0.6 is the best system</b>96% against keyword search's 90%, with no confident wrong answers, and 98% on the newest sessions where earlier versions struggled.</div></div>
+    <div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-eye"/></svg></span><div><b>Evidence beats summaries</b>The exact-value rule stopped fluent summaries from passing as answers: 100% on every question answered at the small level.</div></div>
+    <div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-zap"/></svg></span><div><b>Cheaper where it matters</b>The hard 42% now read ~5,780 tokens instead of ~9,920, because the log steps no longer carry the big summaries.</div></div>
+    <div class="fact"><span class="badge-ic g"><svg class="ic"><use href="#i-search"/></svg></span><div><b>Meaning search found what keywords missed</b>"Consolidate service hosts" now finds <code>SvcHostSplitThresholdInKB</code>, which no earlier version answered.</div></div>
+    <div class="fact"><span class="badge-ic r"><svg class="ic"><use href="#i-alert"/></svg></span><div><b>Still more tokens than keyword search</b>3,531 against 2,258 per answer, plus 0.78M to build. Against plain opencode it is about 10× cheaper.</div></div>
+    <div class="fact"><span class="badge-ic y"><svg class="ic"><use href="#i-sliders"/></svg></span><div><b>Tuned on these questions</b>v0.6's fixes came from studying failures on these same 60 questions, so a fresh question set is needed to confirm the gain.</div></div>
+  </div>
+
+  <h3>Caveats</h3>
+  <ul class="narrow">
+    <li>Questions were written from the raw log text and graded against exact quotes; 59 of 60 ask for an exact value.</li>
+    <li>v0.6 was graded by Muse Spark 1.3 only: the 1.2 cross-check was failing on OpenCode's servers during this run. Earlier runs showed the two graders agreeing on 99% of grades.</li>
+    <li>v0.4 to v0.6 were designed after seeing earlier results on these same questions. Plain opencode covers 24 of the 60.</li>
+    <li>Reduced prototype: fixed-size episodes, no entities, trust order, validity windows or incremental rebuilds. One run.</li>
+  </ul>
+  <p class="narrow muted">Harness and raw numbers: <code>~\memtest</code> (<code>bench.py</code>, <code>bench_e.py</code>, <code>bench_f.py</code>, <code>bench_g.py</code>, <code>bench_h.py</code>, <code>out/report_h.json</code>). Every call is cached, so the test can be rerun or extended cheaply.</p>
+
+  <!-- bench:own:end -->
+<h3>Next</h3>
+  <ol class="build">
+    <li class="first"><div class="bn"><span class="pill g">most important</span></div><b>Leaner facts, narrower topics</b>v0.8 leads LoCoMo (73% with Opus 5.5, ~610 tokens; below). Next: faster search (fewer Jev round trips, skip search when a message needs no memory, caching), then short self-contained facts and narrower chat topics (v0.9). Python stays the main engine; a Rust version is kept for later.</li>
+    <li><div class="bn"></div><b>Finish plain opencode</b>Run its remaining 36 questions so the comparison covers all 60.</li>
+    <li><div class="bn"></div><b>Cheaper build</b>A cheaper extractor model and lazily written medium and big summaries.</li>
+    <li class="last"><div class="bn"><span class="pill y">Jev</span></div><b>Promote Jev</b>Verify and topic choice live, with thresholds tuned from the decision log.</li>
+  </ol>
+
+  <p class="narrow muted">Published numbers for Mem0, Letta, Zep and others use other answer models, graders and question subsets, so compare only loosely. Harness and per-question results: <code>benchmark/locomo</code> and <code>benchmark/locomo/compare</code> in the agent-memory-architecture repo.</p>
+</section>
+
+<!-- 11 -->
+<section class="block" id="spec" aria-labelledby="h-spec">
+  <div class="sec-head"><span class="badge-ic"><svg class="ic"><use href="#i-code"/></svg></span><div><div class="num">11</div><h2 id="h-spec">JSON spec</h2></div></div>
+  <p class="sec-intro">The same architecture in machine-readable form. It lives in a <code>&lt;script type="application/json" id="architecture-spec"&gt;</code> element in this file and is shown below.</p>
+  <div class="code">
+    <div class="code-head">
+      <span class="l"><svg class="ic sm"><use href="#i-bot"/></svg>architecture-spec.json</span>
+      <span class="r">
+        <button class="btn ghost small" type="button" id="copy-spec"><svg class="ic sm"><use href="#i-copy"/></svg><span>Copy</span></button>
+        <button class="btn small" type="button" id="dl-spec"><svg class="ic sm"><use href="#i-dl"/></svg><span>Download</span></button>
+      </span>
+    </div>
+    <pre class="tall"><code id="spec-view">Loading…</code></pre>
+  </div>
+</section>
+
+</main>
+
+<footer>Architecture v0.8, 29 September 2026 (v0.7: 29 September; v0.6: 26 September; v0.5 to v0.2: 25 September; v0.1: 21 September 2026). Companion to the research spec (keep / change / ditch, experiment design, risks).<br><br><b>© 2026 Luza Maharjan. All rights reserved.</b> Designed and written by Luza Maharjan, first published 21 September 2026. This architecture, its text, diagrams and specification may not be copied, republished or presented as someone else's work without written permission.</footer>
+
+</div>
+
+<script type="application/json" id="architecture-spec">
+{
+  "name": "evidence-linked-memory-agent",
+  "author": "Luza Maharjan",
+  "copyright": "© 2026 Luza Maharjan. All rights reserved. First published 2026-09-21. Not to be copied, republished or presented as someone else's work without written permission.",
+  "version": "0.8",
+  "changes_v0_8": [
+    "Recall is Jev-routed: code gathers candidates from every layer (three summary levels, hybrid-ranked facts and raw messages, entity facts); Jev answers typed questions about them in parallel.",
+    "Jev classifies the question: overview, single_fact, list, when, exact_value.",
+    "Overview questions: the smallest summary level Jev judges sufficient (small, then medium, then big) is the whole context.",
+    "Every candidate fact and message is gated by Jev (relevant? part of the answer?); only kept items are sent; list questions keep every relevant item.",
+    "An answerable check adds on-topic items when the kept evidence is not enough. Average context on LoCoMo: ~600 tokens."
+  ],
+  "changes_v0_7": [
+    "Recall is evidence first: hybrid search (BM25 + vectors, fused with RRF) over facts and raw messages is the first step; topic summaries only orient.",
+    "Raw messages get a local meaning-search index (bge-small), built at sleep.",
+    "Entity gather: all facts about the people and things named in the question, ranked by relevance.",
+    "The recall gate stops early only when the evidence itself answers the question (R15 applied to every question)."
+  ],
+  "date": "2026-09-26",
+  "previous_versions": [
+    "0.5 (2026-09-25)",
+    "0.4 (2026-09-25)",
+    "0.3 (2026-09-25)",
+    "0.2 (2026-09-25)",
+    "0.1 (2026-09-21)"
+  ],
+  "summary": "A long-running LLM agent with an evidence-linked memory organised two ways over the same verified facts: by time (core, period, session, episode) and by topic (small, medium, big). Facts carry source, validity window, scope and entities. An offline consolidation (sleep) phase builds and tidies memory per session. Jev makes typed decisions (gate while awake, judge while asleep); an LLM does all writing. Exact values are always answered from evidence, not summaries.",
+  "modes": [
+    "awake",
+    "asleep"
+  ],
+  "components": [
+    {
+      "id": "agent_loop",
+      "mode": "awake",
+      "job": "Do the task with a reasoning LLM",
+      "reads": [
+        "wake_context",
+        "recall",
+        "current code"
+      ],
+      "writes": [
+        "raw_log (via redactor)"
+      ]
+    },
+    {
+      "id": "redactor",
+      "mode": "awake",
+      "job": "Remove secrets and private data before logging; local only (pattern rules plus a local model), never a hosted API",
+      "reads": [
+        "incoming events"
+      ],
+      "writes": [
+        "raw_log"
+      ]
+    },
+    {
+      "id": "raw_log",
+      "mode": "storage",
+      "job": "Per-session append-only record of redacted events; one consolidated_upto watermark per session"
+    },
+    {
+      "id": "memory_tree",
+      "mode": "storage",
+      "job": "Time nodes (core, period, session, episode) and topic nodes (small, medium, big)"
+    },
+    {
+      "id": "entities",
+      "mode": "storage",
+      "job": "People, files, symbols, services, configs, projects with aliases; referenced by facts and topics"
+    },
+    {
+      "id": "link_graph",
+      "mode": "storage",
+      "job": "Typed links between nodes or single facts"
+    },
+    {
+      "id": "index",
+      "mode": "storage",
+      "job": "Hybrid search over active nodes at every level and raw log chunks: BM25 (bm25_weight), vectors, path/symbol index"
+    },
+    {
+      "id": "decision_log",
+      "mode": "storage",
+      "job": "Every Jev question, answer, probability, mode (shadow|live), fallback answer and later outcome"
+    },
+    {
+      "id": "wake_note",
+      "mode": "storage",
+      "job": "Open problems, unfinished work, plan and topics for the next session"
+    },
+    {
+      "id": "exporter",
+      "mode": "asleep",
+      "job": "Write export_path (core, topic smalls, pinned facts, open items); on wake, import user edits as user-sourced facts",
+      "reads": [
+        "memory_tree",
+        "memory.md"
+      ],
+      "writes": [
+        "memory.md",
+        "raw_log (edits as user events)"
+      ]
+    },
+    {
+      "id": "recall",
+      "mode": "awake",
+      "job": "Hybrid search from the chosen start level, zoom in only as needed, raw-log fallback, scope and validity filter, code staleness check, attach replacements, order by trust",
+      "reads": [
+        "index",
+        "memory_tree",
+        "entities",
+        "link_graph",
+        "raw_log",
+        "git"
+      ],
+      "writes": [
+        "last_used",
+        "recalled_count",
+        "status (unarchive on hit)"
+      ]
+    },
+    {
+      "id": "consolidator",
+      "mode": "asleep",
+      "job": "Run the sleep pipeline for one session from its watermark, within sleep_token_budget, holding the memory lock",
+      "reads": [
+        "raw_log",
+        "memory_tree",
+        "entities",
+        "link_graph"
+      ],
+      "writes": [
+        "memory_tree",
+        "entities",
+        "link_graph",
+        "index",
+        "wake_note",
+        "memory.md",
+        "watermark"
+      ]
+    },
+    {
+      "id": "gate",
+      "mode": "awake",
+      "model": "Jev",
+      "job": "Advise on bounded awake decisions (G1-G7)",
+      "writes": [
+        "decision_log"
+      ],
+      "constraints": [
+        "never writes memory",
+        "below gate_min_probability or after jev_timeout_ms, defer to the reasoning model or a safe default"
+      ]
+    },
+    {
+      "id": "judge",
+      "mode": "asleep",
+      "model": "Jev",
+      "job": "Answer bounded consolidation questions (J1-J10)",
+      "writes": [
+        "decision_log"
+      ],
+      "constraints": [
+        "never writes memory; the consolidator applies its answers",
+        "below judge_min_probability or after jev_timeout_ms, ask an LLM instead"
+      ]
+    }
+  ],
+  "jev": {
+    "primitives": {
+      "noul": "probability that a condition holds",
+      "choice": "pick one option, with probabilities",
+      "score": "ordered level, 2 to 10 levels"
+    },
+    "limits": [
+      "hosted API only",
+      "a few hundred ms per call",
+      "text state only",
+      "does not write text"
+    ],
+    "rollout": {
+      "start_mode": "shadow",
+      "promote_when": "agreement with the LLM or old rule >= jev_promote_agreement over >= jev_promote_min_samples decisions",
+      "calibration": "weekly per-question threshold tuning from recorded outcomes"
+    },
+    "questions": [
+      {
+        "id": "G1",
+        "role": "gate",
+        "q": "Does this input need a memory lookup?",
+        "type": "noul",
+        "used_by": "awake_loop",
+        "replaces": "main-model reasoning about memory"
+      },
+      {
+        "id": "G2",
+        "role": "gate",
+        "q": "Which level should recall start at?",
+        "type": "choice",
+        "options": [
+          "core",
+          "topic_small",
+          "topic_medium",
+          "topic_big",
+          "session",
+          "episode"
+        ],
+        "used_by": "recall.start",
+        "replaces": "always starting at the top"
+      },
+      {
+        "id": "G3",
+        "role": "gate",
+        "q": "Do these recalled memories answer the query?",
+        "type": "noul",
+        "used_by": "recall.sufficient",
+        "replaces": "LLM call per zoom step"
+      },
+      {
+        "id": "G4",
+        "role": "gate",
+        "q": "Is this unusual enough to interrupt the reasoning model?",
+        "type": "noul",
+        "used_by": "awake_loop",
+        "replaces": "none (new)"
+      },
+      {
+        "id": "G5",
+        "role": "gate",
+        "q": "Is this a task boundary, so sleep now?",
+        "type": "noul",
+        "used_by": "should_sleep",
+        "replaces": "guessing task ends; hard thresholds stay in code"
+      },
+      {
+        "id": "G6",
+        "role": "gate",
+        "q": "Did recalled memory X change what the agent did?",
+        "type": "noul",
+        "used_by": "useful_count",
+        "replaces": "main agent self-reporting"
+      },
+      {
+        "id": "G9",
+        "role": "router",
+        "q": "What kind of answer does the question need: overview, single_fact, list, when, exact_value?",
+        "type": "choice",
+        "used_by": "recall.route",
+        "replaces": "one fixed recall recipe for every question"
+      },
+      {
+        "id": "G10",
+        "role": "gate",
+        "q": "Does this summary level (small, medium, big) alone answer the question?",
+        "type": "noul",
+        "used_by": "recall.overview_ladder",
+        "replaces": "always sending summaries, or never using medium and big"
+      },
+      {
+        "id": "G11",
+        "role": "gate",
+        "q": "Is this fact or message about the question's subject? Is it part of the answer?",
+        "type": "noul",
+        "used_by": "recall.evidence_gate",
+        "replaces": "sending every search hit"
+      },
+      {
+        "id": "G8",
+        "role": "gate",
+        "q": "Does the question ask for an exact value (name, path, number, ID, setting, version, command, output)?",
+        "type": "noul",
+        "used_by": "recall.exact_rule",
+        "replaces": "trusting a fluent summary for exact values"
+      },
+      {
+        "id": "G7",
+        "role": "gate",
+        "q": "Is topic T relevant to the next session's plan?",
+        "type": "noul",
+        "used_by": "wake",
+        "replaces": "only topics named in the wake note"
+      },
+      {
+        "id": "J1",
+        "role": "judge",
+        "q": "Is there a task boundary between these two windows?",
+        "type": "noul",
+        "used_by": "sleep.segment",
+        "replaces": "LLM segmentation"
+      },
+      {
+        "id": "J2",
+        "role": "judge",
+        "q": "Does this span support this claim?",
+        "type": "noul",
+        "used_by": "sleep.verify",
+        "replaces": "LLM verify per claim"
+      },
+      {
+        "id": "J3",
+        "role": "judge",
+        "q": "How does this fact relate to that one?",
+        "type": "choice",
+        "options": [
+          "same_entity",
+          "supports",
+          "contradicts",
+          "unrelated"
+        ],
+        "used_by": "sleep.link",
+        "replaces": "LLM link labelling"
+      },
+      {
+        "id": "J4",
+        "role": "judge",
+        "q": "Which topic does this episode belong to?",
+        "type": "choice",
+        "options": [
+          "5 nearest topics",
+          "new_topic"
+        ],
+        "used_by": "sleep.link",
+        "replaces": "LLM topic assignment"
+      },
+      {
+        "id": "J5",
+        "role": "judge",
+        "q": "Which entity is this mention?",
+        "type": "choice",
+        "options": [
+          "nearest entities",
+          "new_entity"
+        ],
+        "used_by": "sleep.link",
+        "replaces": "string matching and alias rules"
+      },
+      {
+        "id": "J6",
+        "role": "judge",
+        "q": "What kind of contradiction is this?",
+        "type": "choice",
+        "options": [
+          "newer_replaces",
+          "both_true_in_different_scopes",
+          "older_still_valid"
+        ],
+        "used_by": "sleep.resolve",
+        "replaces": "newer always wins"
+      },
+      {
+        "id": "J7",
+        "role": "judge",
+        "q": "How important is this fact?",
+        "type": "score",
+        "levels": [
+          "trivial",
+          "minor",
+          "useful",
+          "important",
+          "critical"
+        ],
+        "used_by": "importance",
+        "replaces": "unspecified 0..1 number"
+      },
+      {
+        "id": "J8",
+        "role": "judge",
+        "q": "How much did this change what the agent believed?",
+        "type": "score",
+        "levels": [
+          "none",
+          "small",
+          "large",
+          "reversal"
+        ],
+        "used_by": "surprise",
+        "replaces": "0/1 flag"
+      },
+      {
+        "id": "J9",
+        "role": "judge",
+        "q": "Do the cited facts support this summary sentence?",
+        "type": "noul",
+        "used_by": "drift_check",
+        "replaces": "LLM drift check"
+      },
+      {
+        "id": "J10",
+        "role": "judge",
+        "q": "Does this change matter at this summary size?",
+        "type": "noul",
+        "used_by": "sleep.update_topics",
+        "replaces": "rewriting all three sizes every time"
+      }
+    ],
+    "not_for_jev": [
+      "extract, summaries and the wake note: they write text",
+      "the redactor: sending text to a hosted API to ask whether it is secret leaks it",
+      "hard thresholds and the retention formula: plain code; Jev only supplies importance and surprise"
+    ]
+  },
+  "interfaces": {
+    "log_append": {
+      "args": [
+        "session",
+        "role",
+        "content"
+      ],
+      "returns": "seq",
+      "note": "redacted first"
+    },
+    "wake": {
+      "args": [
+        "session"
+      ],
+      "returns": "context"
+    },
+    "recall": {
+      "args": [
+        "query",
+        "token_budget",
+        "start?",
+        "context?"
+      ],
+      "returns": [
+        "nodes",
+        "evidence_spans"
+      ],
+      "note": "context = files, entities, branch, as_of"
+    },
+    "open_evidence": {
+      "args": [
+        "span"
+      ],
+      "returns": "log_rows | code_lines",
+      "note": "deleted rows return tombstones"
+    },
+    "pin": {
+      "args": [
+        "claim"
+      ],
+      "returns": "fact_id",
+      "note": "source = user"
+    },
+    "correct": {
+      "args": [
+        "fact_id",
+        "claim"
+      ],
+      "returns": "fact_id",
+      "note": "source = user; supersedes the old fact"
+    },
+    "should_sleep": {
+      "args": [
+        "state"
+      ],
+      "returns": "bool"
+    },
+    "consolidate": {
+      "args": [
+        "session",
+        "to_seq",
+        "mode: nap | full"
+      ],
+      "returns": "report"
+    },
+    "delete_log_rows": {
+      "args": [
+        "span",
+        "reason"
+      ],
+      "returns": "tombstones"
+    },
+    "export": {
+      "args": [],
+      "returns": "memory.md"
+    },
+    "import_edits": {
+      "args": [],
+      "returns": "user facts"
+    },
+    "gate": {
+      "args": [
+        "state",
+        "question",
+        "options"
+      ],
+      "returns": [
+        "answer",
+        "probability"
+      ]
+    },
+    "judge": {
+      "args": [
+        "state",
+        "question",
+        "options"
+      ],
+      "returns": [
+        "answer",
+        "probability"
+      ]
+    },
+    "log_decision": {
+      "args": [
+        "question",
+        "answer",
+        "probability",
+        "mode"
+      ],
+      "returns": "decision_id"
+    },
+    "record_outcome": {
+      "args": [
+        "decision_id",
+        "outcome"
+      ],
+      "returns": "none"
+    }
+  },
+  "levels": [
+    {
+      "id": "core",
+      "axis": "time",
+      "holds": "identity, goals, standing beliefs",
+      "built_from": "period nodes and topic smalls; session nodes while no period exists",
+      "written": "first full sleep, then every core_regen_days"
+    },
+    {
+      "id": "period",
+      "axis": "time",
+      "holds": "one calendar week",
+      "id_format": "per_YYYY-Www",
+      "built_from": "session nodes in that week",
+      "written": "when the week has closed with sessions on at least period_min_days distinct dates"
+    },
+    {
+      "id": "session",
+      "axis": "time",
+      "holds": "one awake stretch",
+      "id_format": "ses_NNNNNN",
+      "built_from": "episode nodes",
+      "written": "every full sleep"
+    },
+    {
+      "id": "episode",
+      "axis": "time",
+      "holds": "one task or topic as typed facts",
+      "id_format": "ep_sNNNNNN_NN",
+      "built_from": "raw_log spans and code evidence",
+      "written": "every sleep or nap"
+    },
+    {
+      "id": "topic",
+      "axis": "topic",
+      "resolutions": [
+        {
+          "id": "small",
+          "budget": "topic_small_tokens",
+          "use": "quick orientation, read first"
+        },
+        {
+          "id": "medium",
+          "budget": "topic_medium_tokens",
+          "use": "working context"
+        },
+        {
+          "id": "big",
+          "budget": "topic_big_tokens",
+          "use": "full picture"
+        }
+      ],
+      "id_format": "topic_<slug>.<resolution>",
+      "built_from": "the topic's active verified facts; each resolution written independently",
+      "rebuild": "big when any of its facts changed; medium and small when a cited fact changed or J10 says the change matters at that size",
+      "original_log": {
+        "holds": "the topic's own log_spans (and cited code lines), word for word; never rewritten",
+        "budget": "topic_log_tokens",
+        "selection": "keyword and vector match against the query, best segments first"
+      },
+      "zoom_order": [
+        "small",
+        "medium",
+        "big",
+        "original_log"
+      ]
+    }
+  ],
+  "trust_order": [
+    "CLAUDE.md",
+    "user",
+    "observed",
+    "inferred"
+  ],
+  "schemas": {
+    "episode_node": {
+      "id": "string",
+      "level": "episode",
+      "session": "session_id",
+      "scope": "{ repo, branch, merged }",
+      "topics": "topic_id[]",
+      "entities": "entity_id[]",
+      "text": "string",
+      "facts": "fact[]",
+      "claims_extracted": "integer",
+      "claims_rejected": "integer",
+      "confidence": "(claims_extracted - claims_rejected) / claims_extracted",
+      "parents": "node_id[]",
+      "importance": "J7 level 1..5",
+      "created": "ISO 8601",
+      "last_used": "ISO 8601",
+      "recalled_count": "integer",
+      "useful_count": "integer",
+      "status": "active | archived | superseded"
+    },
+    "summary_node": {
+      "id": "string",
+      "level": "core | period | session | topic",
+      "resolution": "small | medium | big (topic only)",
+      "entities": "entity_id[] (topic only)",
+      "sentences": "{ text, cites: (fact_id | node_id)[] }[]",
+      "children": "node_id[]",
+      "dirty": "boolean",
+      "anchors": "string[] (topic only): up to topic_anchors_max exact identifiers from its facts, for keyword search",
+      "log_spans": "span[] (topic only): every log and code span its facts came from, for the original-log step",
+      "confidence": "share of sentences passing the drift check",
+      "status": "active | archived"
+    },
+    "fact": {
+      "id": "<episode_id>#f<n>",
+      "claim": "string",
+      "kind": "event | prediction | outcome | decision | lesson | belief_revision | convention | command | gotcha | failed_approach",
+      "source": "user | observed | inferred",
+      "evidence": "span[]: log:a-b | code:path@commit#La-b | user:memory.md@hash; at least one",
+      "evidence_status": "ok | stale | deleted",
+      "valid_from": "ISO 8601",
+      "valid_to": "ISO 8601 or null",
+      "superseded_by": "fact_id or null"
+    },
+    "entity": {
+      "id": "string",
+      "type": "person | file | symbol | service | config | project | other",
+      "names": "string[]",
+      "path": "string, optional",
+      "topics": "topic_id[]"
+    },
+    "link": {
+      "from": "node_id | fact_id",
+      "to": "node_id | fact_id",
+      "type": "same_entity | supports | contradicts | supersedes | about_topic",
+      "note": "string"
+    },
+    "decision": {
+      "id": "string",
+      "ts": "ISO 8601",
+      "role": "gate | judge",
+      "question": "question id",
+      "primitive": "noul | choice | score",
+      "answer": "any",
+      "probability": "number",
+      "mode": "shadow | live",
+      "fallback_answer": "any, optional",
+      "outcome": "any, filled later",
+      "model": "string"
+    },
+    "log_row": {
+      "session": "session_id",
+      "seq": "integer, strictly increasing per session",
+      "ts": "ISO 8601",
+      "role": "user | agent | tool | observation | system",
+      "content": "string, redacted",
+      "redacted": "string[], optional",
+      "tombstone": "{ deleted, reason }, optional"
+    },
+    "watermark": {
+      "session": "session_id",
+      "consolidated_upto": "seq"
+    }
+  },
+  "flows": {
+    "wake": [
+      "read CLAUDE.md",
+      "import user edits to memory.md as user facts",
+      "load core and the last wake_session_summaries session nodes",
+      "load topic smalls named in the wake note plus those G7 marks relevant",
+      "load the wake note last (stable prefix first, for prompt caching)",
+      "start the agent loop with only this context"
+    ],
+    "awake_loop": [
+      "receive input, redact locally, append to the session log",
+      "G1 and G2: need memory, where to start; call recall with files, entities and branch",
+      "if a recalled fact will drive a decision, open its evidence; for code evidence read the current lines",
+      "act; append redacted action and result",
+      "off the main path, G6 marks recalled memories that changed the action (useful_count + 1)",
+      "should_sleep: hard thresholds in code, G5 for task boundaries"
+    ],
+    "recall": [
+      "v0.8: gather candidates (code only): hybrid BM25 + vector search over facts and original messages fused with RRF, all facts about entities named in the question ranked by meaning, and the best topic with its small, medium and big summaries",
+      "one round of Jev questions in parallel: G9 intent (overview, single_fact, list, when, exact_value), G10 which summary level alone answers, G11 per candidate fact or message: relevant? part of the answer?",
+      "overview questions: return the smallest summary level Jev judged sufficient (small, then medium, then big)",
+      "other questions: keep candidates Jev judged part of the answer (up to 12; up to 40 for lists), facts with quotes plus dated original messages",
+      "G3: if the kept evidence does not answer completely, add on-topic backups",
+      "R15: exact-value questions never get summary text; others may get one line of the small summary for orientation",
+      "filter by branch scope and validity window (as_of); mark facts whose code changed since the cited commit as stale; attach replacements to superseded facts",
+      "trim to the token budget (LoCoMo average ~600 tokens)"
+    ],
+    "sleep": [
+      {
+        "step": 1,
+        "id": "segment",
+        "priority": "must",
+        "jev": "J1",
+        "do": "split the session log from its watermark into episodes; advance the watermark"
+      },
+      {
+        "step": 2,
+        "id": "extract",
+        "priority": "must",
+        "do": "LLM lists facts per episode with id, kind, source, evidence, entity mentions and valid_from; count claims"
+      },
+      {
+        "step": 3,
+        "id": "verify",
+        "priority": "must",
+        "jev": "J2",
+        "do": "claim plus cited span only; drop and count failures; re-check stale and deleted evidence"
+      },
+      {
+        "step": 4,
+        "id": "link",
+        "priority": "must",
+        "jev": [
+          "J5",
+          "J4",
+          "J3",
+          "J7",
+          "J8"
+        ],
+        "do": "resolve entity mentions; attach episodes to topics; label relations to nearest facts; score importance and surprise"
+      },
+      {
+        "step": 5,
+        "id": "resolve",
+        "priority": "must",
+        "jev": "J6",
+        "do": "per contradiction: newer_replaces sets valid_to and superseded_by; both_true narrows scopes; older_still_valid rejects the new fact; trust order breaks ties and lower trust never silently wins"
+      },
+      {
+        "step": 6,
+        "id": "update_topics",
+        "priority": "defer",
+        "jev": "J10",
+        "do": "split topics above topic_split_facts into chronological parts; refresh keyword anchors by code; rebuild dirty topics incrementally; every sentence cites fact ids"
+      },
+      {
+        "step": 7,
+        "id": "roll_up",
+        "priority": "session must; period and core defer",
+        "do": "write session node; periods for closed weeks; core when due or on first sleep"
+      },
+      {
+        "step": 8,
+        "id": "forget",
+        "priority": "defer",
+        "do": "retention score; archive under archive_threshold; never core, latest period or user facts"
+      },
+      {
+        "step": 9,
+        "id": "wake_note_and_export",
+        "priority": "must",
+        "do": "write wake note and memory.md; release the lock"
+      }
+    ],
+    "nap": [
+      "take the oldest nap_fraction of the context from the session watermark",
+      "run sleep steps 1 to 4 and advance the watermark",
+      "replace that context with the episode text and continue",
+      "the next full sleep runs steps 5 to 9 over all episodes since the last full sleep"
+    ],
+    "sessions": [
+      "each session has its own log stream and watermark",
+      "a session consolidates only its own log, under the memory lock",
+      "facts carry scope.branch; other branches skip them until merge",
+      "on merge, promote branch facts at the next sleep; on unmerged branch deletion, archive them",
+      "cross-session contradictions are handled by the resolve step"
+    ],
+    "privacy_delete": [
+      "replace the row content with a tombstone, keeping seq",
+      "set evidence_status = deleted on citing facts",
+      "at the next sleep re-verify or drop them and rebuild affected summaries"
+    ],
+    "calibration": [
+      "record outcomes for decisions (was recall enough, did a verified fact hold up, was an archived node needed)",
+      "weekly, per question, compare probabilities with outcomes and tune thresholds",
+      "promote a shadow question to live when it meets the rollout rule"
+    ]
+  },
+  "sleep_triggers": [
+    "context_used >= sleep_context_threshold",
+    "task finished and queue empty (if sleep_on_task_end), or G5",
+    "idle for idle_timeout_minutes",
+    "tokens since last sleep >= max_awake_tokens"
+  ],
+  "retention_score": {
+    "formula": "0.35*(importance-1)/4 + 0.25*exp(-days_since_last_used/30) + 0.20*min(1, ln(1+useful_count)/3) + 0.20*(surprise-1)/3",
+    "archive_if": "score < archive_threshold (parents keep their links)",
+    "never_archive": [
+      "core",
+      "latest period",
+      "facts with source = user"
+    ],
+    "unarchive": "on any recall hit"
+  },
+  "rules": [
+    {
+      "id": "R1",
+      "rule": "The raw log is append-only and redacted locally before writing; the only exception is a privacy tombstone that keeps seq."
+    },
+    {
+      "id": "R2",
+      "rule": "Every fact has an id and cites at least one log, code or user span."
+    },
+    {
+      "id": "R3",
+      "rule": "Only verified facts are stored as facts. Failed claims are dropped and counted."
+    },
+    {
+      "id": "R4",
+      "rule": "Summaries are regenerated from their sources: time nodes from children, topic sizes from the topic's facts."
+    },
+    {
+      "id": "R5",
+      "rule": "Forgetting is archiving: out of the index, kept in storage, reachable through parents."
+    },
+    {
+      "id": "R6",
+      "rule": "Superseded facts are returned together with their replacement, flagged."
+    },
+    {
+      "id": "R7",
+      "rule": "Before acting on a remembered fact that drives a decision, open its evidence. If unchecked, say so."
+    },
+    {
+      "id": "R8",
+      "rule": "Verify uses a different model from extract (Jev qualifies), or at minimum a different prompt with no access to extractor reasoning."
+    },
+    {
+      "id": "R9",
+      "rule": "Each session consolidates only its own log, only while sleeping or napping. Recall bookkeeping is allowed while awake."
+    },
+    {
+      "id": "R10",
+      "rule": "Every summary sentence cites fact ids or child ids."
+    },
+    {
+      "id": "R11",
+      "rule": "Trust order CLAUDE.md > user > observed > inferred. A lower-trust fact never silently replaces a higher-trust one."
+    },
+    {
+      "id": "R12",
+      "rule": "Every Jev decision is logged; no question goes live without passing shadow mode; Jev never writes memory."
+    },
+    {
+      "id": "R13",
+      "rule": "Stale code evidence cannot drive a decision until the current code has been read."
+    },
+    {
+      "id": "R14",
+      "rule": "Shared memory is written by one session at a time under the lock; branch facts stay scoped until merge."
+    },
+    {
+      "id": "R15",
+      "rule": "When a question asks for an exact value, recall may stop, and the answer may quote, only from fact evidence, anchors or the original log, never from a summary."
+    }
+  ],
+  "parameters": {
+    "sleep_context_threshold": 0.75,
+    "sleep_on_task_end": true,
+    "idle_timeout_minutes": 30,
+    "max_awake_tokens": 2000000,
+    "nap_fraction": 0.33,
+    "sleep_token_budget": 400000,
+    "wake_session_summaries": 3,
+    "topic_small_tokens": 60,
+    "topic_medium_tokens": 300,
+    "topic_big_tokens": 1500,
+    "topic_anchors_max": 30,
+    "topic_split_facts": 24,
+    "topic_log_tokens": 3000,
+    "recall_k": 5,
+    "fallback_k": 5,
+    "bm25_weight": 0.4,
+    "context_boost": 1.5,
+    "archive_threshold": 0.25,
+    "period_min_days": 3,
+    "core_regen_days": 7,
+    "gate_min_probability": 0.8,
+    "judge_min_probability": 0.85,
+    "jev_timeout_ms": 800,
+    "jev_promote_agreement": 0.9,
+    "jev_promote_min_samples": 200,
+    "export_path": "memory.md",
+    "exact_snippet_tokens": 800
+  },
+  "build_order": [
+    "local redactor, per-session raw log with watermarks, decision log, test environment with known ground truth, flat-search and rolling-summary baselines",
+    "episodes with typed sourced facts, sessions, topic ladder, entities, hybrid search, recall with fallback and trust order",
+    "verify, link, resolve with validity windows, incremental topic rebuilds, forget, sleep budget, memory.md export; compare against baselines",
+    "Jev: all 17 questions in shadow, promote one by one, starting with J2 and G3",
+    "code-aware evidence and staleness, coding fact kinds, CLAUDE.md on wake, memory lock and branch scopes"
+  ],
+  "out_of_scope": [
+    "weight updates from memory",
+    "embodiment",
+    "multiple cooperating agents"
+  ],
+  "suggested_stack": [
+    "Python",
+    "SQLite with FTS5 (BM25)",
+    "sqlite-vec or FAISS",
+    "git",
+    "any LLM API for writing",
+    "Jev (TypeSafe AI) for gate and judge"
+  ]
+}
+</script>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  /* theme */
+  var themeBtn = document.getElementById('theme');
+  try { var saved = localStorage.getItem('arch-theme'); if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved); } catch (e) {}
+  themeBtn.addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme');
+    if (!cur) cur = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('arch-theme', next); } catch (e) {}
+  });
+
+  /* layers */
+  var LAYERS = {
+    core:    { name: 'Core', icon: 'i-user', holds: 'Identity, goals, standing beliefs', size: 'About one page', written: 'First sleep, then weekly', from: 'Period nodes and topic smalls (sessions until a period exists)' },
+    period:  { name: 'Period', icon: 'i-cal', holds: 'What happened in one calendar week', size: 'A few paragraphs each', written: 'When a week closes with sessions on 3 or more dates', from: 'Session nodes in that week' },
+    session: { name: 'Session', icon: 'i-sun', holds: 'One awake stretch, from one sleep to the next', size: 'One or two paragraphs', written: 'Every full sleep', from: 'Episode nodes' },
+    episode: { name: 'Episode', icon: 'i-clip', holds: 'One task or topic: events, predictions, outcomes, decisions, lessons, conventions, commands, gotchas, failed approaches', size: 'Text plus a list of facts, each with an id, source and validity window', written: 'Every sleep or nap', from: 'Raw log spans and code evidence' },
+    raw:     { name: 'Raw log', icon: 'i-file', holds: 'Everything, word for word, after redaction. The ground truth', size: 'Unbounded', written: 'Continuously while awake', from: 'Nothing. It is the source' }
+  };
+  var detail = document.getElementById('layer-detail');
+  var layerBtns = document.querySelectorAll('.layer-btn');
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  layerBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var L = LAYERS[b.getAttribute('data-layer')];
+      layerBtns.forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+      detail.innerHTML = '<h3><svg class="ic"><use href="#' + L.icon + '"/></svg><span>' + esc(L.name) + '</span></h3><dl>' +
+        '<dt>Holds</dt><dd>' + esc(L.holds) + '</dd><dt>Size</dt><dd>' + esc(L.size) + '</dd>' +
+        '<dt>Written</dt><dd>' + esc(L.written) + '</dd><dt>Built from</dt><dd>' + esc(L.from) + '</dd></dl>';
+    });
+  });
+
+  /* tabs: all panels stay in the source; script only hides the inactive ones */
+  var tabs = document.querySelectorAll('.tab');
+  function selectTab(t) {
+    tabs.forEach(function (o) {
+      var on = o === t;
+      o.setAttribute('aria-selected', on ? 'true' : 'false');
+      o.tabIndex = on ? 0 : -1;
+      document.getElementById(o.getAttribute('aria-controls')).hidden = !on;
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { selectTab(t); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      var n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+      selectTab(n); n.focus();
+    });
+  });
+  if (tabs.length) selectTab(tabs[0]);
+  /* deep links like #flow-sleep open the right tab */
+  function openFromHash() {
+    var id = location.hash.slice(1);
+    tabs.forEach(function (t) { if (t.getAttribute('aria-controls') === id) selectTab(t); });
+  }
+  window.addEventListener('hashchange', openFromHash); openFromHash();
+
+  /* spec */
+  var src = document.getElementById('architecture-spec');
+  var view = document.getElementById('spec-view');
+  var text = src ? src.textContent.trim() : '';
+  try { text = JSON.stringify(JSON.parse(text), null, 2); } catch (e) {}
+  view.textContent = text;
+  function flash(btn, label) {
+    var s = btn.querySelector('span'); var old = s.textContent; s.textContent = label;
+    setTimeout(function () { s.textContent = old; }, 1600);
+  }
+  var copyBtn = document.getElementById('copy-spec');
+  copyBtn.addEventListener('click', function () {
+    try { navigator.clipboard.writeText(text).then(function () { flash(copyBtn, 'Copied'); }, function () { flash(copyBtn, 'Select the text to copy'); }); }
+    catch (e) { flash(copyBtn, 'Select the text to copy'); }
+  });
+  var dlBtn = document.getElementById('dl-spec');
+  dlBtn.addEventListener('click', function () {
+    try {
+      var url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+      var a = document.createElement('a'); a.href = url; a.download = 'architecture-spec.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      flash(dlBtn, 'Saved');
+    } catch (e) { flash(dlBtn, 'Use Copy instead'); }
+  });
+})();
+</script>
+</body>
+</html>

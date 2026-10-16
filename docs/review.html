@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Evidence-linked memory with sleep consolidation: spec v0.3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+
+  --bg: #EDF1F5;
+  --surface: #F8FAFC;
+  --ink: #15243A;
+  --muted: #4E5F77;
+  --rule: #C4CFDB;
+  --keep: #17695F;
+  --change: #8A5D08;
+  --ditch: #9C3A31;
+  --accent: #2B4C9B;
+  --code-bg: #E1E8F0;
+
+  /* strata: same in both themes, top is most compressed, bottom is raw */
+  --s1: #D5E0EC; --s1-ink: #15243A;
+  --s2: #AFC3DA; --s2-ink: #15243A;
+  --s3: #7F9CBE; --s3-ink: #0F1A2B;
+  --s4: #4F6F98; --s4-ink: #F3F7FB;
+  --s5: #2C476C; --s5-ink: #F3F7FB;
+
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Newsreader", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101A2A;
+    --surface: #172437;
+    --ink: #DEE6F0;
+    --muted: #9AABC0;
+    --rule: #2B3B52;
+    --keep: #5CC7B8;
+    --change: #E3AE48;
+    --ditch: #EC8E82;
+    --accent: #93B3F7;
+    --code-bg: #1B2A40;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101A2A;
+  --surface: #172437;
+  --ink: #DEE6F0;
+  --muted: #9AABC0;
+  --rule: #2B3B52;
+  --keep: #5CC7B8;
+  --change: #E3AE48;
+  --ditch: #EC8E82;
+  --accent: #93B3F7;
+  --code-bg: #1B2A40;
+}
+
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1.125rem;
+  line-height: 1.62;
+}
+.page { max-width: 70rem; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
+.prose { max-width: 42rem; }
+
+h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -0.015em; margin: 0; }
+h1 { font-size: clamp(2.4rem, 8.5vw, 4.6rem); font-weight: 700; max-width: 14ch; }
+h2 { font-size: clamp(1.7rem, 5vw, 2.4rem); font-weight: 700; margin-top: 4.5rem; padding-top: 1.25rem; border-top: 2px solid var(--ink); }
+h3 { font-size: 1.25rem; font-weight: 700; margin-top: 2.25rem; letter-spacing: -0.005em; }
+p { margin: 1rem 0 0; }
+.lede { font-size: 1.3rem; line-height: 1.5; color: var(--muted); margin-top: 1.5rem; }
+a { color: var(--accent); text-underline-offset: 0.18em; }
+a:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+strong { font-weight: 600; }
+ul, ol { padding-left: 1.3rem; margin: 1rem 0 0; }
+li { margin-top: 0.5rem; }
+code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 0.08em 0.32em; border-radius: 3px; }
+
+.toc { margin-top: 2rem; font-family: var(--display); font-weight: 500; font-size: 1rem; display: flex; flex-wrap: wrap; gap: 0.4rem 1.3rem; }
+
+/* strata diagram */
+.strata { margin-top: 2.5rem; max-width: 52rem; }
+.strata details { margin: 0; border-radius: 0; }
+.strata details + details { margin-top: 3px; }
+.strata summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  padding: 0.95rem 1.1rem;
+  font-family: var(--display); font-weight: 700; font-size: 1.12rem;
+}
+.strata summary::-webkit-details-marker { display: none; }
+.strata summary span { font-family: var(--body); font-weight: 400; font-size: 0.98rem; text-align: right; opacity: 0.9; }
+.strata .body { padding: 0 1.1rem 1.1rem; font-size: 1rem; line-height: 1.55; }
+.strata .body p { margin-top: 0; }
+.st1 { background: var(--s1); color: var(--s1-ink); width: 62%; }
+.st2 { background: var(--s2); color: var(--s2-ink); width: 72%; }
+.st3 { background: var(--s3); color: var(--s3-ink); width: 82%; }
+.st4 { background: var(--s4); color: var(--s4-ink); width: 92%; }
+.st5 { background: var(--s5); color: var(--s5-ink); width: 100%; }
+.strata details[open] { width: 100%; }
+.strata-note { font-size: 0.98rem; color: var(--muted); margin-top: 0.9rem; max-width: 42rem; }
+@media (max-width: 34rem) {
+  .st1 { width: 84%; } .st2 { width: 88%; } .st3 { width: 92%; } .st4 { width: 96%; }
+  .strata summary { flex-direction: column; gap: 0.1rem; }
+  .strata summary span { text-align: left; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .strata details { animation: settle 0.5s ease-out both; }
+  .st1 { animation-delay: 0.40s; } .st2 { animation-delay: 0.30s; } .st3 { animation-delay: 0.20s; }
+  .st4 { animation-delay: 0.10s; } .st5 { animation-delay: 0s; }
+  @keyframes settle { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+}
+
+/* triage */
+.triage { display: grid; gap: 2.5rem; margin-top: 2rem; }
+@media (min-width: 60rem) { .triage { grid-template-columns: repeat(3, 1fr); gap: 2rem; } }
+.triage section h3 { margin-top: 0; padding-bottom: 0.6rem; border-bottom: 4px solid currentColor; font-size: 1.5rem; }
+.triage .k h3 { color: var(--keep); }
+.triage .c h3 { color: var(--change); }
+.triage .d h3 { color: var(--ditch); }
+.triage dl { margin: 0; }
+.triage dt { font-family: var(--display); font-weight: 700; font-size: 1.04rem; margin-top: 1.15rem; line-height: 1.25; }
+.triage dd { margin: 0.25rem 0 0; font-size: 1rem; line-height: 1.5; color: var(--muted); }
+
+/* code + tables */
+.scroll { overflow-x: auto; margin-top: 1.25rem; max-width: 52rem; }
+pre { margin: 0; padding: 1.1rem 1.2rem; background: var(--code-bg); border-left: 4px solid var(--accent); font-family: var(--mono); font-size: 0.84rem; line-height: 1.55; white-space: pre; min-width: max-content; }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; min-width: 36rem; font-size: 0.98rem; line-height: 1.45; }
+th { font-family: var(--display); font-weight: 700; text-align: left; border-bottom: 2px solid var(--ink); padding: 0.5rem 0.9rem 0.5rem 0; }
+td { border-bottom: 1px solid var(--rule); padding: 0.65rem 0.9rem 0.65rem 0; vertical-align: top; }
+
+.steps { counter-reset: step; list-style: none; padding: 0; margin-top: 1.5rem; max-width: 46rem; }
+.steps li { counter-increment: step; position: relative; padding: 0 0 1.2rem 3rem; margin: 0; border-left: 2px solid var(--rule); margin-left: 1rem; }
+.steps li:last-child { border-left-color: transparent; padding-bottom: 0; }
+.steps li::before {
+  content: counter(step); position: absolute; left: -1rem; top: 0;
+  width: 2rem; height: 2rem; border-radius: 50%;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--display); font-weight: 700; font-size: 0.95rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.steps b { font-family: var(--display); font-weight: 700; display: block; }
+
+.callout { margin-top: 1.5rem; padding: 1rem 1.2rem; background: var(--surface); border: 1px solid var(--rule); max-width: 42rem; font-size: 1.04rem; }
+.callout p:first-child { margin-top: 0; }
+footer { margin-top: 5rem; padding-top: 1.25rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.98rem; max-width: 42rem; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <h1>Memory that sleeps, and can show its evidence</h1>
+  <p class="lede prose">Spec v0.3 for a long-running LLM agent. It takes the original "AI that lives and sleeps like a human" idea, keeps the parts that can be built and tested, and drops the rest. One person can build this with an LLM API and a database.</p>
+  <nav class="toc" aria-label="Contents">
+    <a href="#triage">Keep, change, ditch</a>
+    <a href="#claim">The claim</a>
+    <a href="#parts">Parts</a>
+    <a href="#data">Data model</a>
+    <a href="#awake">Awake</a>
+    <a href="#sleep">Sleep</a>
+    <a href="#test">Experiment</a>
+    <a href="#risks">Risks</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#reading">Reading</a>
+  </nav>
+
+  <div class="strata" aria-label="Memory layers, most compressed at the top, raw log at the bottom. Tap a layer to open it.">
+    <details class="st1">
+      <summary>Core <span>who I am, goals, standing beliefs</span></summary>
+      <div class="body"><p>About one page. Always loaded on wake. Built on the first sleep, then rebuilt weekly from the period summaries and the small topic summaries (from sessions until the first period exists). Never edited in place, so errors cannot pile up inside it.</p></div>
+    </details>
+    <details class="st2">
+      <summary>Period summaries <span>one per calendar week</span></summary>
+      <div class="body"><p>What the agent worked on, what changed, what it learned. Written once a week has closed with sessions on at least three dates.</p></div>
+    </details>
+    <details class="st3">
+      <summary>Session summaries <span>one per sleep cycle</span></summary>
+      <div class="body"><p>Written during sleep from that session's episodes only. A calendar day can hold several sessions. Each sentence keeps the ids of the facts or episodes it came from.</p></div>
+    </details>
+    <details class="st4">
+      <summary>Episodes <span>what happened, predictions, outcomes, lessons</span></summary>
+      <div class="body"><p>The working unit of memory. Structured, not just prose. Every claim cites a span of the raw log, and a checker pass has confirmed the span supports it.</p></div>
+    </details>
+    <details class="st5">
+      <summary>Raw log <span>everything, append-only, never rewritten</span></summary>
+      <div class="body"><p>Every message, tool call and observation with a timestamp. It is the ground truth. Summaries are an index into it, not a replacement for it.</p></div>
+    </details>
+  </div>
+  <p class="strata-note">Recall starts at the top and digs down only as far as the question needs. Tap a layer to see what it holds. Alongside these time layers, every topic is also kept at three sizes (small, medium, big), each written from the topic's verified facts, with the topic's own original log underneath as the fourth step.</p>
+</header>
+
+<main>
+
+<h2 id="triage">Keep, change, ditch</h2>
+<p class="prose">The test for each idea was simple: does it add a capability that can be measured, at a cost one person can pay? Ideas that only made the system look more human failed that test.</p>
+
+<div class="triage">
+  <section class="k">
+    <h3>Keep</h3>
+    <dl>
+      <dt>Summary tree that expands on demand</dt>
+      <dd>The strongest idea in the design. Small summary first, then medium, then big, then the exact event. v0.2 keeps this per topic as well as per time period.</dd>
+      <dt>Every summary points to its evidence</dt>
+      <dd>Lets the agent tell "I remember X" apart from "my summary says X, let me check". This is what most agent memory lacks.</dd>
+      <dt>Sleep as a separate offline phase</dt>
+      <dd>Consolidation is slow and costly. Doing it while the agent is not working keeps the awake loop fast.</dd>
+      <dt>Sleep does more than summarise</dt>
+      <dd>Linking to old memories, spotting contradictions, and deciding what to forget. These are rare in current systems.</dd>
+      <dt>A wake routine</dt>
+      <dd>Load core, goals and open problems before anything else. This is where continuity between sessions comes from.</dd>
+      <dt>A fast layer under the reasoner</dt>
+      <dd>Kept, but moved to phase 3 and given a narrower job. See "Change".</dd>
+    </dl>
+  </section>
+
+  <section class="c">
+    <h3>Change</h3>
+    <dl>
+      <dt>Sleep trigger</dt>
+      <dd>Was: context at 90 to 95 percent. Now: context near 75 percent, or a task boundary, or idle time. At 95 percent there is no room left to finish cleanly.</dd>
+      <dt>"Summarise the day"</dt>
+      <dd>Now: extract structured episodes (event, prediction, outcome, lesson), then check each claim against the log.</dd>
+      <dt>Jev as reflexes</dt>
+      <dd>Now: Jev answers every bounded, typed question: as a gate while awake ("does this need a memory lookup?") and as a judge during sleep (verify, link, topic, entity, contradiction type, importance). At a few hundred ms over a hosted API it cannot do balance. Each question starts in shadow mode next to an LLM and goes live only when it agrees.</dd>
+      <dt>100 PB of storage</dt>
+      <dd>Now: SQLite or Postgres plus a vector index. Years of text experience fit in gigabytes.</dd>
+      <dt>"Remember everything"</dt>
+      <dd>Now: log everything, but index selectively. Low-value memories leave the index and stay in the log.</dd>
+      <dt>Pure top-down recall</dt>
+      <dd>Now: top-down first, with a fallback search over the raw log. If a summary dropped a detail, top-down alone can never find it.</dd>
+    </dl>
+  </section>
+
+  <section class="d">
+    <h3>Ditch</h3>
+    <dl>
+      <dt>DNA storage</dt>
+      <dd>Slow to write, slow to read, no random access. Storage size was never the bottleneck.</dd>
+      <dt>Fixed 12 to 16 hour sessions</dt>
+      <dd>Context fills by tokens, not hours. A body clock adds rules without adding ability.</dd>
+      <dt>Humanoid body and balance control</dt>
+      <dd>A separate field with its own hardware. Robotics labs already run layered fast and slow control.</dd>
+      <dt>Simulated universe, civilisation of agents</dt>
+      <dd>Cannot be measured yet. Prove one agent's memory works first.</dd>
+      <dt>Nightly weight updates</dt>
+      <dd>Parked, not deleted. It is the real open research problem, and it needs the memory layer working first as its data source.</dd>
+      <dt>"Lives like a human" as the goal</dt>
+      <dd>Not testable. The goal is now a number: recall accuracy over long gaps, at a known cost.</dd>
+    </dl>
+  </section>
+</div>
+
+<h2 id="claim">The claim this spec tests</h2>
+<div class="prose">
+  <p>An agent with an evidence-linked summary tree and an offline consolidation phase will, after many sessions, answer questions about its own past <strong>more accurately</strong>, with <strong>fewer confident false memories</strong>, and at <strong>similar or lower cost per question</strong> than the two things agents do today: flat vector search over old chunks, and a single rolling summary.</p>
+  <p>If that is false, the architecture is not worth its complexity. Write that down before running anything.</p>
+</div>
+
+<h2 id="parts">Parts</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Part</th><th>Job</th><th>Build with</th></tr></thead>
+  <tbody>
+    <tr><td>Redactor</td><td>Strips secrets and private data before anything is logged</td><td>Pattern rules plus a small model</td></tr>
+    <tr><td>Agent loop</td><td>The reasoning model doing the actual task</td><td>Any LLM API</td></tr>
+    <tr><td>Raw log</td><td>Append-only record of everything seen and done</td><td>One SQLite table</td></tr>
+    <tr><td>Memory tree</td><td>Time nodes (core, period, session, episode) and topic nodes (small, medium, big), each linked to children and evidence</td><td>SQLite tables</td></tr>
+    <tr><td>Entities</td><td>People, files, symbols, services and configs that facts and topics point at</td><td>One table plus aliases</td></tr>
+    <tr><td>Link graph</td><td>Typed links across the tree: same entity, supports, contradicts, supersedes</td><td>One edge table</td></tr>
+    <tr><td>Index</td><td>Hybrid search: BM25 keywords, embeddings, and a path/symbol index</td><td>SQLite FTS5 plus sqlite-vec or FAISS</td></tr>
+    <tr><td>Recall</td><td>Top-down search with expansion and a raw-log fallback</td><td>About 100 lines of Python</td></tr>
+    <tr><td>Consolidator</td><td>The sleep pipeline</td><td>Batch script, cheaper model where possible</td></tr>
+    <tr><td>Jev gate and judge (phase 3)</td><td>17 typed decisions: when and where to recall, whether a claim is supported, how facts relate, which topic or entity, how important</td><td>Jev, shadow first</td></tr>
+    <tr><td>Decision log</td><td>Every Jev answer, its probability and the later outcome, for calibration</td><td>One SQLite table</td></tr>
+    <tr><td>memory.md export</td><td>Readable core and topic summaries you can edit; edits return as user facts</td><td>Markdown file</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="data">Data model</h2>
+<p class="prose">One node type covers every level above the raw log. Sketch, not strict JSON:</p>
+<div class="scroll"><pre><code>node = {
+  id:          "ep_s000412_03",
+  level:       "episode",            # core | period | session | episode | topic
+  topics:      ["topic_storage_sim"],
+  text:        "Tested config X on the storage sim. Predicted +12% efficiency. Got -3%.",
+  facts: [                           # episodes only; each fact is checkable
+    { id:    "ep_s000412_03#f2",
+      claim: "Config X reduced efficiency by 3%",
+      kind:  "outcome",              # event | prediction | outcome | decision | lesson | belief_revision
+      evidence: ["log:48211-48390"], # spans in the raw log
+      superseded_by: null }          # a fact id
+  ],
+  claims_extracted: 11,              # counted before verify
+  claims_rejected:  2,               # dropped by verify
+  confidence:  0.82,                 # (extracted - rejected) / extracted
+  children:    [],                   # one level down; empty for episodes
+  parents:     ["ses_000412"],
+  importance:  0.6,                  # scored once at creation
+  created:     "2026-09-21T23:04Z",
+  last_used:   "2026-10-02T09:15Z",
+  recalled_count: 4,
+  useful_count:   3,                 # times it changed what the agent did
+  status:      "active"              # active | archived | superseded
+}
+
+summary = { id: "topic_storage_sim.medium", level: "topic", resolution: "medium",
+            sentences: [ { text: "...", cites: ["ep_s000412_03#f2"] } ] }
+
+link = { from: "ep_...#f2", to: "ep_...#f4", type: "contradicts", note: "..." }
+
+log_row   = { seq: 48211, ts: "...", role: "tool", content: "...(redacted)" }
+watermark = { consolidated_upto: 48390 }</code></pre></div>
+
+<div class="callout">
+  <p><strong>Two rules that carry the design.</strong> A summary is always regenerated from its sources (time nodes from their children, each topic size from the topic's facts), never edited from its own previous text. And nothing is deleted: forgetting removes a node from the index, not from storage, and its parent keeps the link.</p>
+</div>
+
+<h2 id="awake">Awake</h2>
+<div class="prose">
+  <h3>Wake routine</h3>
+  <p>Load the core node, the last few session summaries, the small summaries of the topics the wake note names, and finally the wake note itself (open problems, unfinished work, plans). That is the whole starting context. Everything else is fetched when needed.</p>
+
+  <h3>Recall</h3>
+</div>
+<div class="scroll"><pre><code>def recall(query, token_budget, start="topic_small"):
+    # 1. search the small, compressed levels first (the gate may pick another start)
+    frontier = search(query, levels=START[start], k=5)
+    found = []
+
+    # 2. dig down only where it looks promising
+    while frontier and token_budget.left():
+        node = frontier.pop_best(query)
+        found.append(node)
+        if sufficient(query, found):          # cheap model call or the gate
+            break
+        frontier.add(zoom_in(node))            # small -> medium -> big -> episodes
+        frontier.add(linked(node, types=["same_entity", "supersedes"]))
+
+    # 3. safety net: what did the summaries drop?
+    if not sufficient(query, found):
+        found += vector_search(raw_log_chunks, query, k=5)
+
+    # 4. return superseded facts together with their replacements, flagged
+    found = attach_replacements(found)
+    return found, evidence_spans(found)</code></pre></div>
+<div class="prose">
+  <h3>The evidence rule</h3>
+  <p>When a remembered fact matters to a decision, the agent opens the cited log span before acting on it. When it only has a summary and has not checked, it says so. This is cheap, and it is the behaviour the false-memory metric rewards.</p>
+
+  <h3>When to sleep</h3>
+  <ul>
+    <li>Context use passes about 75 percent.</li>
+    <li>A task finishes and nothing is queued.</li>
+    <li>The agent has been idle for a set time.</li>
+    <li>A hard cap on awake tokens is reached, as a backstop.</li>
+  </ul>
+  <p>A "nap" is allowed mid-task: consolidate only the oldest third of the context, move the consolidation watermark, then carry on. The next full sleep starts from the watermark, so nothing is turned into episodes twice.</p>
+</div>
+
+<h2 id="sleep">Sleep</h2>
+<p class="prose">A batch job over the raw log from the consolidation watermark onward. The order matters, which is why these are numbered.</p>
+<ol class="steps">
+  <li><b>Segment</b>Split the new log into episodes at task boundaries and topic shifts.</li>
+  <li><b>Extract</b>For each episode, pull out events, predictions, outcomes, decisions and lessons. Each one must cite log spans.</li>
+  <li><b>Verify</b>A second pass reads only the claim and its cited span and answers: does the span support this? Unsupported claims are dropped. This is the main defence against drift.</li>
+  <li><b>Link</b>Search existing memory for related nodes. Add typed links: same entity, supports, contradicts.</li>
+  <li><b>Resolve contradictions</b>For each "contradicts" link, write a short belief-revision fact ("believed A until 21 Sep, evidence now says not-A"), and mark the old fact superseded. Do not delete it.</li>
+  <li><b>Update topics</b>For each topic touched, rewrite its small, medium and big summaries from the topic's facts, each size written separately.</li>
+  <li><b>Roll up</b>Write the session summary from its episodes. Write a period for each closed week. Rebuild the core on the first sleep and then weekly.</li>
+  <li><b>Forget</b>Score every active node. Archive the ones below the threshold. Parents keep their links, and a recall hit brings a node back.</li>
+  <li><b>Write the wake note</b>Open problems, unfinished work, and the plan for the next session.</li>
+</ol>
+
+<div class="prose">
+  <h3>Retention score</h3>
+</div>
+<div class="scroll"><pre><code>score = 0.35 * importance
+      + 0.25 * exp(-days_since(last_used) / 30)
+      + 0.20 * min(1, log(1 + useful_count) / 3)   # helped, not just fetched
+      + 0.20 * surprise            # 1.0 if it contradicted or revised a belief
+
+archive if score < 0.25                 # parents keep their links</code></pre></div>
+<p class="prose">The weights are starting guesses. Tune them against the experiment, not by feel.</p>
+
+<h2 id="test">Experiment</h2>
+<div class="prose">
+  <h3>Environment</h3>
+  <p>A scripted "lab life" generator. It produces 100 or more sessions of events for the agent to live through: experiments with results, people with roles, facts that later change, and plenty of irrelevant noise. Because a script wrote it, the ground truth is known exactly, and questions can be generated automatically.</p>
+  <p>Also run an existing long-term memory benchmark so results can be compared with other work. LoCoMo and LongMemEval are the two to look at first.</p>
+
+  <h3>Conditions</h3>
+</div>
+<div class="scroll">
+<table>
+  <thead><tr><th>Condition</th><th>What it is</th><th>What it isolates</th></tr></thead>
+  <tbody>
+    <tr><td>A. Flat retrieval</td><td>Vector search over raw log chunks</td><td>The common baseline</td></tr>
+    <tr><td>B. Rolling summary</td><td>One summary rewritten each session</td><td>What context compaction does today</td></tr>
+    <tr><td>C. Tree only</td><td>Summary tree, no verify, links or forgetting</td><td>Whether hierarchy alone helps</td></tr>
+    <tr><td>D. Full</td><td>Everything in this spec</td><td>The claim</td></tr>
+    <tr><td>D minus one</td><td>D without verify, then without links, then without forgetting</td><td>Which sleep step earns its cost</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="prose">
+  <h3>Metrics</h3>
+  <ul>
+    <li><strong>Recall accuracy by gap.</strong> Questions about events 1, 10 and 50 sessions ago.</li>
+    <li><strong>False-memory rate.</strong> Share of answers that are wrong and stated with confidence.</li>
+    <li><strong>Update accuracy.</strong> For facts that changed, does it return the latest value?</li>
+    <li><strong>Drift.</strong> Share of sentences in session, period, core and topic nodes that the raw log does not support, measured every 10 cycles.</li>
+    <li><strong>Cost.</strong> Tokens per sleep cycle, tokens and seconds per recall.</li>
+  </ul>
+  <h3>Pass bar</h3>
+  <p>D beats A and B on 50-session recall and on update accuracy, with a false-memory rate no worse than A, at no more than about twice A's cost per question. If C matches D, the sleep steps are not earning their cost and should be cut.</p>
+</div>
+
+<h2 id="risks">Risks</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>Risk</th><th>Sign</th><th>Response</th></tr></thead>
+  <tbody>
+    <tr><td>Summary drift</td><td>Drift metric climbs with cycle count</td><td>Verify step, regenerate parents from children, evidence rule</td></tr>
+    <tr><td>Detail lost in roll-up</td><td>Top-down recall misses, fallback hits</td><td>Keep the raw-log fallback; track how often it rescues an answer</td></tr>
+    <tr><td>Extraction errors become beliefs</td><td>Verified flag true but claim wrong</td><td>Use a different model for verify than for extract; sample and hand-check</td></tr>
+    <tr><td>Sleep cost grows</td><td>Tokens per cycle rising over time</td><td>Link search limited to top-k; regenerate core weekly, not nightly</td></tr>
+    <tr><td>Forgetting the wrong thing</td><td>Archived node needed later</td><td>Fallback search covers the log; un-archive on hit</td></tr>
+    <tr><td>Private data kept forever</td><td>Log contains things that should not persist</td><td>Redaction pass before logging; a real delete path for the log</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="roadmap">Roadmap</h2>
+<ol class="steps">
+  <li><b>Phase 0: log and baselines</b>Raw log, the environment generator, question generator, and conditions A and B. Without this, nothing later can be judged.</li>
+  <li><b>Phase 1: the tree</b>Episodes, session summaries, topic summaries, evidence pointers, top-down recall with fallback. Run condition C.</li>
+  <li><b>Phase 2: real sleep</b>Verify, links, contradictions with validity windows, incremental topic rebuilds, forgetting, sleep budget, wake note, memory.md export. Run D and the ablations. This is the result worth writing up.</li>
+  <li><b>Phase 3: Jev</b>Run all 17 gate and judge questions in shadow next to the LLM, then promote them one by one, starting with verify and "is recall enough?". Measure cost saved against accuracy lost.</li>
+  <li><b>Phase 4: coding agent</b>Code evidence with staleness checks, coding fact kinds, CLAUDE.md at the top of the trust order, and several sessions sharing memory under a lock with branch scopes.</li>
+  <li><b>Parked</b>Slow weight updates trained from verified memories, with regression tests before any update is accepted. Embodiment. Many agents. Revisit only after phase 2 passes.</li>
+</ol>
+
+<h2 id="reading">Reading before building</h2>
+<div class="prose">
+  <ul>
+    <li>Park et al., <em>Generative Agents</em> (2023): memory stream, reflection, retrieval scoring.</li>
+    <li>Packer et al., <em>MemGPT</em> (2023), and Letta's later work on sleep-time compute: tiered memory, background processing.</li>
+    <li>Sarthi et al., <em>RAPTOR</em> (2024): tree-of-summaries retrieval.</li>
+    <li>McClelland, McNaughton and O'Reilly, <em>Complementary learning systems</em> (1995): why brains keep a fast and a slow memory.</li>
+    <li>SOAR, ACT-R and LIDA: decades of cognitive architectures with separate memory types.</li>
+    <li>Brooks, <em>A robust layered control system for a mobile robot</em> (1986): the layered fast-behaviour idea.</li>
+    <li>LoCoMo and LongMemEval: long-term memory benchmarks.</li>
+  </ul>
+  <p>The earlier chat also named recent sleep-consolidation papers, including "Language Models Need Sleep" and REM-MEM. Find and read them directly before citing them. What is new here, if anything, is narrow: verified evidence pointers at every level, plus contradiction handling and forgetting inside consolidation, tested head to head against today's defaults.</p>
+</div>
+
+</main>
+
+<footer>
+  Spec v0.3, 25 September 2026 (v0.2: 25 September; v0.1: 21 September 2026). Weights, thresholds and level names are starting points to be changed by results.
+</footer>
+
+</div>
+</body>
+</html>

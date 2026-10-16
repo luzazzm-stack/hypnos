@@ -1,0 +1,57 @@
+{
+ "n": 200,
+ "judge": "claude haiku (all 4 answers graded together)",
+ "answerer": "muse-spark-1.3",
+ "accuracy": {
+  "agentmem": 41.5,
+  "mem0": 52.0,
+  "gbrain": 51.0,
+  "keyword": 35.0
+ },
+ "by_category": {
+  "agentmem": {
+   "multi-hop": 26.0,
+   "temporal": 68.0,
+   "open-domain": 16.0,
+   "single-hop": 56.0
+  },
+  "mem0": {
+   "multi-hop": 46.0,
+   "temporal": 68.0,
+   "open-domain": 20.0,
+   "single-hop": 74.0
+  },
+  "gbrain": {
+   "multi-hop": 30.0,
+   "temporal": 78.0,
+   "open-domain": 18.0,
+   "single-hop": 78.0
+  },
+  "keyword": {
+   "multi-hop": 12.0,
+   "temporal": 64.0,
+   "open-domain": 16.0,
+   "single-hop": 48.0
+  }
+ },
+ "ctx_tokens": {
+  "agentmem": 2243,
+  "mem0": 1126,
+  "gbrain": 3982,
+  "keyword": 384
+ },
+ "not_mentioned": {
+  "agentmem": 64,
+  "mem0": 44,
+  "gbrain": 45,
+  "keyword": 88
+ },
+ "calls": {
+  "muse:calls": 473,
+  "muse:in_chars": 7408376,
+  "haiku:calls": 199,
+  "haiku:in_chars": 119983,
+  "muse:cached": 3,
+  "haiku:cached": 1
+ }
+}
