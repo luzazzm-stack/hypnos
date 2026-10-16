@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import os
 
-from .client import call, ensure_running, space_for_dir
+from .client import call, current_space, ensure_running
 
 
 def _check_in_while_open():
@@ -36,7 +36,7 @@ def main():
         except ImportError as ex:
             raise SystemExit(f'The MCP server needs the "mcp" package ({ex}):  pip install "hypnos[mcp]"')
 
-    space = os.environ.get('HYPNOS_SPACE') or space_for_dir(os.getcwd())
+    space = current_space()
     profile = os.environ.get('HYPNOS_PROFILE', 'coding')
     base = {'space': space, 'profile': profile, 'session': os.environ.get('HYPNOS_SESSION', 'mcp')}
     ensure_running()
@@ -72,18 +72,21 @@ def main():
         return json.dumps(_call('/cleanup', {'unused_days': unused_days}), ensure_ascii=False)
 
     @app.tool()
-    def memory_cleanup_view() -> str:
-        """The /memory-cleanup list, ready to show: numbered suggestions (duplicates, unused, stale) and topics T1, T2...
-        with counts. Show it to the user exactly as returned. Deletes nothing."""
-        r = _call('/cleanup_view', {})
+    def memory_cleanup_view(space: str = '') -> str:
+        """The /memory-cleanup list, ready to show: numbered suggestions (duplicates, unused, stale) and every fact,
+        numbered, under its topic (T1, T2...). Show it to the user exactly as returned. Deletes nothing.
+        `space`: the name after "Memory for" when a list was already shown; leave empty otherwise."""
+        r = _call('/cleanup_view', {'space': space} if space else {})
         return r.get('text') or r.get('error') or 'Memory is empty.'
 
     @app.tool()
-    def memory_cleanup_apply(selection: str, delete_source: bool = False) -> str:
-        """Delete what the user picked from the memory_cleanup_view list, in their words: "1-5, 9", "T2", "all duplicates",
-        "all unused", or "show T3" to list a topic's facts. Add "purge" to delete forgotten facts for good. Only after the
-        user chose."""
-        return json.dumps(_call('/cleanup_apply', {'selection': selection, 'hard': delete_source}, timeout=120), ensure_ascii=False)
+    def memory_cleanup_apply(selection: str, space: str = '', delete_source: bool = False) -> str:
+        """Delete what the user picked from the /memory-cleanup list, in their words: "1-5, 9", "T2", "all duplicates",
+        "all unused", or "show T3" to list a topic's older facts. Add "purge" to delete forgotten facts for good. Only after
+        the user chose. `space`: ALWAYS pass the name shown after "Memory for" in the list the user saw, so the numbers
+        mean the same facts."""
+        extra = {'selection': selection, 'hard': delete_source, **({'space': space} if space else {})}
+        return json.dumps(_call('/cleanup_apply', extra, timeout=120), ensure_ascii=False)
 
     @app.tool()
     def memory_forget_ids(ids: list[str], delete_source: bool = False) -> str:

@@ -278,3 +278,31 @@ def test_no_system_one_uses_the_memory_model_for_checks(cfg):
     ps = j.verify_many([{'claim': 'a', 'evidence': 'a'}, {'claim': 'b', 'evidence': 'x'}], *VERIFY)
     assert ps == [0.9, 0.1] and len(calls) == 1                     # every claim in one call
     assert j.noul({'message': 'hi'}, 'q?', 'y', 'n') is None         # recall-time checks stay on plain code
+
+
+def test_cleanup_lists_every_fact_and_numbers_differ_are_not_duplicates(mem):
+    mem.log('ARKX Level 6 was solved and gave flag flag_6842e1', role='agent', session='s1')
+    mem.log('ARKX Level 7 was solved and gave flag flag_80bcd4', role='agent', session='s1')
+    mem.sleep()
+    assert not mem.cleanup_suggestions()['duplicates']
+    view = mem.cleanup_view()
+    mem.remember_cleanup_map(view)
+    assert 'flag_6842e1' in view['text'] and 'flag_80bcd4' in view['text']   # facts are listed, not just counted
+    num = next(k for k, v in view['map'].items() if k.isdigit() and
+               'flag_6842e1' in mem.store.q('SELECT claim FROM facts WHERE id=?', (v[0],))[0]['claim'])
+    assert mem.cleanup_apply(num)['forgotten'] == 1
+    left = [r['claim'] for r in mem.store.q("SELECT claim FROM facts WHERE status='active'")]
+    assert any('flag_80bcd4' in c for c in left) and not any('flag_6842e1' in c for c in left)
+
+
+def test_session_keeps_its_first_folder_space(tmp_path, monkeypatch):
+    from hypnos import client
+    monkeypatch.setenv('HYPNOS_HOME', str(tmp_path / 'home'))
+    a, b = tmp_path / 'proj_a', tmp_path / 'proj_b'
+    a.mkdir(); b.mkdir()
+    assert client.session_space('sess-1', str(a)) == 'code-proj_a'
+    assert client.session_space('sess-1', str(b)) == 'code-proj_a'      # moved folders, same memory
+    assert client.session_space('sess-2', str(b)) == 'code-proj_b'
+    monkeypatch.setenv('CLAUDE_CODE_SESSION_ID', 'sess-1')
+    monkeypatch.delenv('HYPNOS_SPACE', raising=False)
+    assert client.current_space(str(b)) == 'code-proj_a'

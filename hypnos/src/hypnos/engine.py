@@ -642,11 +642,13 @@ class Memory:
         s = self.store
         facts = s.q("SELECT f.*, e.topic AS tp FROM facts f LEFT JOIN episodes e ON e.id = f.episode WHERE f.status='active' ORDER BY f.rowid")
         dup, by_topic = [], defaultdict(list)
+        nums = lambda w: {x for x in w if any(ch.isdigit() for ch in x)}
         for f in facts:
             fw = _words(f['claim'])
             for g in by_topic[f['tp']]:
                 gw = _words(g['claim'])
-                if fw and gw and len(fw & gw) / len(fw | gw) >= 0.6:
+                # facts that differ in a number or id (Level 6 vs Level 7, port 8080 vs 8081) are never duplicates
+                if fw and gw and nums(fw) == nums(gw) and len(fw & gw) / len(fw | gw) >= 0.6:
                     dup.append({'remove': g['id'], 'claim': g['claim'], 'kept': f['id'], 'kept_claim': f['claim']})
                     break
             by_topic[f['tp']].append(f)
@@ -684,12 +686,17 @@ class Memory:
         return len(rows)
 
     # ------------------------------------------------------------------ /memory-cleanup, fast (v0.9)
-    def cleanup_view(self, unused_days: int = 30, per_list: int = 15) -> dict:
+    def cleanup_view(self, unused_days: int = 30, per_list: int = 15, max_facts: int = 150) -> dict:
         """Everything /memory-cleanup shows, already numbered and written out, so the agent only has to print it.
-        Suggestions are numbered 1, 2, 3...; topics are T1, T2...; `map` turns those numbers back into fact ids."""
+        Suggestions and every fact (grouped under its topic) are numbered 1, 2, 3...; topics are T1, T2...;
+        `map` turns those numbers back into fact ids."""
         s = self.store
         sug = self.cleanup_suggestions(unused_days)
         lines, nums, n = [], {}, 0
+
+        def short(text, width=110):               # cut at a word, never mid-word
+            text = ' '.join((text or '').split())
+            return text if len(text) <= width else text[:width].rsplit(' ', 1)[0] + ' …'
 
         def section(title, items, text):
             nonlocal n
@@ -699,24 +706,36 @@ class Memory:
             for it in items[:per_list]:
                 n += 1
                 nums[str(n)] = [it.get('remove') or it.get('id')]
-                lines.append(f'  {n}. {text(it)[:150]}')
+                lines.append(f'  {n}. {text(it)}')
             if len(items) > per_list:
                 lines.append(f'  ... {len(items) - per_list} more (say "all {title.split()[0].lower()}" to pick them all)')
             nums['all ' + title.split()[0].lower()] = [it.get('remove') or it.get('id') for it in items]
-        section('Duplicates', sug['duplicates'], lambda d: f'{d["claim"]}  (same as: {d["kept_claim"][:60]})')
-        section('Unused', sug['unused'], lambda u: f'{u["claim"]}  (since {u["date"]})')
-        section('Stale', sug['stale'], lambda x: x['claim'])
-        rows = s.q("SELECT COALESCE(t.id, e.topic, 'inbox') AS tid, COALESCE(t.name, e.topic, 'inbox') AS name, f.id AS fid "
-                   "FROM facts f LEFT JOIN episodes e ON e.id = f.episode LEFT JOIN topics t ON t.id = e.topic "
-                   "WHERE f.status='active' ORDER BY f.rowid DESC")
+        section('Duplicates (the older copy goes)', sug['duplicates'],
+                lambda d: f'{short(d["claim"])}\n      same as: {short(d["kept_claim"], 100)}')
+        section('Unused for a month', sug['unused'], lambda u: f'{short(u["claim"])}  (since {u["date"]})')
+        section('Stale', sug['stale'], lambda x: short(x['claim']))
+        rows = s.q("SELECT COALESCE(t.id, e.topic, 'inbox') AS tid, COALESCE(t.name, e.topic, 'inbox') AS name, "
+                   "f.id AS fid, f.claim AS claim FROM facts f LEFT JOIN episodes e ON e.id = f.episode "
+                   "LEFT JOIN topics t ON t.id = e.topic WHERE f.status='active' ORDER BY f.rowid DESC")
         topics = {}
         for r in rows:
-            topics.setdefault(r['tid'], {'name': r['name'], 'ids': []})['ids'].append(r['fid'])
+            tp = topics.setdefault(r['tid'], {'name': r['name'], 'ids': [], 'claims': []})
+            tp['ids'].append(r['fid']); tp['claims'].append(r['claim'])
         if topics:
-            lines.append(f'Topics ({len(rows)} facts):')
-            for k, (tid, tp) in enumerate(sorted(topics.items(), key=lambda kv: -len(kv[1]['ids'])), 1):
+            ordered = sorted(topics.values(), key=lambda tp: -len(tp['ids']))
+            lines.append(f'All facts by topic, newest first ({len(rows)} facts):')
+            room = max_facts
+            for k, tp in enumerate(ordered, 1):
                 nums[f't{k}'] = tp['ids']
-                lines.append(f'  T{k}. {tp["name"]}: {len(tp["ids"])} facts')
+                lines.append(f'T{k}. {tp["name"]} ({len(tp["ids"])} facts)')
+                shown = min(len(tp['ids']), max(room, 3))   # every topic shows at least its 3 newest facts
+                for fid, claim in list(zip(tp['ids'], tp['claims']))[:shown]:
+                    n += 1
+                    nums[str(n)] = [fid]
+                    lines.append(f'  {n}. {short(claim)}')
+                room -= shown
+                if shown < len(tp['ids']):
+                    lines.append(f'  ... {len(tp["ids"]) - shown} older (say "show T{k}" to see them)')
         pg = sug['purgeable']
         if pg['archived'] or pg['replaced']:
             lines.append(f'Already forgotten: {pg["archived"]}, replaced versions: {pg["replaced"]} (say "purge" to delete them for good)')
@@ -737,8 +756,16 @@ class Memory:
         m = re.match(r'\s*(?:show|list|open)\s+(t\d+)', sel)
         if m:
             ids = nums.get(m.group(1), [])
-            rows = self.store.q(f"SELECT id, claim FROM facts WHERE id IN ({','.join('?' * len(ids))})", ids) if ids else []
-            return {'show': [f'{r["claim"]}' for r in rows][:200]}
+            rows = self.store.q(f"SELECT id, claim FROM facts WHERE status='active' AND id IN ({','.join('?' * len(ids))})", ids) if ids else []
+            by_id = {i: k for k, v in nums.items() if k.isdigit() and len(v) == 1 for i in v}
+            nxt = max([int(k) for k in nums if k.isdigit()] or [0]) + 1
+            out = []
+            for r in rows[:300]:                           # every fact gets a number the user can delete by
+                if r['id'] not in by_id:
+                    by_id[r['id']] = str(nxt); nums[str(nxt)] = [r['id']]; nxt += 1
+                out.append(f'{by_id[r["id"]]}. {r["claim"]}')
+            self.store.note('cleanup_map', json.dumps(nums))
+            return {'show': sorted(out, key=lambda x: int(x.split('.', 1)[0]))}
         ids = []
         for key in ('all duplicates', 'all unused', 'all stale'):
             if key in sel:

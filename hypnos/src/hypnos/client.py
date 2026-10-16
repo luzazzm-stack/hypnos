@@ -50,6 +50,46 @@ def ensure_running(wait=6.0) -> bool:
     return False
 
 
+def _pin_file(session: str) -> Path | None:
+    safe = ''.join(ch for ch in str(session or '') if ch.isalnum() or ch in '-_')[:80]
+    if not safe or safe in ('default', 'mcp'):
+        return None
+    return load_config().home / 'session-spaces' / f'{safe}.txt'
+
+
+def session_space(session: str, cwd: str | None = None, prefix='code') -> str | None:
+    """The memory space a session belongs to: the folder it STARTED in. A session that later moves to another folder
+    keeps its one memory, so logging, recall and /memory-cleanup always use the same space.
+    With `cwd`, pins the session on first sight; without it, only looks the pin up (None if the session is unknown)."""
+    f = _pin_file(session)
+    try:
+        if f and f.exists():
+            return f.read_text(encoding='utf-8').strip() or None
+    except OSError:
+        pass
+    if cwd is None:
+        return None
+    space = space_for_dir(cwd, prefix)
+    if f:
+        try:
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text(space, encoding='utf-8')
+            cutoff = time.time() - 60 * 86400              # forget pins of sessions older than 60 days
+            for old in f.parent.glob('*.txt'):
+                if old.stat().st_mtime < cutoff:
+                    old.unlink(missing_ok=True)
+        except OSError:
+            pass
+    return space
+
+
+def current_space(cwd: str | None = None) -> str:
+    """Space for a command run inside an agent session (CLI, MCP server): HYPNOS_SPACE, else the space the running
+    Claude Code session is pinned to, else the folder."""
+    return (os.environ.get('HYPNOS_SPACE') or session_space(os.environ.get('CLAUDE_CODE_SESSION_ID', ''))
+            or space_for_dir(cwd or os.getcwd()))
+
+
 def space_for_dir(cwd: str, prefix='code') -> str:
     """Coding memory space = the git repository (or folder) the agent is working in."""
     try:

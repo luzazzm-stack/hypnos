@@ -63,15 +63,14 @@ def main(argv=None):
         from .setup_wizard import main as setup_main
         return setup_main(a)
     if a.cmd == 'cleanup':                                # v0.9: fast, from the service's ready-made list
-        import os
-        from .client import call, ensure_running, space_for_dir
+        from .client import call, current_space, ensure_running
         if hasattr(sys.stdout, 'reconfigure'):
             sys.stdout.reconfigure(encoding='utf-8')
         ensure_running()
-        base = {'space': a.space or os.environ.get('HYPNOS_SPACE') or space_for_dir(os.getcwd()), 'profile': 'coding'}
+        base = {'space': a.space or current_space(), 'profile': 'coding'}
         if a.apply:
             r = call('/cleanup_apply', {**base, 'selection': a.apply, 'hard': a.hard}, timeout=120) or {'error': 'memory service not running'}
-            print('\n'.join('- ' + x for x in r['show']) if 'show' in r else json.dumps(r))
+            print('\n'.join(r['show']) if 'show' in r else json.dumps(r))
         else:
             r = call('/cleanup_view', base, timeout=60) or {'error': 'memory service not running'}
             print(r.get('text') or r.get('error'))

@@ -19,7 +19,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from .client import call, ensure_running, space_for_dir
+from .client import call, ensure_running, session_space
 from .proc import hidden
 
 SKIP_TOOLS = {'TodoWrite', 'TaskCreate', 'TaskUpdate', 'TaskList', 'TaskGet', 'ToolSearch'}
@@ -82,7 +82,7 @@ def run(kind: str, d: dict, emit) -> int:
     if isinstance(cwd, list):
         cwd = cwd[0] if cwd else os.getcwd()
     session = str(_first(d, 'session_id', 'sessionId', 'session', 'conversation_id', 'thread-id', 'thread_id', default='default'))
-    base = {'space': os.environ.get('HYPNOS_SPACE') or space_for_dir(cwd), 'profile': os.environ.get('HYPNOS_PROFILE', 'coding'),
+    base = {'space': os.environ.get('HYPNOS_SPACE') or session_space(session, cwd), 'profile': os.environ.get('HYPNOS_PROFILE', 'coding'),
             'session': session}
     if kind == 'start':
         if ensure_running():
