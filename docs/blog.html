@@ -6,7 +6,7 @@
 <title>Building Hypnos</title>
 <meta name="author" content="Luza Maharjan">
 <meta name="copyright" content="© 2026 Luza Maharjan. All rights reserved.">
-<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.5, with every benchmark against Mem0, GBrain and my own earlier versions.">
+<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.6, with every benchmark against Mem0, GBrain and my own earlier versions.">
 <meta property="og:title" content="Building Hypnos: memory for AI agents that sleeps on it">
 <meta property="og:description" content="Nine versions, every benchmark, including the one where my new version lost by 10 points.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -116,6 +116,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <tr><td>v0.8</td><td>Sep 29</td><td>System One routes each question and picks the smallest context that answers</td></tr>
 <tr class="me"><td>v0.9</td><td>Oct 15</td><td>Usable by anyone: one-line install, works with any coding agent, cleanup, no windows</td></tr>
 <tr class="me"><td>v0.9.5</td><td>Oct 16</td><td>Fixes from a day of real use: never a duplicate, small memory, housekeeping stays out of memory</td></tr>
+<tr class="me"><td>v0.9.6</td><td>Oct 19</td><td>Smaller chats: less memory per message, never repeated, a long-chat notice</td></tr>
 </tbody></table></div>
 
 <p>v0.1 and v0.2 were designs on paper, so they have no scores. Everything from v0.3 on was measured.</p>
@@ -229,6 +230,14 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <p>Several sessions can work in the same project at once. Each one is told what the others are doing and that their tasks aren't its own, and it never hands your current conversation back to you as a "memory".</p>
 
 <p>Refusals aren't remembered. "The assistant couldn't do X" is never saved, so a later session won't refuse the same thing because a memory told it to.</p>
+
+<h2>A chat that cost a billion tokens: v0.9.6</h2>
+
+<p>On one machine, a single chat that was never restarted used about 1.2 billion tokens in two days. Almost all of it was the chat being re-read on every reply. Claude Code had been set to wait until a million tokens before compacting, and Hypnos made it worse: it added up to 2,500 tokens of memory to every message, often the same facts again, and that text stayed in the chat.</p>
+
+<p>So memory added to a message is now 800 tokens at most, and a chat never gets the same memory twice; after a compaction it can come back, because the agent no longer sees it. Past 150,000 tokens the agent is asked to tell you that <code>/clear</code> or <code>/compact</code> would make each reply much cheaper. Every session also starts with a short note on how the memory works. Without it, agents wrote handover files Hypnos doesn't need, thought sleep shrinks the chat, and told the user that saving "isn't possible".</p>
+
+<p>Two quieter bugs went too. The service now follows edits to its settings file; before, one started a minute before setup finished ran on the old settings for days. And setup writes the full path to <code>hypnos</code> into agent settings, because a bare name silently does nothing when an agent starts without the shell's PATH.</p>
 
 <h2>The first day of real use: v0.9.5</h2>
 

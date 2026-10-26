@@ -19,12 +19,14 @@ pip install -e ".[all]"                                   # extras: mcp, vectors
 
 ```toml
 systemone = "jev"            # jev (hosted, key in ~/.typesafe/credentials or TYPESAFE_API_KEY) | laya (local laya-serve) | llm
-systemone_model = ""          # with systemone = "llm": the model that makes the checks, e.g. "claude:haiku" (empty = the memory model)
+systemone_model = ""          # systemone = "llm": the model that makes the checks, e.g. "claude:haiku"; systemone = "laya": the checkpoint name to ask for
 jev = true                   # use the System One model at all
 writer = "auto"              # auto = the writer_chain below; or opencode | claude | codex | openai | fake
 writer_chain = ["opencode:opencode/some-free-model", "openai:model@https://api.deepseek.com/v1#DEEPSEEK_API_KEY", "claude:haiku"]
 writer_parallel = 0          # 0 = automatic (1 under 12 GB RAM, else 3)
 vectors = true               # local bge-small meaning search
+prompt_tokens = 800          # memory added to each message at most; a chat never gets the same item twice
+long_chat_tokens = 150000    # past this, the agent suggests /clear or /compact (0 = never)
 stay_running = false         # false = stop ~90 s after the last agent closes; true keeps it on (servers, robots)
 port = 7439
 ```

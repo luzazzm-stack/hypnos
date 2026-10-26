@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.9.6: smaller chats: 2026-10-19
+
+Found on a machine where one never-restarted chat used about 1.2 billion tokens in two days. Memory added to every message stays in the chat, so in a long chat it is re-read again and again.
+
+- Memory added to each message is smaller: 800 tokens at most (was 2,500). Change it with `prompt_tokens`.
+- A chat never gets the same memory twice. Hypnos remembers what it already gave each session and sends only new items. After a compaction the agent has forgotten them, so they can come again.
+- Long-chat notice: once the agent's context passes 150,000 tokens (`long_chat_tokens`, 0 turns it off), the agent is asked to tell the user that `/clear` or `/compact` would make each reply much cheaper. It says so once per 50,000 tokens.
+- The service follows edits to `~/.hypnos/config.toml`. Before, a service started before setup finished kept the old settings until it restarted, and kept trying writers the user had removed.
+- Every session now starts with a short "how your memory works" note, so the agent knows Hypnos saves on its own (no handover files needed), how to look things up and pin things, that sleep never shrinks the chat, and that exact values come from the cited source.
+- Setup writes the full path to `hypnos` into agent hooks and MCP settings. A bare `hypnos` failed silently when an agent was started without the shell PATH, and memory then did nothing.
+- `systemone_model` with `systemone = "laya"` names the Laya checkpoint to use (for example one fine-tuned for Hypnos).
+
 ## v0.9.5: fixes from real use (no duplicates, small memory, usable cleanup): 2026-10-16
 
 - A fact is never stored twice. A new fact that only restates a stored one is dropped. System One gets a "repeat" answer in the check it already makes for every new fact; without System One, plain code compares meaning (local embeddings), words, and every number, date, version, name, file, id and ordinal. Any difference in those keeps both facts ("Level 6" vs "Level 7", "v0.8" vs "v0.9", "10 emails" vs "20 emails", "VS Code" vs "Neovim").

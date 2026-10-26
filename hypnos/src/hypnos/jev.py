@@ -47,7 +47,11 @@ class Jev:
         if self.llm:                     # only the topic choice; claims are checked in one batch (verify_many)
             topic = any(isinstance(q.get('criteria'), dict) and 'new_topic' in q['criteria'] for q in questions.values())
             return self._ask_llm(state, questions) if role == 'judge' and topic else None
-        msg = {'state': state, 'questions': questions} if self.laya else {'state': state, 'model': 'jev-latest', 'questions': questions}
+        if self.laya:                  # a named Laya checkpoint (e.g. one fine-tuned for Hypnos) via systemone_model
+            spec = getattr(self.cfg, 'systemone_model', '')
+            msg = {'state': state, 'questions': questions, **({'model': spec} if spec else {})}
+        else:
+            msg = {'state': state, 'model': 'jev-latest', 'questions': questions}
         headers = {'Content-Type': 'application/json', **({'Authorization': 'Bearer ' + self.key} if self.key else {})}
         req = urllib.request.Request(self.url, data=json.dumps(msg).encode(), method='POST', headers=headers)
         try:

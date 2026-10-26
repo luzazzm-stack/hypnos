@@ -30,7 +30,8 @@ class Config:
     # locally with `laya-serve`; same /v1/systemone API). systemone_url overrides where requests go.
     systemone: str = 'jev'
     systemone_url: str = ''
-    # with systemone = "llm": which model answers the checks, as a writer_chain entry such as "claude:haiku"
+    # systemone = "llm": which model answers the checks, as a writer_chain entry such as "claude:haiku";
+    # systemone = "laya": the checkpoint name to ask laya-serve for (e.g. one fine-tuned for Hypnos)
     # (empty = the memory model chain itself)
     systemone_model: str = ''
     jev_credentials: Path = field(default_factory=lambda: Path.home() / '.typesafe' / 'credentials')
@@ -54,6 +55,10 @@ class Config:
     topic_split_facts: int = 24
     anchors_max: int = 30
     wake_tokens: int = 1500
+    # v0.9.6: memory added to each user message (was 2500). It stays in the chat, so in a long chat it adds up.
+    prompt_tokens: int = 800
+    # v0.9.6: once the agent's context passes this size, it is asked to suggest /clear or /compact (0 = never)
+    long_chat_tokens: int = 150000
     # daemon
     # v0.9: the service lives only while an agent is open; it stops ~1-2 minutes after the last one closes.
     # true = keep it running (robots, automation, servers).

@@ -113,6 +113,31 @@ def _last_assistant_text(transcript_path):
     return ''
 
 
+def _context_tokens(transcript_path):
+    """v0.9.6: how big the agent's context is right now: the token usage of its last reply (Claude Code transcripts).
+    Reads only the end of the file; 0 when unknown."""
+    if not transcript_path:
+        return 0
+    try:
+        with open(transcript_path, 'rb') as f:
+            f.seek(0, 2)
+            f.seek(max(0, f.tell() - 400_000))
+            lines = f.read().decode('utf-8', 'replace').splitlines()
+    except OSError:
+        return 0
+    for line in reversed(lines):
+        if '"usage"' not in line:
+            continue
+        try:
+            u = (json.loads(line).get('message') or {}).get('usage') or {}
+        except ValueError:
+            continue
+        n = sum(int(u.get(k) or 0) for k in ('input_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens'))
+        if n:
+            return n
+    return 0
+
+
 EVENTS = {                       # every agent names its hooks differently; all map to these six
     'start': ('SessionStart', 'session_start', 'sessionstart', 'start'),
     'prompt': ('UserPromptSubmit', 'BeforeAgent', 'beforeSubmitPrompt', 'user_prompt_submit', 'prompt'),
@@ -156,9 +181,10 @@ def run(kind: str, d: dict, emit) -> int:
         if not ensure_running(wait=3):
             return 0
         call('/log', {**base, 'role': 'user', 'content': str(prompt), 'meta': {'cwd': cwd}}, timeout=5)
-        r = call('/recall', {**base, 'query': str(prompt), 'gate': True, 'budget': 2500}, timeout=20) or {}
+        r = call('/recall', {**base, 'query': str(prompt), 'gate': True, 'fresh_only': True,
+                             'context_tokens': _context_tokens(d.get('transcript_path'))}, timeout=20) or {}
         ctx, others = r.get('context', ''), r.get('others') or []
-        parts = []
+        parts = [r['notice']] if r.get('notice') else []
         if others:                                         # v0.9: know the parallel sessions, never take over their work
             parts.append('Other sessions are working in this project right now. Their tasks are NOT yours; do only what '
                          'the user asks in this session:\n' + '\n'.join(others))

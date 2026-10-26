@@ -1,5 +1,6 @@
 """The memory engine (architecture v0.9): log, sleep, recall, wake, pin/correct/forget, review/cleanup, export."""
 from __future__ import annotations
+import hashlib
 import json
 import re
 from collections import defaultdict
@@ -14,6 +15,18 @@ from .filters import is_refusal
 from .redact import redact
 from .store import Store, now, STOP, entity_id
 from .vectors import Vectors
+
+
+# v0.9.6: agents did not know what their own memory does (they wrote handover files, thought "sleep" shrinks the chat,
+# or claimed Hypnos replaces exact records). One short paragraph at the start of every session.
+HOW_MEMORY_WORKS = (
+    '[how your memory works: Hypnos]\n'
+    '- It saves on its own: every message and tool result is logged, and facts are sorted out of them in the '
+    'background ("sleep"). No handover or memory files are needed for that.\n'
+    '- Relevant memory comes with each user message (only items not given earlier in this chat). To look up a topic on '
+    'purpose, call memory_recall; when the user says "remember ...", call memory_remember.\n'
+    '- Sleep never shrinks this chat. Only /compact or /clear does, and both are safe: the next chat gets the memory back.\n'
+    '- Memory gives facts with their evidence. For an exact price, date or reference, open the cited source before using it.')
 
 
 def est(text: str) -> int:
@@ -198,6 +211,36 @@ class Memory:
         top = self.store.q('SELECT MAX(id) FROM log WHERE session=?', (session,))[0][0]
         if top:
             self.store.note('compact:' + session, str(top))
+        self.store.note('shown:' + session, '[]')          # what memory gave it earlier is gone from its view too
+
+    def only_new(self, session, ctx):
+        """v0.9.6: drop the memory items this session was already given. They are still in the agent's context (until a
+        compaction), so sending them again only makes every later message longer."""
+        if not session or not ctx:
+            return ctx
+        shown = json.loads(self.store.note('shown:' + session) or '[]')
+        seen = set(shown)
+        out = []
+        for block in ctx.split('\n\n'):
+            lines = block.split('\n')
+            if lines[0] not in ('[facts]', '[original messages]'):     # a topic summary or other single block
+                items, head = ['\n'.join(lines)], None
+            else:                                                       # one item per "- ..." or "[date ...]" line
+                head, items = lines[0], []
+                for ln in lines[1:]:
+                    if items and not re.match(r'(- |\[\d{4}-\d\d-\d\d)', ln):
+                        items[-1] += '\n' + ln                          # a message that spans lines
+                    else:
+                        items.append(ln)
+            fresh = []
+            for it in items:
+                k = hashlib.sha1(it.encode('utf-8', 'replace')).hexdigest()[:12]
+                if k not in seen:
+                    seen.add(k); shown.append(k); fresh.append(it)
+            if fresh:
+                out.append('\n'.join(([head] if head else []) + fresh))
+        self.store.note('shown:' + session, json.dumps(shown[-3000:]))
+        return '\n\n'.join(out)
 
     @staticmethod
     def _evidence_row(f):
@@ -630,7 +673,7 @@ class Memory:
             return ''
         return ('Long-term memory (hypnos, space "%s"). Summaries are orientation only: for exact values, '
                 'use the memory_recall tool or open the cited evidence. Your task is only what the user asks in this session.\n\n'
-                % self.space) + '\n\n'.join(parts)
+                % self.space) + HOW_MEMORY_WORKS + '\n\n' + '\n\n'.join(parts)
 
     # ------------------------------------------------------------------ user edits
     def pin(self, claim: str, session: str = 'default') -> str:

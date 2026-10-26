@@ -369,3 +369,51 @@ def test_coding_memory_drops_junk_without_system_one(mem):
 def test_user_stated_facts_are_never_dropped_as_junk(mem):
     mem.pin('Always keep tmp_scratch/notes.md, I use it daily')
     assert any('tmp_scratch' in r['claim'] for r in mem.store.q("SELECT claim FROM facts WHERE status='active'"))
+
+
+def test_per_message_memory_never_repeats_until_compaction(mem):
+    ctx = ('[topic deploy / small] staging deploys\n\n[facts]\n- (2026-10-01) staging port is 8443  evidence: "8443"\n'
+           '- (2026-10-02) bucket is s3://stage  evidence: "stage"\n\n[original messages]\n[2026-10-01 log:3] use 8443\nsecond line')
+    first = mem.only_new('s1', ctx)
+    assert first == ctx
+    again = ctx.replace('- (2026-10-02) bucket is s3://stage  evidence: "stage"', '- (2026-10-03) region is eu  evidence: "eu"')
+    second = mem.only_new('s1', again)
+    assert second == '[facts]\n- (2026-10-03) region is eu  evidence: "eu"'      # only what it hasn't seen yet
+    assert mem.only_new('s2', ctx) == ctx                                          # another session gets everything
+    mem.log('hi', 'user', 's1')
+    mem.mark_compacted('s1')                                                       # compaction: it forgot, give it again
+    assert mem.only_new('s1', ctx) == ctx
+
+
+def test_service_reloads_changed_config(tmp_path, monkeypatch):
+    import os
+    import time
+    monkeypatch.setenv('HYPNOS_HOME', str(tmp_path))
+    (tmp_path / 'config.toml').write_text('prompt_tokens = 800\n', encoding='utf-8')
+    svc = Service()
+    assert svc.cfg.prompt_tokens == 800
+    (tmp_path / 'config.toml').write_text('prompt_tokens = 300\n', encoding='utf-8')
+    os.utime(tmp_path / 'config.toml', (time.time() + 5, time.time() + 5))
+    svc.handle('/status', {'space': 'x'})
+    assert svc.cfg.prompt_tokens == 300
+
+
+def test_long_chat_notice_once_per_step(cfg):
+    svc = Service(cfg)
+    m = svc.mem('x', 'coding')
+    assert svc.long_chat_note(m, 's1', 90_000) == ''
+    assert '160k tokens' in svc.long_chat_note(m, 's1', 160_000)
+    assert svc.long_chat_note(m, 's1', 170_000) == ''                            # same 50k step: said already
+    assert '210k' in svc.long_chat_note(m, 's1', 210_000)
+
+
+def test_context_tokens_from_transcript(tmp_path):
+    from hypnos import hooks
+    import json
+    t = tmp_path / 't.jsonl'
+    t.write_text('\n'.join(json.dumps(x) for x in [
+        {'type': 'user', 'message': {'content': 'hi'}},
+        {'type': 'assistant', 'message': {'usage': {'input_tokens': 10, 'cache_read_input_tokens': 120000,
+                                                     'cache_creation_input_tokens': 500}}}]), encoding='utf-8')
+    assert hooks._context_tokens(str(t)) == 120510
+    assert hooks._context_tokens(None) == 0

@@ -88,9 +88,12 @@ def write_json(path: Path, data):
 
 
 def exe():
-    """How agents should start hypnos: the bare name if it is on PATH, else its full path."""
-    if shutil.which('hypnos'):
-        return 'hypnos'
+    """How agents should start hypnos: always its full path (v0.9.6). Hooks and MCP servers are started by the agent,
+    often without the shell's PATH (desktop apps, other launchers), and then a bare `hypnos` silently does nothing."""
+    found = shutil.which('hypnos')
+    if found:
+        p = str(Path(found).resolve())
+        return f'"{p}"' if ' ' in p else p
     names = ('hypnos.exe', 'hypnos') if os.name == 'nt' else ('hypnos',)
     for d in (Path(sys.argv[0]).resolve().parent, Path(sys.executable).parent, HOME / '.local' / 'bin'):
         for n in names:

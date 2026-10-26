@@ -20,6 +20,8 @@ GLOBAL_SPACE = 'global'        # v0.9: things the user wants remembered in every
 class Service:
     def __init__(self, cfg=None):
         self.cfg = cfg or load_config()
+        self.cfg_file = None if cfg else self.cfg.home / 'config.toml'   # v0.9.6: follow edits to the settings file
+        self.cfg_mtime = self._cfg_mtime()
         self.mems: dict[str, Memory] = {}
         self.sleeping: set[str] = set()
         self.last_log: dict[str, float] = {}
@@ -44,6 +46,36 @@ class Service:
                 m.fast_async = True               # logging never waits on the real-time fact path
                 self.view_jobs.put(space)         # have the cleanup list ready before anyone asks
             return m
+
+    def _cfg_mtime(self):
+        try:
+            return self.cfg_file.stat().st_mtime if self.cfg_file else None
+        except OSError:
+            return None
+
+    def reload_config(self):
+        """v0.9.6: the settings file changed while the service runs (e.g. setup finished a minute after the first
+        agent started it). Use the new settings now instead of waiting for a restart."""
+        mt = self._cfg_mtime()
+        if mt == self.cfg_mtime:
+            return
+        self.cfg_mtime = mt
+        with self.lock:
+            self.cfg = load_config()
+            self.mems.clear()                     # rebuilt on next use with the new writer and System One settings
+
+    def long_chat_note(self, m, session, tokens):
+        """v0.9.6: a chat that has grown very long re-reads all of itself on every reply. Say so once per 50k tokens."""
+        limit = self.cfg.long_chat_tokens
+        if not limit or not session or tokens < limit:
+            return ''
+        step = str(tokens // 50000)
+        if m.store.note('longchat:' + session) == step:
+            return ''
+        m.store.note('longchat:' + session, step)
+        return (f'This chat is now about {tokens // 1000}k tokens, and every reply re-reads all of it. Tell the user in one '
+                'line that starting fresh (/clear, then "carry on") or /compact would make each reply much cheaper; '
+                'Hypnos keeps what matters for the next chat.')
 
     def changed(self, space):
         """Memory content changed: rebuild the cleanup list in the background."""
@@ -133,6 +165,7 @@ class Service:
             return {'ok': True}
         if path != '/ping':
             self.last_activity = time.time()
+            self.reload_config()
         space, profile = d.get('space', 'default'), d.get('profile', 'generic')
         m = self.mem(space, profile)
         if path == '/log':
@@ -150,12 +183,17 @@ class Service:
             session = d.get('session')
             self.touch(space, session)
             others = self.others_now(m, space, session)
+            notice = self.long_chat_note(m, session, int(d.get('context_tokens') or 0))
             if not m.has_memory_beyond(session):                       # v0.9: nothing outside this conversation yet
-                return {'context': '', 'level': 'empty', 'others': others}
+                return {'context': '', 'level': 'empty', 'others': others, 'notice': notice}
             if d.get('gate') and not m.needs_memory(d['query']):
-                return {'context': '', 'level': 'skipped', 'others': others}
-            r = m.recall(d['query'], int(d.get('budget', 6000)), session=session, live=self.live_sessions(space)).as_dict()
-            return {**r, 'others': others}
+                return {'context': '', 'level': 'skipped', 'others': others, 'notice': notice}
+            budget = int(d.get('budget') or (self.cfg.prompt_tokens if d.get('fresh_only') else 6000))
+            r = m.recall(d['query'], budget, session=session, live=self.live_sessions(space)).as_dict()
+            if d.get('fresh_only'):                                    # v0.9.6: per-message memory: nothing given twice
+                r['context'] = m.only_new(session, r['context'])
+                r['tokens'] = len(r['context']) // 4
+            return {**r, 'others': others, 'notice': notice}
         if path == '/wake':
             self.touch(space, d.get('session'))
             for s in self.idle_sessions(m, space):                     # v0.9: sessions that went quiet, not live parallel ones

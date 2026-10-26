@@ -1,6 +1,6 @@
 [project]
 name = "hypnos"
-version = "0.9.5"
+version = "0.9.6"
 description = "Hypnos: human-like memory for AI agents. Notes everything, sorts it while it sleeps, recalls with evidence (architecture v0.9)"
 readme = "README.md"
 requires-python = ">=3.10"

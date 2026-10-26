@@ -60,7 +60,7 @@ export const Hypnos: Plugin = async ({ directory, worktree }) => {
       if (quiet[input.sessionID] && selectionReply(text)) return
       quiet[input.sessionID] = false
       call("/log", { ...base, session: input.sessionID, role: "user", content: text, meta: { cwd: directory } })
-      const r = await call("/recall", { ...base, session: input.sessionID, query: text, gate: true, budget: 2500 }, 20000)
+      const r = await call("/recall", { ...base, session: input.sessionID, query: text, gate: true, fresh_only: true }, 20000)
       memo[input.sessionID] = { query: text, context: r?.context ?? "", others: r?.others ?? [] }
     },
 
