@@ -19,9 +19,9 @@ class Config:
     # v0.9: tried in order, cheapest first; a failing writer rests 30 min and the next takes over.
     # Free opencode models first, then small paid Claude (Haiku), then a bigger one only if all else is down.
     writer_chain: list = field(default_factory=lambda: [
-        'opencode:opencode/muse-spark-1.3-contributor-free', 'opencode:opencode/nemotron-3.5-lightning-free',
-        'opencode:opencode/mimo-v2.6-flash-free', 'opencode:opencode/ling-3.1-flash-free', 'claude:haiku', 'claude:sonnet'])
-    writer_model: str = 'opencode/muse-spark-1.3-contributor-free'
+        'opencode:opencode/mimo-v2.6-flash-free', 'opencode:opencode/nemotron-3.5-lightning-free',
+        'opencode:opencode/deepseek-v4.1-flash-free', 'claude:haiku', 'claude:sonnet'])
+    writer_model: str = 'opencode/mimo-v2.6-flash-free'
     openai_base_url: str = 'http://localhost:11434/v1'   # any OpenAI-compatible server (Ollama, OpenRouter, ...)
     openai_api_key_env: str = 'OPENAI_API_KEY'
     # Jev (TypeSafe) for typed decisions; falls back to heuristics without a key
@@ -98,7 +98,7 @@ def load_config() -> Config:
     cfg = Config()
     path = cfg.home / 'config.toml'
     if tomllib and path.exists():
-        data = tomllib.loads(path.read_text(encoding='utf-8'))
+        data = tomllib.loads(path.read_text(encoding='utf-8-sig'))   # utf-8-sig: Windows editors may add a BOM
         for k, v in data.items():
             if hasattr(cfg, k):
                 cur = getattr(cfg, k)

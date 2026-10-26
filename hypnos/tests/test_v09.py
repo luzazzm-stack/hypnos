@@ -417,3 +417,10 @@ def test_context_tokens_from_transcript(tmp_path):
                                                      'cache_creation_input_tokens': 500}}}]), encoding='utf-8')
     assert hooks._context_tokens(str(t)) == 120510
     assert hooks._context_tokens(None) == 0
+
+
+def test_config_with_bom_still_loads(tmp_path, monkeypatch):
+    from hypnos.config import load_config
+    monkeypatch.setenv('HYPNOS_HOME', str(tmp_path))
+    (tmp_path / 'config.toml').write_bytes(b'\xef\xbb\xbfprompt_tokens = 500\n')   # what PowerShell's utf8 writes
+    assert load_config().prompt_tokens == 500

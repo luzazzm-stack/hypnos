@@ -10,6 +10,8 @@ Found on a machine where one never-restarted chat used about 1.2 billion tokens 
 - The service follows edits to `~/.hypnos/config.toml`. Before, a service started before setup finished kept the old settings until it restarted, and kept trying writers the user had removed.
 - Every session now starts with a short "how your memory works" note, so the agent knows Hypnos saves on its own (no handover files needed), how to look things up and pin things, that sleep never shrinks the chat, and that exact values come from the cited source.
 - Setup writes the full path to `hypnos` into agent hooks and MCP settings. A bare `hypnos` failed silently when an agent was started without the shell PATH, and memory then did nothing.
+- Settings files with a BOM (as PowerShell and some Windows editors write them) load fine; before, Hypnos could not read its settings at all.
+- Default writer list updated: Muse Spark and Ling are gone from opencode's free models, so the free choices are now MiMo, Nemotron Lightning and DeepSeek Flash, then Claude Haiku and Sonnet.
 - `systemone_model` with `systemone = "laya"` names the Laya checkpoint to use (for example one fine-tuned for Hypnos).
 
 ## v0.9.5: fixes from real use (no duplicates, small memory, usable cleanup): 2026-10-16

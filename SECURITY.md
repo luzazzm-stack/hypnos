@@ -9,6 +9,6 @@ hypnos stores what your agents see. Treat its database like the data it contains
   - During sleep, redacted log text goes to the writer LLM you configure.
   - Short questions and evidence go to the System One model: to TypeSafe if you chose Jev; Laya runs on your machine; with no System One model, the writer LLM answers them.
   - Choose a local writer (Ollama through the `openai` writer) and Laya (or no System One model) to keep everything on the machine.
-- **Free-tier writers:** OpenCode's free Muse Spark tier may use prompts and completions to train Meta models. Don't use it on sensitive data.
+- **Free-tier writers:** OpenCode's free models may use your prompts and completions for training (check each model's terms in opencode). Don't send sensitive data to them; pick a paid or local writer for that.
 
 Please report security issues privately to the repository owner.

@@ -26,8 +26,8 @@ claude mcp add --scope user hypnos -- hypnos mcp
 
 | Hook | Architecture step |
 |---|---|
-| `SessionStart` | **wake**: pinned user facts, topic small summaries, wake note |
-| `UserPromptSubmit` | log the prompt (redacted), **G1** "needs memory?", then **v0.8 recall** (System One-routed: the smallest context that answers); the result is added as context |
+| `SessionStart` | **wake**: a short note on how the memory works, pinned user facts, topic small summaries, wake note |
+| `UserPromptSubmit` | log the prompt (redacted), **G1** "needs memory?", then **v0.8 recall** (System One-routed: the smallest context that answers), at most 800 tokens and only items this chat has not been given yet; the result is added as context |
 | `PostToolUse` | log the tool call; file tools get `code:path@commit` evidence, so a fact goes **stale** when git shows the file changed (R13) |
 | `Stop` | log the assistant's final reply |
 | `PreCompact` | mark the compaction (older turns of this session may be recalled again), then **sleep** |
@@ -39,6 +39,8 @@ claude mcp add --scope user hypnos -- hypnos mcp
 - **Small coding memory:** before saving, each fact is checked: would a later session need this, and can't it find it in the files? (System One does the check, or the memory model in one call when System One is unavailable.) One-off steps, a tool's internals, run counts and session titles are dropped. Facts you state (`memory_remember`, pin) are always kept.
 - **Cleanup tools:** `memory_cleanup_view(space)` and `memory_cleanup_apply(selection, space, delete_source)`. Claude passes the space name shown after "Memory for" in the list, so the numbers mean the same facts.
 - **System One problems:** if the System One account refuses (no credits, bad key), Hypnos logs a warning and says so in the wake note; `memory_status` shows it as `systemone_problem`.
+- **Long chats:** once the chat passes 150,000 tokens (`long_chat_tokens`), Claude is asked to tell you that `/clear` or `/compact` would make each reply much cheaper. Memory already given comes back after a compaction, because Claude no longer sees it.
+- **Settings:** the service follows edits to `~/.hypnos/config.toml` without a restart. Setup writes the full path to `hypnos` into the hooks and the MCP server, so they work even when Claude Code starts without your shell's PATH.
 - **Sleep timing:** on compaction, at session end, when a new session starts, after 10 idle minutes, or once 150 new rows pile up.
 - **Safety:** hooks never block or fail a session. If the service is down they exit silently.
 - **No recursion:** when hypnos uses `claude -p` as its writer, it sets `HYPNOS_DISABLE=1`, so those runs don't trigger the hooks again, and passes `--no-session-persistence`, so they never appear in your Claude Code session list.

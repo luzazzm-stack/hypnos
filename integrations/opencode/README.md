@@ -33,7 +33,7 @@ Then add the MCP server to `~/.config/opencode/opencode.json`:
 
 | Plugin hook | Architecture step |
 |---|---|
-| `chat.message` | log the user's message; **G1** gate, then **v0.8 recall** (System One-routed: the smallest context that answers) once per message |
+| `chat.message` | log the user's message; **G1** gate, then **v0.8 recall** (System One-routed: the smallest context that answers) once per message, at most 800 tokens and only items this session has not been given yet |
 | `experimental.chat.system.transform` | add the recalled memory to the system prompt of every model call in that turn |
 | `tool.execute.after` | log the tool call and output, with `file:` evidence for file tools |
 | `session.compacted` / `session.deleted` | **sleep** in the background |
