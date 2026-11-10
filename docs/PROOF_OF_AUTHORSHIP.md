@@ -2,7 +2,7 @@
 
 **Author:** Luza Maharjan
 **Work:** Evidence-linked agent memory architecture with sleep consolidation (small / medium / big topic summaries, original-log layer, Jev gate and judge), the `agentmem` engine, and its benchmark results.
-**Copyright:** © 2026 Luza Maharjan. All rights reserved (see [LICENSE](../LICENSE)).
+**Copyright:** © 2026 Luza Maharjan. Released under the MIT License (see [LICENSE](../LICENSE)); copies must keep this copyright notice.
 
 ## Timeline
 

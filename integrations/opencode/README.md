@@ -12,8 +12,8 @@ Three parts, all optional and independent:
 ```bash
 uv tool install --python 3.12 "./hypnos[mcp,vectors]"   # puts `hypnos` on PATH
 
-# plugin (global)
-cp integrations/opencode/hypnos.ts ~/.config/opencode/plugins/hypnos.ts
+# plugin (global): hypnos-v2.ts for opencode 2.x, hypnos.ts for opencode 1.x
+cp integrations/opencode/hypnos-v2.ts ~/.config/opencode/plugins/hypnos.ts
 
 # /memory-cleanup command
 cp integrations/opencode/command/memory-cleanup.md ~/.config/opencode/command/

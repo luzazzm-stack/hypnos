@@ -111,6 +111,7 @@ class Memory:
         self._writer = writer
         self.jev = J.Jev(self.cfg, self.store)
         self.vec = Vectors(self.cfg, self.store)
+        self.on_shared = None                      # v0.9.7: callback(claim, session) for the user's rules (set by the service)
 
     @property
     def writer(self) -> Writer:
@@ -223,7 +224,7 @@ class Memory:
         out = []
         for block in ctx.split('\n\n'):
             lines = block.split('\n')
-            if lines[0] not in ('[facts]', '[original messages]'):     # a topic summary or other single block
+            if lines[0] not in ('[facts]', '[original messages]', "[the user's rules and preferences from all projects]"):     # a topic summary or other single block
                 items, head = ['\n'.join(lines)], None
             else:                                                       # one item per "- ..." or "[date ...]" line
                 head, items = lines[0], []
@@ -940,7 +941,9 @@ class Memory:
             'Each fact: "claim" (one self-contained sentence with enough context to be understood later; name people and things '
             f'explicitly, no pronouns), "kind" (one of: {", ".join(self.profile.kinds)}), "quote" (a short passage under 200 characters '
             'copied EXACTLY from the log that supports the claim), "entities" (the specific people, places, projects, tools, files, '
-            'devices or objects the fact is about, as short names). Return ONLY a JSON array.', [text])
+            'devices or objects the fact is about, as short names), "everywhere" (true ONLY for a rule, preference or fact about '
+            'themselves that the USER stated and that applies in any project or chat, not just this one; otherwise false). '
+            'Return ONLY a JSON array.', [text])
 
     def _consolidate_episode(self, session, win, ep_id=None, only_row=None, allow_writer_topic=True, raw=None):
         s = self.store
@@ -970,7 +973,9 @@ class Memory:
                          'kind': x.get('kind') if x.get('kind') in self.profile.kinds else self.profile.kinds[-1],
                          'source': 'user' if hit['role'] in ('user', 'fact') and self.profile.name in ('chat', 'generic') else 'observed',
                          'quote': quote[:300], 'evidence': evidence, 'verify_p': p, 'entities': ents, 'valid_from': hit['ts'],
-                         'scope': meta.get('scope', {}), 'meta': {k: meta[k] for k in ('cwd', 'url', 'sensor') if k in meta}})
+                         'scope': meta.get('scope', {}), 'meta': {k: meta[k] for k in ('cwd', 'url', 'sensor') if k in meta},
+                         # v0.9.7: the user's own rules and preferences are shared with every project (see on_shared)
+                         'everywhere': x.get('everywhere') is True and hit['role'] in ('user', 'fact')})
         kept = [f for f in kept if not self._duplicate(f)]
         if self.profile.name == 'coding' and only_row is None:
             kept = self._worth_keeping(kept)       # v0.9.5: coding memory keeps only what a later session needs
@@ -991,6 +996,13 @@ class Memory:
         if topic and stored:
             s.x('UPDATE topics SET dirty=1 WHERE id=?', (topic,))
         self.vec.index('fact', [(f['id'], f['claim'] + ' ' + f['quote']) for f in stored])
+        if self.on_shared:                         # v0.9.7: copy the user's rules to the memory every project reads
+            for f in stored:
+                if f.get('everywhere'):
+                    try:
+                        self.on_shared(f['claim'], session)
+                    except Exception as ex:
+                        print(f'[hypnos] sharing a rule failed: {ex}', flush=True)
         return len(stored), len(items)
 
     def _duplicate(self, f) -> bool:
@@ -1007,7 +1019,7 @@ class Memory:
         """Coding sessions produce many facts nobody needs again (one-off steps, a tool's internals, run counts).
         System One judges each fact; without it, the writer judges the whole batch in one call. Facts the user stated
         are always kept. If neither answers, everything is kept (never lose memory because a check failed)."""
-        cand = [f for f in facts if f.get('source') != 'user']
+        cand = [f for f in facts if f.get('source') != 'user' and not f.get('everywhere')]
         if not cand:
             return facts
         drop = set()

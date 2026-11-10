@@ -26,7 +26,7 @@ writer_chain = ["opencode:opencode/some-free-model", "openai:model@https://api.d
 writer_parallel = 0          # 0 = automatic (1 under 12 GB RAM, else 3)
 vectors = true               # local bge-small meaning search
 prompt_tokens = 800          # memory added to each message at most; a chat never gets the same item twice
-long_chat_tokens = 150000    # past this, the agent suggests /clear or /compact (0 = never)
+long_chat_percent = 50       # past this share of the model's context window, the agent suggests /clear or /compact (0 = never)
 stay_running = false         # false = stop ~90 s after the last agent closes; true keeps it on (servers, robots)
 port = 7439
 ```

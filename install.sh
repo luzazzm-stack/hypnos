@@ -61,6 +61,7 @@ fi
 uv tool update-shell >/dev/null 2>&1 || true
 export PATH="$(uv tool dir --bin 2>/dev/null || echo "$HOME/.local/bin"):$PATH"
 have hypnos || fail "hypnos is not on PATH; open a new terminal and run: hypnos setup"
+hypnos check || fail "memory tools are missing after install (see above)"   # v0.9.7
 
 # 3. connect the agents. Questions are asked on the terminal even though this script is piped into sh.
 if [ -t 1 ] && [ -r /dev/tty ] && ! printf '%s ' "$@" | grep -q -- '--yes'; then

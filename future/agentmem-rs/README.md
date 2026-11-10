@@ -61,4 +61,4 @@ Local meaning search uses bge-small-en-v1.5 (ONNX, CPU) and is built in by defau
 
 Most of the time is Jev's network round trips and most of the RAM is the embedding model, which is the same size in both languages.
 
-© 2026 Luza Maharjan. All rights reserved.
+© 2026 Luza Maharjan. MIT License.

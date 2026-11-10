@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Building Hypnos</title>
 <meta name="author" content="Luza Maharjan">
-<meta name="copyright" content="© 2026 Luza Maharjan. All rights reserved.">
-<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.6, with every benchmark against Mem0, GBrain and my own earlier versions.">
+<meta name="copyright" content="© 2026 Luza Maharjan. MIT License.">
+<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.7, with every benchmark against Mem0, GBrain and my own earlier versions.">
 <meta property="og:title" content="Building Hypnos: memory for AI agents that sleeps on it">
 <meta property="og:description" content="Nine versions, every benchmark, including the one where my new version lost by 10 points.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -116,6 +116,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <tr><td>v0.8</td><td>Sep 29</td><td>System One routes each question and picks the smallest context that answers</td></tr>
 <tr class="me"><td>v0.9</td><td>Oct 15</td><td>Usable by anyone: one-line install, works with any coding agent, cleanup, no windows</td></tr>
 <tr class="me"><td>v0.9.5</td><td>Oct 16</td><td>Fixes from a day of real use: never a duplicate, small memory, housekeeping stays out of memory</td></tr>
+<tr class="me"><td>v0.9.7</td><td>Nov 10</td><td>Your rules reach every project, opencode v2, MIT License</td></tr>
 <tr class="me"><td>v0.9.6</td><td>Oct 19</td><td>Smaller chats: less memory per message, never repeated, a long-chat notice</td></tr>
 </tbody></table></div>
 
@@ -231,6 +232,18 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 
 <p>Refusals aren't remembered. "The assistant couldn't do X" is never saved, so a later session won't refuse the same thing because a memory told it to.</p>
 
+<h2>Three weeks of daily use: v0.9.7</h2>
+
+<p>I used Hypnos every day on two machines, with Claude Code and opencode, and kept a list of everything that went wrong.</p>
+
+<p>The biggest one: my rules got lost. Hypnos keeps one memory per folder, which is right for project facts, but my own rules ("show me every draft before it's sent") stayed in whichever folder I said them in. A chat started somewhere else never saw them. On my laptop about 35 rules were spread over 28 folder memories. Now, when Hypnos sleeps and finds a rule or preference you stated that applies anywhere, it also copies it to one shared memory that every project reads.</p>
+
+<p>The long-chat notice from v0.9.6 fired far too early. 150,000 tokens is most of a 200k window but only 15% of a 1M one. It is now a share of each model's own window: the agent mentions <code>/clear</code> only past 50%.</p>
+
+<p>opencode v2 renamed its plugin hooks, so the old plugin silently did nothing. Setup now checks the version and installs the right one. The new plugin also stops opencode from starting two memory services at once and never saves Hypnos's own background work as memories.</p>
+
+<p>Smaller fixes: a failing memory model rests 3 minutes instead of 30, Groq works (it rejected requests without a User-Agent), and a reinstall can no longer leave agents without their memory tools. <code>hypnos check</code> shows what is installed and how to fix what isn't. Hypnos is also MIT licensed now.</p>
+
 <h2>A chat that cost a billion tokens: v0.9.6</h2>
 
 <p>On one machine, a single chat that was never restarted used about 1.2 billion tokens in two days. Almost all of it was the chat being re-read on every reply. Claude Code had been set to wait until a million tokens before compacting, and Hypnos made it worse: it added up to 2,500 tokens of memory to every message, often the same facts again, and that text stayed in the chat.</p>
@@ -273,6 +286,6 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <p>Restart your agent afterwards and keep working. The code, the install guide and the steps for coding agents are on <a href="https://github.com/luzazzm-stack/hypnos">GitHub</a>. Every benchmark run, with per-question results, is on the <a href="benchmarks.html">benchmarks page</a>.</p>
 
 </main>
-<footer><div class="wrap">© 2026 Luza Maharjan. All rights reserved.</div></footer>
+<footer><div class="wrap">© 2026 Luza Maharjan. Released under the MIT License.</div></footer>
 </body>
 </html>

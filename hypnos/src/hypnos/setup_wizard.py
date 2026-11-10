@@ -194,13 +194,31 @@ def wire_opencode(cmd, remove=False):
         data.pop('mcp', None)
     data.setdefault('$schema', 'https://opencode.ai/config.json')
     write_json(conf, data)
-    for src, dst in (('opencode-plugin.ts', d / 'plugins' / 'hypnos.ts'),
+    plugin = 'opencode-plugin-v2.ts' if opencode_major() >= 2 else 'opencode-plugin.ts'   # v0.9.7: v2 renamed the hooks
+    for src, dst in ((plugin, d / 'plugins' / 'hypnos.ts'),
                      ('opencode-memory-cleanup.md', d / 'command' / 'memory-cleanup.md')):
         if remove:
             dst.unlink(missing_ok=True)
         else:
             dst.parent.mkdir(parents=True, exist_ok=True)
-            dst.write_text((ASSETS / src).read_text(encoding='utf-8'), encoding='utf-8')
+            text = (ASSETS / src).read_text(encoding='utf-8')
+            # the full path: opencode's background service may run without the shell PATH
+            text = text.replace('Bun.which("hypnos")', json.dumps(cmd.strip('"')))
+            dst.write_text(text, encoding='utf-8')
+
+
+def opencode_major() -> int:
+    """opencode's major version (0 = unknown or not installed)."""
+    exe = shutil.which('opencode')
+    if not exe:
+        return 0
+    try:
+        out = subprocess.run([exe, '--version'], capture_output=True, text=True, timeout=30, stdin=subprocess.DEVNULL,
+                             **hidden()).stdout
+        m = re.search(r'(\d+)\.\d+', out or '')
+        return int(m.group(1)) if m else 0
+    except (OSError, subprocess.TimeoutExpired):
+        return 0
 
 
 def _rules(path: Path, remove=False):

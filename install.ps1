@@ -67,6 +67,7 @@ try {
 }
 Add-Path ((& uv tool dir --bin) 2>$null)
 if (-not (Have 'hypnos')) { Fail 'hypnos is not on PATH; open a new terminal and run: hypnos setup' }
+& hypnos check; if ($LASTEXITCODE -ne 0) { Fail 'memory tools are missing after install (see above)' }   # v0.9.7
 
 # 3. connect the agents (asks questions when a person is at the keyboard)
 $interactive = [Environment]::UserInteractive -and -not [Console]::IsInputRedirected -and $env:HYPNOS_SETUP_YES -ne '1'

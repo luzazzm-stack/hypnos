@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.9.7: your rules reach every project, opencode v2, MIT License: 2026-11-10
+
+Found in three weeks of daily use on two machines.
+
+- **Your rules reach every project.** Hypnos keeps one memory per folder, so a rule you gave while working in one folder was never seen by a chat started in another (on one laptop, about 35 rules and preferences were spread over 28 folder memories). Now, when sleep finds a rule, a preference or a fact about yourself that you stated and that applies anywhere, it also copies it to the shared memory every project reads. Each message gets the shared rules that match it, and a brand-new folder with no memory of its own gets them too. A rule already in the shared memory is not copied again.
+- **opencode v2.** opencode v2 renamed the plugin hooks, so the old plugin did nothing there. `hypnos setup` now checks opencode's version and installs the matching plugin (`integrations/opencode/hypnos-v2.ts`). The new plugin follows each session's folder (opencode's background service serves many folders), starts only one memory service when opencode loads it several times at once, never logs Hypnos's own memory-model runs, and works with a separate `HYPNOS_HOME` and `HYPNOS_PORT` if you want opencode's memory kept apart from another agent's.
+- **The long-chat notice is a share of the window, not a token count.** Models have 200k, 400k or 1M token windows, so a fixed 150,000 tokens fired at 15% of a 1M window. Now the agent suggests `/clear` or `/compact` only past `long_chat_percent` (default 50%) of its own model's window, once per 10%. Claude Code tells only the status line the window size, so your status line saves it to `~/.claude/context-window/<session>` (see integrations/claude-code); without it Hypnos stays quiet rather than guess (a `[1m]` model is known to be 1M).
+- **A failing memory model rests 3 minutes, not 30.** Per-minute limits clear in about a minute, and a model that is out for the day fails again in under a second, so 30 minutes only kept the best model idle.
+- **Groq works.** Groq rejected Hypnos's requests (HTTP 403) because they carried no User-Agent. They now send `hypnos-memory/0.9`.
+- **Memory tools are part of every install.** A reinstall without the `[mcp]` extra left agents with no memory tools and nothing said why. The MCP package is now a normal dependency, `hypnos mcp` explains a missing part instead of failing silently, and the new `hypnos check` lists every part (memory tools, meaning search, service) with the fix for anything missing. Both installers run it at the end.
+- **MIT License.** Hypnos is now open source.
+
+
 ## v0.9.6: smaller chats: 2026-10-19
 
 Found on a machine where one never-restarted chat used about 1.2 billion tokens in two days. Memory added to every message stays in the chat, so in a long chat it is re-read again and again.

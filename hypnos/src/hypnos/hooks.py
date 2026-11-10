@@ -113,6 +113,33 @@ def _last_assistant_text(transcript_path):
     return ''
 
 
+def _context_window(session, transcript_path):
+    """v0.9.7: the size of this chat's context window. Claude Code tells only the status line, so the status line
+    saves it to ~/.claude/context-window/<session> (see statusline). Fallback: a model id with [1m] = 1M.
+    0 = unknown (then no long-chat notice at all, never a wrong one)."""
+    try:
+        n = int((Path.home() / '.claude' / 'context-window' / str(session)).read_text().strip() or 0)
+        if n > 0:
+            return n
+    except (OSError, ValueError):
+        pass
+    try:
+        with open(transcript_path, 'rb') as f:
+            f.seek(0, 2)
+            f.seek(max(0, f.tell() - 200_000))
+            tail = f.read().decode('utf-8', 'replace')
+        if '[1m]' in tail.lower():
+            return 1_000_000
+    except (OSError, TypeError):
+        pass
+    return 0
+
+
+def _context_percent(session, transcript_path):
+    window = _context_window(session, transcript_path)
+    return round(100 * _context_tokens(transcript_path) / window, 1) if window else 0
+
+
 def _context_tokens(transcript_path):
     """v0.9.6: how big the agent's context is right now: the token usage of its last reply (Claude Code transcripts).
     Reads only the end of the file; 0 when unknown."""
@@ -182,7 +209,7 @@ def run(kind: str, d: dict, emit) -> int:
             return 0
         call('/log', {**base, 'role': 'user', 'content': str(prompt), 'meta': {'cwd': cwd}}, timeout=5)
         r = call('/recall', {**base, 'query': str(prompt), 'gate': True, 'fresh_only': True,
-                             'context_tokens': _context_tokens(d.get('transcript_path'))}, timeout=20) or {}
+                             'context_percent': _context_percent(session, d.get('transcript_path'))}, timeout=20) or {}
         ctx, others = r.get('context', ''), r.get('others') or []
         parts = [r['notice']] if r.get('notice') else []
         if others:                                         # v0.9: know the parallel sessions, never take over their work

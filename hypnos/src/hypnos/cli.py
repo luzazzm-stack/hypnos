@@ -6,6 +6,7 @@
   hypnos hook generic <event> [JSON]   any agent: start | prompt | tool | reply | compact | end
   hypnos chat-proxy --upstream URL     OpenAI-compatible proxy that gives any chat model memory
   hypnos setup [--yes] [--systemone jev|laya|none] [--uninstall]   connect every coding agent on this machine
+  hypnos check                         is every part installed and working? (memory tools, meaning search, service)
   hypnos cleanup [--apply "1-5, T2"]   the /memory-cleanup list for this folder's memory (via the service)
   hypnos log|recall|sleep|pin|forget|status|export   work with a memory space by hand
 """
@@ -17,11 +18,32 @@ import sys
 from .engine import Memory
 
 
+REINSTALL = 'run the one-line installer again, or: uv tool install --force --python 3.12 "<hypnos folder>[mcp,vectors]"'
+
+
+def check() -> int:
+    """v0.9.7: a reinstall without the extras left the agents without memory tools and nobody noticed.
+    This lists every part, says what is missing and how to fix it. Exit code 1 if memory tools are missing."""
+    from importlib.util import find_spec
+    from .client import call
+    ok = True
+    tools = find_spec('mcp') is not None
+    ok &= tools
+    print(('ok      ' if tools else 'MISSING ') + 'memory tools for agents (MCP)' + ('' if tools else f' -> {REINSTALL}'))
+    vec = find_spec('fastembed') is not None and find_spec('numpy') is not None
+    print(('ok      ' if vec else 'missing ') + 'meaning search (optional; keyword search still works)'
+          + ('' if vec else ' -> add it with the [vectors] extra'))
+    up = bool(call('/ping', {}, timeout=2))
+    print(('ok      ' if up else 'stopped ') + 'memory service' + ('' if up else ' (normal when no agent is open; it starts with the agent)'))
+    return 0 if ok else 1
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog='hypnos', description='Layered agent memory that sleeps and shows its evidence.')
     sub = ap.add_subparsers(dest='cmd', required=True)
     s = sub.add_parser('serve'); s.add_argument('--host'); s.add_argument('--port', type=int)
     sub.add_parser('mcp')
+    sub.add_parser('check')
     h = sub.add_parser('hook'); h.add_argument('agent', choices=['claude', 'generic']); h.add_argument('event', nargs='?', default='')
     h.add_argument('payload', nargs='?', help='event JSON, if not given on stdin')
     cp = sub.add_parser('chat-proxy'); cp.add_argument('--upstream', required=True); cp.add_argument('--port', type=int, default=7440)
@@ -48,8 +70,14 @@ def main(argv=None):
         from .daemon import serve
         return serve(a.host, a.port)
     if a.cmd == 'mcp':
-        from .mcp_server import main as mcp_main
+        try:
+            from .mcp_server import main as mcp_main
+        except ImportError as ex:                  # v0.9.7: say why, instead of the agent just showing "failed"
+            print(f'hypnos: the memory tools are not installed ({ex}). Fix: {REINSTALL}', file=sys.stderr)
+            return 1
         return mcp_main()
+    if a.cmd == 'check':
+        return check()
     if a.cmd == 'hook':
         from .hooks import claude, generic
         return (claude if a.agent == 'claude' else generic)(a.event, a.payload)

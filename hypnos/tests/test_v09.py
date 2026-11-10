@@ -401,10 +401,10 @@ def test_service_reloads_changed_config(tmp_path, monkeypatch):
 def test_long_chat_notice_once_per_step(cfg):
     svc = Service(cfg)
     m = svc.mem('x', 'coding')
-    assert svc.long_chat_note(m, 's1', 90_000) == ''
-    assert '160k tokens' in svc.long_chat_note(m, 's1', 160_000)
-    assert svc.long_chat_note(m, 's1', 170_000) == ''                            # same 50k step: said already
-    assert '210k' in svc.long_chat_note(m, 's1', 210_000)
+    assert svc.long_chat_note(m, 's1', 40) == ''
+    assert '55%' in svc.long_chat_note(m, 's1', 55)
+    assert svc.long_chat_note(m, 's1', 58) == ''                                  # same 10% step: said already
+    assert '62%' in svc.long_chat_note(m, 's1', 62)
 
 
 def test_context_tokens_from_transcript(tmp_path):
@@ -417,6 +417,7 @@ def test_context_tokens_from_transcript(tmp_path):
                                                      'cache_creation_input_tokens': 500}}}]), encoding='utf-8')
     assert hooks._context_tokens(str(t)) == 120510
     assert hooks._context_tokens(None) == 0
+    assert hooks._context_window('no-such-session', str(t)) == 0             # unknown window: no notice, never a wrong one
 
 
 def test_config_with_bom_still_loads(tmp_path, monkeypatch):
@@ -424,3 +425,32 @@ def test_config_with_bom_still_loads(tmp_path, monkeypatch):
     monkeypatch.setenv('HYPNOS_HOME', str(tmp_path))
     (tmp_path / 'config.toml').write_bytes(b'\xef\xbb\xbfprompt_tokens = 500\n')   # what PowerShell's utf8 writes
     assert load_config().prompt_tokens == 500
+
+
+def test_user_rules_are_shared_with_every_project(cfg, monkeypatch):
+    """v0.9.7: a rule the user states in one folder's chat reaches chats started in any other folder."""
+    import json
+
+    class RuleWriter(FakeWriter):
+        def complete(self, prompt, attachments=()):
+            if 'Return ONLY a JSON array' in prompt and 'everywhere' in prompt:
+                return json.dumps([
+                    {'claim': 'The user wants every email draft shown before it is sent', 'kind': 'convention',
+                     'quote': 'always show me the email draft before sending', 'entities': ['email'], 'everywhere': True},
+                    {'claim': 'The site build uses the folder dist_site', 'kind': 'convention',
+                     'quote': 'always show me the email draft before sending', 'entities': ['dist_site'], 'everywhere': True}])
+            return super().complete(prompt, attachments)
+
+    monkeypatch.setattr('hypnos.engine.make_writer', lambda c: RuleWriter())
+    svc = Service(cfg)
+    svc.handle('/log', {'space': 'code-site', 'profile': 'coding', 'session': 's1', 'role': 'user',
+                        'content': 'always show me the email draft before sending'})
+    svc.handle('/sleep', {'space': 'code-site', 'profile': 'coding', 'session': 's1', 'wait': True})
+    shared = [f['claim'] for f in svc.mem('global').store.q("SELECT claim FROM facts WHERE status='active'")]
+    assert any('email draft' in c for c in shared)
+    # a brand-new folder with no memory of its own still gets the rule when it is relevant
+    r = svc.handle('/recall', {'space': 'code-other', 'profile': 'coding', 'session': 's2',
+                               'query': 'write the email draft to the client'})
+    assert 'email draft' in r['context']
+    # sharing the same rule again does not store it twice
+    assert svc.share('The user wants every email draft shown before it is sent') is None

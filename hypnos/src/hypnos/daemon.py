@@ -15,6 +15,7 @@ STOP_AFTER = 90                # v0.9: no open agent and no activity this long -
 IDLE_SLEEP_MINUTES = 10        # sleep trigger: idle for this long with unconsolidated log (v0.9: was 30)
 MAX_AWAKE_ROWS = 150           # sleep trigger: this many unconsolidated rows (v0.9: was 400)
 GLOBAL_SPACE = 'global'        # v0.9: things the user wants remembered in every project
+SHARED_HEAD = "[the user's rules and preferences from all projects]"   # v0.9.7, also in engine.only_new
 
 
 class Service:
@@ -43,6 +44,8 @@ class Service:
             m = self.mems.get(space)
             if m is None or m.profile.name != profile and profile != 'generic':
                 m = self.mems[space] = Memory(space, profile, cfg=self.cfg)
+                if space != GLOBAL_SPACE:
+                    m.on_shared = self.share
                 m.fast_async = True               # logging never waits on the real-time fact path
                 self.view_jobs.put(space)         # have the cleanup list ready before anyone asks
             return m
@@ -64,18 +67,38 @@ class Service:
             self.cfg = load_config()
             self.mems.clear()                     # rebuilt on next use with the new writer and System One settings
 
-    def long_chat_note(self, m, session, tokens):
-        """v0.9.6: a chat that has grown very long re-reads all of itself on every reply. Say so once per 50k tokens."""
-        limit = self.cfg.long_chat_tokens
-        if not limit or not session or tokens < limit:
+    def long_chat_note(self, m, session, percent):
+        """v0.9.7: the chat has used more than long_chat_percent of its model's context window. Say so once per 10%."""
+        limit = self.cfg.long_chat_percent
+        if not limit or not session or percent <= limit:
             return ''
-        step = str(tokens // 50000)
+        step = str(int(percent) // 10)
         if m.store.note('longchat:' + session) == step:
             return ''
         m.store.note('longchat:' + session, step)
-        return (f'This chat is now about {tokens // 1000}k tokens, and every reply re-reads all of it. Tell the user in one '
-                'line that starting fresh (/clear, then "carry on") or /compact would make each reply much cheaper; '
-                'Hypnos keeps what matters for the next chat.')
+        return (f'This chat has used about {int(percent)}% of its context window, and every reply re-reads all of it. '
+                'Tell the user in one line that starting fresh (/clear, then "carry on") or /compact would make each '
+                'reply much cheaper; Hypnos keeps what matters for the next chat.')
+
+    def share(self, claim, session='default'):
+        """v0.9.7: a rule or preference the user stated in one project goes to the memory every project reads too.
+        Before, it stayed in the folder's own memory, so a chat started in another folder never saw it."""
+        g = self.mem(GLOBAL_SPACE)
+        if g._restated({'claim': claim}):
+            return None
+        fid = g.pin(claim, session)
+        self.changed(GLOBAL_SPACE)
+        return fid
+
+    def shared_for(self, query, k=5):
+        """v0.9.7: the user's rules from every project that match this message (plain search, no model call)."""
+        try:
+            rows = self.mem(GLOBAL_SPACE).store.search_facts(query, k)
+        except Exception:
+            return ''
+        if not rows:
+            return ''
+        return SHARED_HEAD + '\n' + '\n'.join('- ' + r['claim'] for r in rows)
 
     def changed(self, space):
         """Memory content changed: rebuild the cleanup list in the background."""
@@ -183,13 +206,20 @@ class Service:
             session = d.get('session')
             self.touch(space, session)
             others = self.others_now(m, space, session)
-            notice = self.long_chat_note(m, session, int(d.get('context_tokens') or 0))
+            notice = self.long_chat_note(m, session, float(d.get('context_percent') or 0))
             if not m.has_memory_beyond(session):                       # v0.9: nothing outside this conversation yet
-                return {'context': '', 'level': 'empty', 'others': others, 'notice': notice}
+                shared = self.shared_for(d['query']) if space != GLOBAL_SPACE else ''   # v0.9.7: a new folder still gets the rules
+                if shared and d.get('fresh_only'):
+                    shared = m.only_new(session, shared)
+                return {'context': shared, 'level': 'shared' if shared else 'empty', 'others': others, 'notice': notice}
             if d.get('gate') and not m.needs_memory(d['query']):
                 return {'context': '', 'level': 'skipped', 'others': others, 'notice': notice}
             budget = int(d.get('budget') or (self.cfg.prompt_tokens if d.get('fresh_only') else 6000))
             r = m.recall(d['query'], budget, session=session, live=self.live_sessions(space)).as_dict()
+            if space != GLOBAL_SPACE:
+                shared = self.shared_for(d['query'])
+                if shared:
+                    r['context'] = (r['context'] + '\n\n' + shared) if r.get('context') else shared
             if d.get('fresh_only'):                                    # v0.9.6: per-message memory: nothing given twice
                 r['context'] = m.only_new(session, r['context'])
                 r['tokens'] = len(r['context']) // 4

@@ -639,8 +639,11 @@ wheels = [
 
 [[package]]
 name = "hypnos"
-version = "0.9.0"
+version = "0.9.7"
 source = { editable = "." }
+dependencies = [
+    { name = "mcp" },
+]
 
 [package.optional-dependencies]
 all = [
@@ -667,6 +670,7 @@ vectors = [
 requires-dist = [
     { name = "fastembed", marker = "extra == 'all'", specifier = ">=0.3" },
     { name = "fastembed", marker = "extra == 'vectors'", specifier = ">=0.3" },
+    { name = "mcp", specifier = ">=1.2" },
     { name = "mcp", marker = "extra == 'all'", specifier = ">=1.2" },
     { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.2" },
     { name = "numpy", marker = "extra == 'all'" },

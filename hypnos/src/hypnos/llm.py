@@ -159,7 +159,7 @@ class OpenAIWriter(Writer):
         body = prompt + ''.join(f'\n\n--- attached file {i + 1} ---\n{a}' for i, a in enumerate(attachments))
         req = urllib.request.Request(self.url, method='POST', data=json.dumps(
             {'model': self.model, 'messages': [{'role': 'user', 'content': body}], 'temperature': 0}).encode(),
-            headers={'Content-Type': 'application/json', **({'Authorization': 'Bearer ' + self.key} if self.key else {})})
+            headers={'Content-Type': 'application/json', 'User-Agent': 'hypnos-memory/0.9', **({'Authorization': 'Bearer ' + self.key} if self.key else {})})
         with urllib.request.urlopen(req, timeout=300) as r:
             return json.loads(r.read())['choices'][0]['message']['content'].strip()
 
@@ -201,7 +201,7 @@ class ChainWriter(Writer):
     next one takes over, so sleep never depends on one model. Bigger, paid models come last, used only if every
     cheaper one is down. Shared by every memory space in the process."""
     name = 'chain'
-    COOLDOWN = 1800                       # seconds a failed writer rests before it is tried again
+    COOLDOWN = 180                        # seconds a failed writer rests before it is tried again (was 1800; 3 min since 2026-11-07)
     down: dict = {}                       # link -> time it failed
 
     def __init__(self, cfg: Config):
