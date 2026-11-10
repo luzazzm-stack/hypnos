@@ -209,4 +209,4 @@ See [CHANGELOG.md](CHANGELOG.md), [SECURITY.md](SECURITY.md) and [CONTRIBUTING.m
 
 ## License
 
-Copyright (c) 2026 Luza Maharjan (GitHub: luzazzm-stack). Released under the [MIT License](LICENSE).
+Copyright (c) 2026 Luza Maharjan (GitHub: luzazzm-stack). Released under the [MIT License](LICENSE). Third-party parts (for example the LoCoMo dataset in benchmark/locomo) keep their own licenses.
