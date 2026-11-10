@@ -6,7 +6,7 @@
 <title>Architecture: evidence-linked memory with sleep consolidation</title>
 <meta name="author" content="Luza Maharjan">
 <meta name="copyright" content="© 2026 Luza Maharjan. MIT License.">
-<meta name="description" content="Architecture reference v0.8 for a long-running LLM agent with a hierarchical, evidence-linked memory (time layers plus small, medium and big topic summaries), an offline consolidation (sleep) phase, a trust order, code-aware evidence, and Jev as the gate and judge for typed decisions. A machine-readable JSON spec is in the element with id architecture-spec.">
+<meta name="description" content="Architecture reference (design v0.8, current release v0.9.7) for a long-running LLM agent with a hierarchical, evidence-linked memory (time layers plus small, medium and big topic summaries), an offline consolidation (sleep) phase, a trust order, code-aware evidence, and Jev as the gate and judge for typed decisions. A machine-readable JSON spec is in the element with id architecture-spec.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -414,7 +414,7 @@ footer { margin-top: 88px; border-top: 1px solid var(--line); padding: 24px 0 56
 </div>
 
 <details class="changes" id="changes">
-  <summary>What changed in v0.8, v0.7, v0.6, v0.5, v0.4 and v0.3 (all tested)</summary>
+  <summary>What changed in v0.8, v0.7, v0.6, v0.5, v0.4 and v0.3 (all tested; v0.9 to v0.9.7 are in the CHANGELOG)</summary>
   <p class="muted" style="margin-top:10px"><b>v0.8</b>, recall redesigned around Jev, tested on LoCoMo in section 10 (55% with ~600 tokens of context, first):</p>
   <ol>
     <li><b>Code gathers, Jev decides.</b> Code collects candidates from every layer: the three summary levels, hybrid-ranked facts and raw messages, and all facts about the people named. Jev then answers dozens of typed questions in parallel (free, one round).</li>
@@ -450,7 +450,7 @@ footer { margin-top: 88px; border-top: 1px solid var(--line); padding: 24px 0 56
   </ol>
   <p class="muted" style="margin-top:12px"><b>v0.3</b>, tested in section 10 (83%):</p>
   <ol>
-    <li><b>Jev has two roles.</b> The <i>gate</i> advises while awake; the <i>judge</i> answers bounded questions during sleep (verify, link, topic, entity, contradiction type, importance, drift). 17 typed questions in total, section 6.</li>
+    <li><b>Jev has two roles.</b> The <i>gate</i> advises while awake; the <i>judge</i> answers bounded questions during sleep (verify, link, topic, entity, contradiction type, importance, drift). 21 typed questions in total (G1–G11, J1–J10), section 6.</li>
     <li><b>Decision log and shadow mode.</b> Every Jev answer is logged. Each question starts in shadow next to the LLM and goes live only after it agrees often enough.</li>
     <li><b>Facts have a validity window.</b> <code>valid_from</code> and <code>valid_to</code>, so "what was true in March?" has an answer and not every contradiction is a replacement.</li>
     <li><b>Entities.</b> A table of people, files, symbols, services and configs. Mentions are resolved to entities during sleep.</li>
@@ -983,12 +983,15 @@ unarchive on any recall hit</code></pre>
       <tr><td><code>archive_threshold</code></td><td><span class="val">0.25</span></td><td>Retention score below which a node is archived</td></tr>
       <tr><td><code>period_min_days</code></td><td><span class="val">3</span></td><td>Distinct dates with sessions needed before a closed week gets a period node</td></tr>
       <tr><td><code>core_regen_days</code></td><td><span class="val">7</span></td><td>How often the core is regenerated</td></tr>
-      <tr><td><code>gate_min_probability</code></td><td><span class="val">0.80</span></td><td>Awake: below this, the gate's question goes to the reasoning model</td></tr>
+      <tr><td><code>gate_min_probability</code></td><td><span class="val">0.85</span></td><td>Awake: below this, the gate's question goes to the reasoning model</td></tr>
       <tr><td><code>judge_min_probability</code></td><td><span class="val">0.85</span></td><td>Asleep: below this, the judge's question goes to an LLM</td></tr>
       <tr><td><code>jev_timeout_ms</code></td><td><span class="val">800</span></td><td>After this, fall back as if the probability were low</td></tr>
       <tr><td><code>jev_promote_agreement</code></td><td><span class="val">0.90</span></td><td>Agreement with the LLM needed to take a question live</td></tr>
       <tr><td><code>jev_promote_min_samples</code></td><td><span class="val">200</span></td><td>Shadow decisions needed before promotion is considered</td></tr>
       <tr><td><code>export_path</code></td><td><span class="val">memory.md</span></td><td>Where the readable export is written</td></tr>
+      <tr><td><code>prompt_tokens</code></td><td><span class="val">800</span></td><td>Most memory added to one message (v0.9.6); a chat never gets the same item twice</td></tr>
+      <tr><td><code>long_chat_percent</code></td><td><span class="val">50</span></td><td>Past this share of the model's context window, the agent suggests /clear or /compact (v0.9.7)</td></tr>
+      <tr><td><code>stay_running</code></td><td><span class="val">false</span></td><td>false: the service stops ~90 s after the last agent closes; true keeps it on (servers, robots)</td></tr>
     </tbody>
   </table>
   </div>
@@ -1015,10 +1018,10 @@ unarchive on any recall hit</code></pre>
 
 <!-- 10 -->
 <section class="block" id="results" aria-labelledby="h-results">
-  <div class="sec-head"><span class="badge-ic g"><svg class="ic"><use href="#i-check"/></svg></span><div><div class="num">10</div><h2 id="h-results">Test results <span class="pill g" style="vertical-align:middle">latest: v0.8 · LoCoMo 73% with Opus 5.5 · ~610 tokens</span></h2></div></div>
-  <p class="sec-intro"><b>Latest run (v0.9, 14 October 2026):</b> v0.9 ties v0.8 at 60.5% on the same 200 LoCoMo questions; v0.9.5 to v0.9.7 have not been re-run yet. <b>Best comparison (v0.8, 29 September 2026):</b> on LoCoMo, a standard benchmark of 200 questions over long chats, v0.8 scores <b>73% with Claude Opus 5.5 answering</b>, ahead of Mem0 (70%) and GBrain (67%), while sending the least context: <b>~610 tokens per question</b> (Mem0 ~1,130, GBrain ~3,980). With Muse Spark 1.3, a small free model, answering, the order is the same: v0.8 55%, Mem0 51%, GBrain 51%. Grading was done by Claude Haiku 4.5 in both runs. The results below go from newest to oldest; the first test on 15 real coding sessions (v0.3 to v0.6) has not been rerun with v0.8 yet.</p>
+  <div class="sec-head"><span class="badge-ic g"><svg class="ic"><use href="#i-check"/></svg></span><div><div class="num">10</div><h2 id="h-results">Test results <span class="pill g" style="vertical-align:middle">best: v0.8 · LoCoMo 73% with Opus 5.5 · ~610 tokens</span></h2></div></div>
+  <p class="sec-intro"><b>Latest run (v0.9, 14 October 2026):</b> v0.9 ties v0.8 at 60.5% on the same 200 LoCoMo questions; v0.9.5 to v0.9.7 have not been re-run yet. <b>Best comparison (v0.8, 29 September 2026):</b> on LoCoMo, a standard benchmark of 200 questions over long chats, v0.8 scores <b>73% with Claude Opus 5.5 answering</b>, ahead of Mem0 (70%) and GBrain (67%), while sending the least context: <b>~610 tokens per question</b> (Mem0 ~1,130, GBrain ~3,980). With Muse Spark 1.3, a small free model, answering, the order is the same: v0.8 55%, Mem0 51%, GBrain 51%. Grading was done by Claude Haiku 4.5 in both runs. The results below go from newest to oldest; the first test on 15 real coding sessions (v0.3 to v0.6) has not been rerun since v0.6.</p>
 <!-- bench:opus:start -->
-  <h3 id="opus">Latest: answered by Claude Opus 5.5 (medium effort), graded by Claude Haiku 4.5</h3>
+  <h3 id="opus">Best comparison: answered by Claude Opus 5.5 (medium effort), graded by Claude Haiku 4.5</h3>
   <p class="narrow">The same 200 LoCoMo questions, answered by Claude Opus 5.5 (medium effort) instead of the small free model, so the scores sit on the same scale as published results. Each system's context was rebuilt; Claude Haiku graded all four answers to each question blind and side by side (29 September 2026).</p>
   <div class="result-grid">
     <div class="result-card">
@@ -1291,12 +1294,12 @@ unarchive on any recall hit</code></pre>
     <li>v0.4 to v0.6 were designed after seeing earlier results on these same questions. Plain opencode covers 24 of the 60.</li>
     <li>Reduced prototype: fixed-size episodes, no entities, trust order, validity windows or incremental rebuilds. One run.</li>
   </ul>
-  <p class="narrow muted">Harness and raw numbers: <code>~\memtest</code> (<code>bench.py</code>, <code>bench_e.py</code>, <code>bench_f.py</code>, <code>bench_g.py</code>, <code>bench_h.py</code>, <code>out/report_h.json</code>). Every call is cached, so the test can be rerun or extended cheaply.</p>
+  <p class="narrow muted">Harness and raw numbers: <code>benchmark/sessions</code> in the repository (<code>bench.py</code>, <code>bench_e.py</code>, <code>bench_f.py</code>, <code>bench_g.py</code>, <code>bench_h.py</code>, <code>out/report_h.json</code>). Every call is cached, so the test can be rerun or extended cheaply.</p>
 
   <!-- bench:own:end -->
 <h3>Next</h3>
   <ol class="build">
-    <li class="first"><div class="bn"><span class="pill g">most important</span></div><b>Leaner facts, narrower topics</b>v0.8 leads LoCoMo (73% with Opus 5.5, ~610 tokens; below). Next: faster search (fewer Jev round trips, skip search when a message needs no memory, caching), then short self-contained facts and narrower chat topics (v0.9). Python stays the main engine; a Rust version is kept for later.</li>
+    <li class="first"><div class="bn"><span class="pill g">most important</span></div><b>Leaner facts, narrower topics</b>v0.8 leads LoCoMo (73% with Opus 5.5, ~610 tokens; below). Next: faster search (fewer Jev round trips, skip search when a message needs no memory, caching), then short self-contained facts and narrower chat topics. Python stays the main engine; a Rust version is kept for later.</li>
     <li><div class="bn"></div><b>Finish plain opencode</b>Run its remaining 36 questions so the comparison covers all 60.</li>
     <li><div class="bn"></div><b>Cheaper build</b>A cheaper extractor model and lazily written medium and big summaries.</li>
     <li class="last"><div class="bn"><span class="pill y">Jev</span></div><b>Promote Jev</b>Verify and topic choice live, with thresholds tuned from the decision log.</li>
@@ -1323,7 +1326,7 @@ unarchive on any recall hit</code></pre>
 
 </main>
 
-<footer>Architecture v0.8, 29 September 2026 (v0.7: 29 September; v0.6: 26 September; v0.5 to v0.2: 25 September; v0.1: 21 September 2026). Companion to the research spec (keep / change / ditch, experiment design, risks).<br><br><b>© 2026 Luza Maharjan.</b> Designed and written by Luza Maharjan, first published 21 September 2026. Released under the MIT License: copies must keep this copyright notice.</footer>
+<footer>Architecture v0.8, 29 September 2026, with rules R16–R18 from v0.9.5; current release v0.9.7, 10 November 2026 (v0.7: 29 September; v0.6: 26 September; v0.5 to v0.2: 25 September; v0.1: 21 September 2026). Companion to the research spec (keep / change / ditch, experiment design, risks).<br><br><b>© 2026 Luza Maharjan.</b> Designed and written by Luza Maharjan, first published 21 September 2026. Released under the MIT License: copies must keep this copyright notice.</footer>
 
 </div>
 
@@ -1333,6 +1336,7 @@ unarchive on any recall hit</code></pre>
   "author": "Luza Maharjan",
   "copyright": "© 2026 Luza Maharjan. First published 2026-09-21. Released under the MIT License (keep this copyright notice in copies).",
   "version": "0.8",
+  "current_release": "0.9.7 (2026-11-10)",
   "changes_v0_8": [
     "Recall is Jev-routed: code gathers candidates from every layer (three summary levels, hybrid-ranked facts and raw messages, entity facts); Jev answers typed questions about them in parallel.",
     "Jev classifies the question: overview, single_fact, list, when, exact_value.",
@@ -1346,8 +1350,10 @@ unarchive on any recall hit</code></pre>
     "Entity gather: all facts about the people and things named in the question, ranked by relevance.",
     "The recall gate stops early only when the evidence itself answers the question (R15 applied to every question)."
   ],
-  "date": "2026-09-26",
+  "date": "2026-09-29",
   "previous_versions": [
+    "0.7 (2026-09-29)",
+    "0.6 (2026-09-26)",
     "0.5 (2026-09-25)",
     "0.4 (2026-09-25)",
     "0.3 (2026-09-25)",
@@ -2237,7 +2243,7 @@ unarchive on any recall hit</code></pre>
     "archive_threshold": 0.25,
     "period_min_days": 3,
     "core_regen_days": 7,
-    "gate_min_probability": 0.8,
+    "gate_min_probability": 0.85,
     "judge_min_probability": 0.85,
     "jev_timeout_ms": 800,
     "jev_promote_agreement": 0.9,

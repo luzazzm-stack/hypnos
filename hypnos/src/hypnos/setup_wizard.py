@@ -4,8 +4,9 @@ Run by the one-line installers (install.sh / install.ps1), or by hand. Works on 
 Every config file it changes is backed up first (<file>.bak-hypnos), and `hypnos setup --uninstall` undoes it.
 
 Non-interactive (for coding agents installing it): hypnos setup --yes [--systemone jev|laya|none] [--jev-key KEY]
-[--agents claude,opencode,...]. The same options can come from environment variables: HYPNOS_SETUP_YES=1,
-HYPNOS_SETUP_SYSTEMONE, TYPESAFE_API_KEY, HYPNOS_SETUP_AGENTS."""
+[--agents claude,opencode,...] [--memory-model SPEC1,SPEC2]; --list-models prints the usable models as JSON. The same
+options can come from environment variables: HYPNOS_SETUP_YES=1, HYPNOS_SETUP_SYSTEMONE, TYPESAFE_API_KEY,
+HYPNOS_SETUP_AGENTS, HYPNOS_SETUP_MEMORY_MODEL. For opencode, the plugin matching its major version (1.x or 2.x) is installed."""
 from __future__ import annotations
 import json
 import os
@@ -458,7 +459,7 @@ def main(args):
         say('Memory is disconnected. Your saved memory stays in ~/.hypnos (delete that folder to erase it).')
         return 0
 
-    say('\nHypnos v0.9 (memory architecture) setup\n')
+    say('\nHypnos (memory architecture) setup\n')
     if not agents:
         say('No coding agent found. Install Claude Code, opencode, Codex, Gemini CLI, Cursor or Windsurf, then run '
             '`hypnos setup` again. For robots and automation, see the README (Python adapters).')

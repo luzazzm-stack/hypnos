@@ -11,7 +11,7 @@ Hypnos supports Python 3.10 and newer; the installers use 3.12. The tests run fu
 
 ## Ground rules
 
-- **Follow the architecture rules R1–R15** in [docs/architecture.html](docs/architecture.html). A change that breaks one is a design change: update the spec in the same pull request.
+- **Follow the architecture rules R1–R18** in [docs/architecture.html](docs/architecture.html). A change that breaks one is a design change: update the spec in the same pull request.
 - **Memory must never break an agent.** Hooks, plugins and proxies swallow errors and time out quickly.
 - **Nothing leaves the machine unredacted.** New logging paths must go through `Memory.log` (the redactor).
 - **Every typed decision needs a plain-code fallback,** so the engine works without Jev.

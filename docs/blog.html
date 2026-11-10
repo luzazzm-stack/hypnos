@@ -8,7 +8,7 @@
 <meta name="copyright" content="© 2026 Luza Maharjan. MIT License.">
 <meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.7, with every benchmark against Mem0, GBrain and my own earlier versions.">
 <meta property="og:title" content="Building Hypnos: memory for AI agents that sleeps on it">
-<meta property="og:description" content="Nine versions, every benchmark, including the one where my new version lost by 10 points.">
+<meta property="og:description" content="Nine versions, three releases from daily use, every benchmark, including the one where a new version lost by 10 points.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -76,9 +76,9 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <nav><div class="wrap"><b>Hypnos</b><a href="index.html">Architecture</a><a href="benchmarks.html">Benchmarks</a><a class="on" href="blog.html">Blog</a><a href="https://github.com/luzazzm-stack/hypnos">GitHub</a></div></nav>
 <main class="wrap">
 <header>
-  <div class="kicker">October 2026 · Luza Maharjan</div>
+  <div class="kicker">October 2026, updated 10 November 2026 · Luza Maharjan</div>
   <h1>Building Hypnos: memory for AI agents that sleeps on it</h1>
-  <p class="lede">Nine versions in three weeks, every benchmark I ran, and the one where my newest version lost by ten points.</p>
+  <p class="lede">Nine versions in three weeks, three releases from daily use since, every benchmark I ran, and the one where a new version lost by ten points.</p>
 </header>
 
 <p>I run a lot of coding agents, often five or six opencode sessions and a few Claude Code sessions at the same time, on a laptop with 7.5 GB of RAM. Every new session starts knowing nothing about the ones before it, so the same ports, folders and decisions get explained again.</p>
@@ -101,7 +101,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 
 <p>Most of the decisions in a memory system are yes/no or pick-one questions. Does this quote support this claim? Does the new fact replace the old one? Is this memory relevant to the question? Asking a chat model these costs a full LLM call each time. A System One model, like <a href="https://typesafe.ai">Jev</a> or the open-weights <a href="https://laya-ai.com">Laya</a>, answers them in one fast step instead of writing text. In my tests Jev made these calls 7 to 15 times faster than the chat model and agreed with it 76 to 90% of the time. Without one, Hypnos still works. The memory model you pick does those checks while saving, a little more accurately in places, but with more tokens.</p>
 
-<h2>Nine versions, and a bug-fix release</h2>
+<h2>Nine versions, and three releases from real use</h2>
 
 <div class="scroll"><table>
 <thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
@@ -116,8 +116,8 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <tr><td>v0.8</td><td>Sep 29</td><td>System One routes each question and picks the smallest context that answers</td></tr>
 <tr class="me"><td>v0.9</td><td>Oct 15</td><td>Usable by anyone: one-line install, works with any coding agent, cleanup, no windows</td></tr>
 <tr class="me"><td>v0.9.5</td><td>Oct 16</td><td>Fixes from a day of real use: never a duplicate, small memory, housekeeping stays out of memory</td></tr>
-<tr class="me"><td>v0.9.7</td><td>Nov 10</td><td>Your rules reach every project, opencode v2, MIT License</td></tr>
 <tr class="me"><td>v0.9.6</td><td>Oct 19</td><td>Smaller chats: less memory per message, never repeated, a long-chat notice</td></tr>
+<tr class="me"><td>v0.9.7</td><td>Nov 10</td><td>Your rules reach every project, opencode v2, MIT License</td></tr>
 </tbody></table></div>
 
 <p>v0.1 and v0.2 were designs on paper, so they have no scores. Everything from v0.3 on was measured.</p>

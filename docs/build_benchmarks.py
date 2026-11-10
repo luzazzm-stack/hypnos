@@ -1,4 +1,7 @@
-"""Builds docs/benchmarks.html: every benchmark report and result on one page.
+"""RETIRED (2026-11-10): benchmarks.html has been edited by hand since v0.9 (v0.9 section, MIT footer).
+Running this script would undo those edits; edit docs/benchmarks.html directly instead.
+
+Builds docs/benchmarks.html: every benchmark report and result on one page.
 
 Reuses the style, icon sprite and theme switch of docs/architecture.html, the "Test results" section of that
 page (own-sessions test and the agentmem-vs-keyword LoCoMo run), and the head-to-head report written by
@@ -51,7 +54,7 @@ for cut in ('<h3>What it showed at the time (v0.6)</h3>', '<h3>What it shows</h3
     if cut in own:
         own = own[:own.index(cut)]
 own = ('<p class="sec-intro">The first test: 60 questions from 15 real Claude Code sessions, run with versions v0.3 to v0.6 '
-       '(25–26 September 2026). It has not been rerun with v0.8 yet.</p>') + own
+       '(25–26 September 2026). It has not been rerun since v0.6.</p>') + own
 loc = block('locomo06')
 if '<div class="facts">' in loc:
     loc = loc[:loc.index('<div class="facts">')]

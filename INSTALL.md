@@ -14,7 +14,7 @@ curl -fsSL https://agent-memory-architecture-chi.vercel.app/install.sh | sh
 irm https://agent-memory-architecture-chi.vercel.app/install.ps1 | iex
 ```
 
-It installs everything it needs (uv, and Python 3.12 through uv), connects every coding agent it finds (Claude Code, opencode, Codex, Gemini CLI, Cursor, Windsurf), asks which System One model to use, and starts the memory in the background. Restart your agent afterwards. `/memory-cleanup` lists every saved fact, numbered under its topic, and deletes the ones you pick.
+It installs everything it needs (uv, and Python 3.12 through uv), connects every coding agent it finds (Claude Code, opencode, Codex, Gemini CLI, Cursor, Windsurf), asks which System One model and memory model to use, starts the memory in the background, and finishes with `hypnos check`, which lists every part and how to fix anything missing (run it yourself any time memory seems to do nothing). Restart your agent afterwards. `/memory-cleanup` lists every saved fact, numbered under its topic, and deletes the ones you pick.
 
 Uninstall: `hypnos setup --uninstall`, then `uv tool uninstall hypnos`. Your saved memory stays in `~/.hypnos` until you delete that folder.
 

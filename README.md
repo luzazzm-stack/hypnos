@@ -96,9 +96,9 @@ flowchart LR
 | Original log | the topic's own log lines, word for word | ≤3,000 tokens |
 | Facts | verified claims, each with a quote, date, entities and validity window | per fact |
 
-It never saves an AI model's refusals ("the assistant can't do X") or its own output (cleanup lists, recalled memory), never blocks your agent, and keeps each project's memory separate: a session uses the memory of the folder it started in, even if it moves to another folder. Several sessions can run side by side; each knows what the others are doing and that their tasks are not its own.
+It never saves an AI model's refusals ("the assistant can't do X") or its own output (cleanup lists, recalled memory), never blocks your agent, and keeps each project's memory separate (except your own rules and preferences, which are shared with every project since v0.9.7): a session uses the memory of the folder it started in, even if it moves to another folder. Several sessions can run side by side; each knows what the others are doing and that their tasks are not its own.
 
-The full design (rules R1 to R18, the 20 typed decisions, parameters and a machine-readable JSON spec) is in **[docs/architecture.html](docs/architecture.html)**.
+The full design (rules R1 to R18, the 21 typed decisions, parameters and a machine-readable JSON spec) is in **[docs/architecture.html](docs/architecture.html)**.
 
 ### System One model
 
@@ -117,7 +117,7 @@ Writing facts and summaries needs an LLM. Hypnos isn't tied to one: setup lists 
 | Agent | How | Docs |
 |---|---|---|
 | **Claude Code** | hooks (wake, recall per prompt, log tools, sleep on compact/end), MCP tools, `/memory-cleanup` | [integrations/claude-code](integrations/claude-code/README.md) |
-| **opencode** | plugin (`chat.message`, system transform, tool logging), MCP tools, `/memory-cleanup` | [integrations/opencode](integrations/opencode/README.md) |
+| **opencode** | plugin for opencode 1.x and 2.x (setup installs the matching one: log, recall, tool logging), MCP tools, `/memory-cleanup` | [integrations/opencode](integrations/opencode/README.md) |
 | **Codex, Gemini CLI, Cursor, Windsurf** | MCP server plus instructions file (Codex `AGENTS.md`, Gemini hooks + `GEMINI.md`) | [integrations/coding-agents](integrations/coding-agents/README.md) |
 | **Normal chat** | OpenAI-compatible proxy for any chat app or SDK | [integrations/chat](integrations/chat/README.md) |
 | **Automation** | log steps and outcomes, recall before acting | [integrations/automation](integrations/automation/README.md) |
@@ -173,6 +173,7 @@ Everything, including per-question LoCoMo results and how each run was measured:
 
 ```
 hypnos setup            connect agents, pick models (--list-models, --memory-model, --uninstall)
+hypnos check            is every part installed? (memory tools, meaning search, service) and how to fix what is missing
 hypnos cleanup          the /memory-cleanup list (--apply "1-5, T2", --space NAME)
 hypnos mcp              MCP server (memory_recall, memory_remember, memory_note, cleanup tools, ...)
 hypnos hook ...         hook handler for Claude Code and other agents

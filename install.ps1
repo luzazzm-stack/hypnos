@@ -1,4 +1,4 @@
-# Hypnos v0.9 (memory architecture) installer for Windows (Windows 8.1, 10 and 11; Windows PowerShell 5.1 or PowerShell 7).
+# Hypnos (memory architecture) installer for Windows (Windows 8.1, 10 and 11; Windows PowerShell 5.1 or PowerShell 7).
 #
 #   irm https://agent-memory-architecture-chi.vercel.app/install.ps1 | iex
 #   (a coding agent installing it for you:  $env:HYPNOS_SETUP_YES=1; irm ... | iex)
@@ -22,7 +22,7 @@ function Fail($m) { Write-Host "Install failed: $m" -ForegroundColor Red; throw 
 function Have($c) { [bool](Get-Command $c -ErrorAction SilentlyContinue) }
 function Add-Path($d) { if ($d -and (Test-Path $d) -and ($env:Path -split ';' -notcontains $d)) { $env:Path = "$d;$env:Path" } }
 
-Say 'Hypnos v0.9: installing...'
+Say 'Hypnos: installing...'
 Add-Path "$HOME\.local\bin"; Add-Path "$HOME\.cargo\bin"
 
 # 1. uv (installs Python for us; no system Python needed)

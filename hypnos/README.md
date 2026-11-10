@@ -10,7 +10,7 @@ Use the one-line installer (see [INSTALL.md](../INSTALL.md)). By hand (Python 3.
 uv tool install --python 3.12 "./hypnos[mcp,vectors]"     # `hypnos` command on PATH
 hypnos setup                                              # connect your coding agents
 # or, as a library:
-pip install -e ".[all]"                                   # extras: mcp, vectors (fastembed + numpy)
+pip install -e ".[all]"                                   # the MCP package is always installed; extra: vectors (fastembed + numpy)
 ```
 
 ## Configure (`~/.hypnos/config.toml`, or `HYPNOS_*` environment variables)
@@ -21,7 +21,7 @@ pip install -e ".[all]"                                   # extras: mcp, vectors
 systemone = "jev"            # jev (hosted, key in ~/.typesafe/credentials or TYPESAFE_API_KEY) | laya (local laya-serve) | llm
 systemone_model = ""          # systemone = "llm": the model that makes the checks, e.g. "claude:haiku"; systemone = "laya": the checkpoint name to ask for
 jev = true                   # use the System One model at all
-writer = "auto"              # auto = the writer_chain below; or opencode | claude | codex | openai | fake
+writer = "auto"              # auto = the writer_chain below; or opencode | claude | openai | fake (codex only as a writer_chain entry)
 writer_chain = ["opencode:opencode/some-free-model", "openai:model@https://api.deepseek.com/v1#DEEPSEEK_API_KEY", "claude:haiku"]
 writer_parallel = 0          # 0 = automatic (1 under 12 GB RAM, else 3)
 vectors = true               # local bge-small meaning search
@@ -57,6 +57,7 @@ hypnos mcp                          MCP server over stdio
 hypnos hook claude <Event>          Claude Code hook handler
 hypnos hook generic <event>         any other agent with hooks
 hypnos setup [--yes] [--systemone jev|laya|none] [--list-models] [--memory-model ...] [--uninstall]
+hypnos check                        is every part installed and working? (memory tools, meaning search, service)
 hypnos cleanup [--apply "1-5, T2"] [--space NAME]   the /memory-cleanup list: every fact numbered under its topic
 hypnos chat-proxy --upstream URL    memory for any OpenAI-compatible chat client
 hypnos log|recall|sleep|pin|forget|status|export|wake --space S --profile P

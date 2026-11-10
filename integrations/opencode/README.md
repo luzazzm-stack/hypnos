@@ -31,6 +31,17 @@ Then add the MCP server to `~/.config/opencode/opencode.json`:
 
 ## How it maps to the architecture
 
+**opencode 2.x** (`hypnos-v2.ts`):
+
+| Plugin hook | Architecture step |
+|---|---|
+| session `context` | on a new user message: log it; **G1** gate, then **v0.8 recall**, at most 800 tokens and only items this session has not been given yet; add it to the system prompt |
+| tool `execute.after` | log the tool call and output, with `file:` evidence for file tools |
+
+It follows each session's folder (opencode's background service serves many folders), starts only one memory service when opencode loads it several times, never logs Hypnos's own memory-model runs, and honours `HYPNOS_HOME` / `HYPNOS_PORT` / `HYPNOS_EXE` if you want opencode's memory kept apart.
+
+**opencode 1.x** (`hypnos.ts`):
+
 | Plugin hook | Architecture step |
 |---|---|
 | `chat.message` | log the user's message; **G1** gate, then **v0.8 recall** (System One-routed: the smallest context that answers) once per message, at most 800 tokens and only items this session has not been given yet |

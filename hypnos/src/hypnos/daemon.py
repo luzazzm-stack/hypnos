@@ -132,7 +132,8 @@ class Service:
 
     def sleep_async(self, space, profile, session=None):
         """Queue a sleep. Many sessions (Claude Code, opencode, other agents) can ask at once; the queue runs them one
-        after another so the writer models are never hit in parallel, and the same request is never queued twice."""
+        after another (inside one sleep, up to writer_parallel writer calls run at once), and the same request is never
+        queued twice."""
         key = (space, session)
         with self.lock:
             if key in self.queued or (space, None) in self.queued:

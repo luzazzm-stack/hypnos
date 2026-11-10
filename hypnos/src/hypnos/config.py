@@ -16,7 +16,7 @@ class Config:
     home: Path = field(default_factory=lambda: Path(os.environ.get('HYPNOS_HOME', Path.home() / '.hypnos')))
     # writer LLM used during sleep: auto (the chain below) | opencode | claude | openai | fake
     writer: str = 'auto'
-    # v0.9: tried in order, cheapest first; a failing writer rests 30 min and the next takes over.
+    # v0.9: tried in order, cheapest first; a failing writer rests 3 min and the next takes over.
     # Free opencode models first, then small paid Claude (Haiku), then a bigger one only if all else is down.
     writer_chain: list = field(default_factory=lambda: [
         'opencode:opencode/mimo-v2.6-flash-free', 'opencode:opencode/nemotron-3.5-lightning-free',

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Hypnos v0.9 (memory architecture) installer for macOS and Linux.
+# Hypnos (memory architecture) installer for macOS and Linux.
 #
 #   curl -fsSL https://agent-memory-architecture-chi.vercel.app/install.sh | sh
 #   (a coding agent installing it for you:  ... | sh -s -- --yes)
@@ -24,7 +24,7 @@ fetch() {  # fetch URL FILE, with curl or wget
     else fail "neither curl nor wget is installed"; fi
 }
 
-say "Hypnos v0.9: installing..."
+say "Hypnos: installing..."
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 
 # 1. uv (installs Python for us; no system Python needed)

@@ -85,5 +85,5 @@ Running five Claude Code, opencode, Codex and Cursor sessions side by side is fi
 - Each session's own live messages are never recalled back to it. Other sessions' messages in the same project are, so agents see what the others decided.
 - Each session knows the others: with every prompt it's told which other sessions are working in the project right now and what each was asked, with a reminder that their tasks are not its own. Remembered items from those sessions are marked "from another session running now: not your task", and memory is always presented as background, never as instructions.
 - A session is consolidated (sleep) only after it has been quiet for 10 minutes or when it ends. Busy sessions are left alone.
-- Sleeps run one at a time across the whole machine, in a queue, so the writer models are never hit in parallel.
+- Sleeps run one at a time across the whole machine, in a queue; within one sleep, up to `writer_parallel` writer calls run at once (1 on machines under 12 GB of RAM, else 3).
 - Jev requests are capped at 24 in flight for all sessions together (`HYPNOS_JEV_MAX_IN_FLIGHT`).

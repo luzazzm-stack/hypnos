@@ -5,10 +5,11 @@
   hypnos hook claude <Event>           Claude Code hook handler (reads the event JSON on stdin)
   hypnos hook generic <event> [JSON]   any agent: start | prompt | tool | reply | compact | end
   hypnos chat-proxy --upstream URL     OpenAI-compatible proxy that gives any chat model memory
-  hypnos setup [--yes] [--systemone jev|laya|none] [--uninstall]   connect every coding agent on this machine
+  hypnos setup [--yes] [--systemone jev|laya|none] [--jev-key K] [--agents a,b] [--memory-model ...] [--list-models] [--uninstall]
+                                       connect every coding agent on this machine
   hypnos check                         is every part installed and working? (memory tools, meaning search, service)
-  hypnos cleanup [--apply "1-5, T2"]   the /memory-cleanup list for this folder's memory (via the service)
-  hypnos log|recall|sleep|pin|forget|status|export   work with a memory space by hand
+  hypnos cleanup [--apply "1-5, T2"] [--space NAME] [--hard]   the /memory-cleanup list for this folder's memory (via the service)
+  hypnos log|recall|sleep|pin|forget|status|export|wake   work with a memory space by hand
 """
 from __future__ import annotations
 import argparse

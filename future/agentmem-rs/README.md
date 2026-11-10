@@ -1,14 +1,14 @@
 # agentmem (Rust engine): frozen for the future
 
-> **Status: frozen at architecture v0.8 (29 September 2026), not maintained.** Python (`agentmem/`) is the main engine;
+> **Status: frozen at architecture v0.8 (29 September 2026), not maintained.** Python (`hypnos/`, formerly `agentmem/`) is the main engine;
 > design changes are made and tested there first. This Rust version is kept for later, for example to ship agentmem as one
-> self-contained program. To use it anyway: build it, put it on the PATH as `agentmem-rs` and set `AGENTMEM_ENGINE=rust`.
+> self-contained program. To use it anyway: build it, put it on the PATH as `agentmem-rs` (or set `AGENTMEM_RUST_EXE`) and set `HYPNOS_ENGINE=rust`.
 
 
 The agentmem memory engine (architecture v0.8) in Rust: one native program for storage, search, Jev-routed recall,
 sleep consolidation and the local memory service.
 
-It works with everything built for the Python engine, with nothing to change:
+It worked unchanged with the v0.8 integrations. Later Python-only features (cleanup, review, pause, shared rules, the agent check-in) are not in it:
 
 - **Same database:** the SQLite schema, full-text indexes and vector format are identical, so existing memories open as they are.
 - **Same service API:** HTTP on `127.0.0.1:7439` (`/log`, `/recall`, `/wake`, `/sleep`, `/pin`, `/correct`, `/forget`, `/status`, `/export`, `/ping`).
@@ -24,8 +24,8 @@ cargo build --release
 copy target\release\agentmem.exe %USERPROFILE%\.local\bin\agentmem-rs.exe
 ```
 
-When `agentmem-rs` is on the PATH, the Python client (`agentmem.client.ensure_running`) starts it instead of the
-Python service. Set `AGENTMEM_ENGINE=python` to force the Python engine.
+With `HYPNOS_ENGINE=rust` set and `agentmem-rs` on the PATH, the Python client (`hypnos.client.ensure_running`) starts it
+instead of the Python service. Without it, the Python engine runs (the default).
 
 ## Use
 
@@ -38,7 +38,7 @@ agentmem-rs status | wake | export --space code-myrepo
 agentmem-rs index-log --space code-myrepo --vectors  # meaning search over raw messages (older memories)
 ```
 
-Settings are the same as the Python engine: `~/.agentmem/config.toml`, overridable by `AGENTMEM_*` environment variables.
+Settings: the Rust engine still reads the pre-rename `~/.agentmem/config.toml` and `AGENTMEM_*` environment variables; the Python engine has moved to `~/.hypnos` and `HYPNOS_*`.
 Local meaning search uses bge-small-en-v1.5 (ONNX, CPU) and is built in by default (`--no-default-features` builds without it).
 
 ## Full LoCoMo benchmark, Rust vs Python (200 questions, 29 September 2026)

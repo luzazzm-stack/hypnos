@@ -1,7 +1,7 @@
 # Proof of authorship
 
 **Author:** Luza Maharjan
-**Work:** Evidence-linked agent memory architecture with sleep consolidation (small / medium / big topic summaries, original-log layer, Jev gate and judge), the `agentmem` engine, and its benchmark results.
+**Work:** Evidence-linked agent memory architecture with sleep consolidation (small / medium / big topic summaries, original-log layer, Jev gate and judge), the Hypnos engine (formerly `agentmem`), and its benchmark results.
 **Copyright:** © 2026 Luza Maharjan. Released under the MIT License (see [LICENSE](../LICENSE)); copies must keep this copyright notice.
 
 ## Timeline
@@ -20,6 +20,10 @@
 | 2026-09-29 21:00 +0545 | v0.8 page updated (next steps; Python main engine, Rust kept for later) |
 | 2026-09-29 12:20 +0545 | v0.8 page (LoCoMo 55% with ~600 tokens) published and archived |
 | 2026-09-29 11:08 +0545 | v0.7 page (LoCoMo 53%, head-to-head with Mem0 and GBrain) published and archived |
+| 2026-10-13 – 15 | v0.9: renamed Hypnos (was `agentmem`), one-line installers; public repo https://github.com/luzazzm-stack/hypnos created 2026-10-14 |
+| 2026-10-16 | v0.9.5: fixes from real use |
+| 2026-10-19 | v0.9.6: smaller chats |
+| 2026-11-10 | v0.9.7: shared rules, opencode v2; relicensed under the MIT License |
 
 ## Independent timestamps (Internet Archive)
 
@@ -77,4 +81,4 @@ Page with the Claude Opus 5.5 results (2026-09-29):
 22fe6ebc7af7908074a659984193a5049e40531a67a1b00fd2ff1bec82ca6734
 ```
 
-Later versions of the page get their own row here when they are published.
+Later versions get their own row here when they are published; CHANGELOG.md has the details of each.
