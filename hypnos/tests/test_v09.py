@@ -454,3 +454,76 @@ def test_user_rules_are_shared_with_every_project(cfg, monkeypatch):
     assert 'email draft' in r['context']
     # sharing the same rule again does not store it twice
     assert svc.share('The user wants every email draft shown before it is sent') is None
+
+
+def test_inferred_facts_and_missing_paths_are_labelled(cfg, tmp_path):
+    """v0.9.8: a fact the writer concluded is marked, and a file it names that is gone now is flagged (plain code)."""
+    import json
+
+    gone = tmp_path / 'build_output_v3.zip'
+
+    class OriginWriter(FakeWriter):
+        def complete(self, prompt, attachments=()):
+            if '"origin"' in prompt and 'Return ONLY a JSON array' in prompt:
+                return json.dumps([{'claim': f'The release archive is {gone}', 'kind': 'outcome',
+                                    'quote': 'release archive written', 'entities': ['release archive'], 'origin': 'inferred'}])
+            return super().complete(prompt, attachments)
+
+    mem = Memory('t', 'coding', cfg=cfg, writer=OriginWriter())
+    mem.log('release archive written', role='agent', session='old')
+    mem.sleep()
+    f = mem.store.q("SELECT * FROM facts WHERE status='active'")[0]
+    assert json.loads(f['meta'])['origin'] == 'inferred'
+    flags = mem.fact_flags(f)
+    assert 'inferred, not stated' in flags and 'not on this machine now' in flags
+    gone.write_text('x')
+    assert 'not on this machine' not in mem.fact_flags(f)
+
+
+def test_import_reads_claude_chats_and_text_files(cfg, tmp_path, monkeypatch):
+    import json
+    from hypnos import importer
+    monkeypatch.setattr('hypnos.importer.load_config', lambda: cfg)
+    chat = tmp_path / 'abc-123.jsonl'
+    lines = [{'type': 'user', 'sessionId': 'abc-123', 'cwd': str(tmp_path), 'timestamp': '2026-10-01T10:00:00Z',
+              'message': {'role': 'user', 'content': 'We deploy the site with deploy.mjs through the REST API'}},
+             {'type': 'assistant', 'sessionId': 'abc-123', 'timestamp': '2026-10-01T10:00:05Z',
+              'message': {'content': [{'type': 'thinking', 'thinking': 'x'}, {'type': 'text', 'text': 'Noted, REST API only.'}]}},
+             {'type': 'user', 'isMeta': True, 'message': {'content': '<system-reminder>hidden</system-reminder>'}},
+             {'type': 'user', 'message': {'content': 'Long-term memory (hypnos, space "x") ...'}}]
+    chat.write_text('\n'.join(json.dumps(x) for x in lines), encoding='utf-8')
+    note = tmp_path / 'notes.md'
+    note.write_text('# Notes\n\nThe backup drive is E:.\n\nDeploys go through the REST API.', encoding='utf-8')
+    session, cwd, turns = importer.claude_chat(chat)
+    assert session == 'abc-123' and [t[0] for t in turns] == ['user', 'agent'] and turns[0][2].startswith('2026-10-01')
+    got = importer.plan([tmp_path], space='code-x')
+    kinds = sorted(k for k, *_ in got)
+    assert kinds == ['chat', 'file'] and all(sp == 'code-x' for _, _, sp, _, _ in got)
+    assert importer.run([tmp_path], space='code-x', dry=True) == 0
+
+
+def test_path_check_has_no_false_alarms(mem, tmp_path):
+    """Real false alarms from the first day: a trailing comma, a command named without .exe, another user's home."""
+    import os
+    from pathlib import Path
+    tool = tmp_path / ('tool.exe' if os.name == 'nt' else 'tool')
+    tool.write_text('x')
+    assert mem.missing_paths(f'the tool is at {tool}, and runs fine') == []
+    if os.name == 'nt':
+        assert mem.missing_paths(f'the tool is at {tmp_path / "tool"}') == []
+    other = Path.home().parent / 'someone_else_xyz'
+    assert mem.missing_paths(f'on the other laptop the user is {other}') == []
+    assert mem.missing_paths(f'old output {tmp_path / "gone_file.txt"} was used') != []
+
+
+def test_restart_resumes_unsorted_sessions(cfg, monkeypatch):
+    """v0.9.8: after a restart, sessions with unsorted messages are queued again (the queue itself is in memory)."""
+    monkeypatch.setattr('hypnos.engine.make_writer', lambda c: FakeWriter())
+    svc = Service(cfg)
+    svc.handle('/log', {'space': 'code-a', 'profile': 'coding', 'session': 'old-chat', 'content': 'The port is 8443 for staging'})
+    svc2 = Service(cfg)                                   # a fresh service, as after a restart
+    m = svc2.mem('code-a', 'coding')
+    svc2.jobs = __import__('queue').Queue()
+    svc2.queued.clear()
+    svc2.resume('code-a', m)
+    assert ('code-a', 'old-chat') in svc2.queued

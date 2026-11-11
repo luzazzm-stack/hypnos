@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](hypnos/pyproject.toml)
 [![MCP](https://img.shields.io/badge/MCP-server-6E56CF)](integrations/claude-code/README.md)
-[![Version](https://img.shields.io/badge/version-0.9.7-2ea44f)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.9.8-2ea44f)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 ![Status](https://img.shields.io/badge/status-research%20preview-orange)
 
@@ -149,6 +149,7 @@ Writing facts and summaries needs an LLM. Hypnos isn't tied to one: setup lists 
 | v0.7 | 53% | ~3,100 tokens | evidence-first recall; ahead of Mem0 (51%) and GBrain (51%) in the same run |
 | v0.8 | 55% | ~600 tokens | System One routes each question to the smallest context that answers |
 | v0.9 | 60.5% (v0.8: 60.5% in the same run) | ~611 tokens | one-line install, any agent, any model, fast cleanup, parallel sleep, runs only while an agent is open. A first try with extra date instructions scored 47% and was reverted. |
+| v0.9.8 | not re-run yet | | `hypnos import` (past chats and files), stated/inferred facts, missing-file labels, STALE in the main recall, unsorted messages survive a restart |
 | v0.9.7 | not re-run yet | | your rules shared with every project, opencode v2 plugin, long-chat notice as a % of the window, 3-minute writer rest, Groq fix, `hypnos check`, MIT License |
 | v0.9.6 | not re-run yet | | smaller chats: at most 800 tokens of memory per message, never the same memory twice in a chat, a long-chat notice, agents told how memory works, service follows settings edits, setup writes full paths |
 | v0.9.5 | not re-run yet | | fixes from real use: never stores a fact twice, keeps coding memory small (only what a later session needs), housekeeping and its own output never remembered, every fact numbered in `/memory-cleanup`, one memory per session, says when System One is down |
@@ -174,6 +175,7 @@ Everything, including per-question LoCoMo results and how each run was measured:
 ```
 hypnos setup            connect agents, pick models (--list-models, --memory-model, --uninstall)
 hypnos check            is every part installed? (memory tools, meaning search, service) and how to fix what is missing
+hypnos import PATH...   start with your history: past Claude Code chats (~/.claude/projects) and text/Markdown files (--dry first)
 hypnos cleanup          the /memory-cleanup list (--apply "1-5, T2", --space NAME)
 hypnos mcp              MCP server (memory_recall, memory_remember, memory_note, cleanup tools, ...)
 hypnos hook ...         hook handler for Claude Code and other agents
@@ -204,7 +206,7 @@ This is a research preview. Known limits:
 - entity resolution is by name only
 - tested installs: Windows and Linux; macOS not yet tested
 - without a working System One (no key, or no credits left), its checks run on the memory model, which uses more tokens; Hypnos says so when it happens
-- v0.9.5's changes to what gets saved, and v0.9.6's smaller per-message memory and v0.9.7's shared rules, have not been re-run on LoCoMo yet
+- v0.9.5's changes to what gets saved, and v0.9.6's smaller per-message memory v0.9.7's shared rules and v0.9.8's import and labels, have not been re-run on LoCoMo yet
 
 See [CHANGELOG.md](CHANGELOG.md), [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 

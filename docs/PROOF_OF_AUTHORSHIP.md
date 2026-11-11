@@ -24,6 +24,7 @@
 | 2026-10-16 | v0.9.5: fixes from real use |
 | 2026-10-19 | v0.9.6: smaller chats |
 | 2026-11-10 | v0.9.7: shared rules, opencode v2; relicensed under the MIT License |
+| 2026-11-11 | v0.9.8: import, stated/inferred facts, missing-file labels |
 
 ## Independent timestamps (Internet Archive)
 

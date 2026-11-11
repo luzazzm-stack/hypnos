@@ -6,7 +6,7 @@
 <title>Architecture: evidence-linked memory with sleep consolidation</title>
 <meta name="author" content="Luza Maharjan">
 <meta name="copyright" content="© 2026 Luza Maharjan. MIT License.">
-<meta name="description" content="Architecture reference (design v0.8, current release v0.9.7) for a long-running LLM agent with a hierarchical, evidence-linked memory (time layers plus small, medium and big topic summaries), an offline consolidation (sleep) phase, a trust order, code-aware evidence, and Jev as the gate and judge for typed decisions. A machine-readable JSON spec is in the element with id architecture-spec.">
+<meta name="description" content="Architecture reference (design v0.8, current release v0.9.8) for a long-running LLM agent with a hierarchical, evidence-linked memory (time layers plus small, medium and big topic summaries), an offline consolidation (sleep) phase, a trust order, code-aware evidence, and Jev as the gate and judge for typed decisions. A machine-readable JSON spec is in the element with id architecture-spec.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -394,7 +394,7 @@ footer { margin-top: 88px; border-top: 1px solid var(--line); padding: 24px 0 56
 
 <section id="install" style="border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:8px 0 32px;background:var(--panel)">
   <h2 style="margin:0 0 6px">Install Hypnos in one line</h2>
-  <p style="margin:0 0 8px"><b>Current version: v0.9.7</b> (Nov 10): your rules and preferences reach every project, opencode v2 support, the long-chat notice uses a share of each model's window, faster fallback between memory models, and the MIT License. <a href="https://github.com/luzazzm-stack/hypnos/blob/main/CHANGELOG.md">What changed</a>.</p>
+  <p style="margin:0 0 8px"><b>Current version: v0.9.8</b> (Nov 11): import past chats and files, facts marked stated or inferred, missing files flagged, and unsorted messages survive a restart. v0.9.7 (Nov 10): your rules reach every project, opencode v2, MIT License. <a href="https://github.com/luzazzm-stack/hypnos/blob/main/CHANGELOG.md">What changed</a>.</p>
   <p style="margin:0 0 12px;color:var(--muted)">Connects Claude Code, opencode, Codex, Gemini CLI, Cursor and Windsurf, then runs in the background with no windows. Steps for coding agents are in <a href="https://github.com/luzazzm-stack/hypnos/blob/main/INSTALL.md">INSTALL.md</a>. Read the story in the <a href="blog.html">blog post</a>.</p>
   <p style="margin:0 0 4px;font-weight:600">macOS / Linux</p>
   <pre style="overflow-x:auto;margin:0 0 12px"><code>curl -fsSL https://agent-memory-architecture-chi.vercel.app/install.sh | sh</code></pre>
@@ -414,7 +414,7 @@ footer { margin-top: 88px; border-top: 1px solid var(--line); padding: 24px 0 56
 </div>
 
 <details class="changes" id="changes">
-  <summary>What changed in v0.8, v0.7, v0.6, v0.5, v0.4 and v0.3 (all tested; v0.9 to v0.9.7 are in the CHANGELOG)</summary>
+  <summary>What changed in v0.8, v0.7, v0.6, v0.5, v0.4 and v0.3 (all tested; v0.9 to v0.9.8 are in the CHANGELOG)</summary>
   <p class="muted" style="margin-top:10px"><b>v0.8</b>, recall redesigned around Jev, tested on LoCoMo in section 10 (55% with ~600 tokens of context, first):</p>
   <ol>
     <li><b>Code gathers, Jev decides.</b> Code collects candidates from every layer: the three summary levels, hybrid-ranked facts and raw messages, and all facts about the people named. Jev then answers dozens of typed questions in parallel (free, one round).</li>
@@ -1019,7 +1019,7 @@ unarchive on any recall hit</code></pre>
 <!-- 10 -->
 <section class="block" id="results" aria-labelledby="h-results">
   <div class="sec-head"><span class="badge-ic g"><svg class="ic"><use href="#i-check"/></svg></span><div><div class="num">10</div><h2 id="h-results">Test results <span class="pill g" style="vertical-align:middle">best: v0.8 · LoCoMo 73% with Opus 5.5 · ~610 tokens</span></h2></div></div>
-  <p class="sec-intro"><b>Latest run (v0.9, 14 October 2026):</b> v0.9 ties v0.8 at 60.5% on the same 200 LoCoMo questions; v0.9.5 to v0.9.7 have not been re-run yet. <b>Best comparison (v0.8, 29 September 2026):</b> on LoCoMo, a standard benchmark of 200 questions over long chats, v0.8 scores <b>73% with Claude Opus 5.5 answering</b>, ahead of Mem0 (70%) and GBrain (67%), while sending the least context: <b>~610 tokens per question</b> (Mem0 ~1,130, GBrain ~3,980). With Muse Spark 1.3, a small free model, answering, the order is the same: v0.8 55%, Mem0 51%, GBrain 51%. Grading was done by Claude Haiku 4.5 in both runs. The results below go from newest to oldest; the first test on 15 real coding sessions (v0.3 to v0.6) has not been rerun since v0.6.</p>
+  <p class="sec-intro"><b>Latest run (v0.9, 14 October 2026):</b> v0.9 ties v0.8 at 60.5% on the same 200 LoCoMo questions; v0.9.5 to v0.9.8 have not been re-run yet. <b>Best comparison (v0.8, 29 September 2026):</b> on LoCoMo, a standard benchmark of 200 questions over long chats, v0.8 scores <b>73% with Claude Opus 5.5 answering</b>, ahead of Mem0 (70%) and GBrain (67%), while sending the least context: <b>~610 tokens per question</b> (Mem0 ~1,130, GBrain ~3,980). With Muse Spark 1.3, a small free model, answering, the order is the same: v0.8 55%, Mem0 51%, GBrain 51%. Grading was done by Claude Haiku 4.5 in both runs. The results below go from newest to oldest; the first test on 15 real coding sessions (v0.3 to v0.6) has not been rerun since v0.6.</p>
 <!-- bench:opus:start -->
   <h3 id="opus">Best comparison: answered by Claude Opus 5.5 (medium effort), graded by Claude Haiku 4.5</h3>
   <p class="narrow">The same 200 LoCoMo questions, answered by Claude Opus 5.5 (medium effort) instead of the small free model, so the scores sit on the same scale as published results. Each system's context was rebuilt; Claude Haiku graded all four answers to each question blind and side by side (29 September 2026).</p>
@@ -1326,7 +1326,7 @@ unarchive on any recall hit</code></pre>
 
 </main>
 
-<footer>Architecture v0.8, 29 September 2026, with rules R16–R18 from v0.9.5; current release v0.9.7, 10 November 2026 (v0.7: 29 September; v0.6: 26 September; v0.5 to v0.2: 25 September; v0.1: 21 September 2026). Companion to the research spec (keep / change / ditch, experiment design, risks).<br><br><b>© 2026 Luza Maharjan.</b> Designed and written by Luza Maharjan, first published 21 September 2026. Released under the MIT License: copies must keep this copyright notice.</footer>
+<footer>Architecture v0.8, 29 September 2026, with rules R16–R18 from v0.9.5; current release v0.9.8, 11 November 2026 (v0.7: 29 September; v0.6: 26 September; v0.5 to v0.2: 25 September; v0.1: 21 September 2026). Companion to the research spec (keep / change / ditch, experiment design, risks).<br><br><b>© 2026 Luza Maharjan.</b> Designed and written by Luza Maharjan, first published 21 September 2026. Released under the MIT License: copies must keep this copyright notice.</footer>
 
 </div>
 
@@ -1336,7 +1336,7 @@ unarchive on any recall hit</code></pre>
   "author": "Luza Maharjan",
   "copyright": "© 2026 Luza Maharjan. First published 2026-09-21. Released under the MIT License (keep this copyright notice in copies).",
   "version": "0.8",
-  "current_release": "0.9.7 (2026-11-10)",
+  "current_release": "0.9.8 (2026-11-11)",
   "changes_v0_8": [
     "Recall is Jev-routed: code gathers candidates from every layer (three summary levels, hybrid-ranked facts and raw messages, entity facts); Jev answers typed questions about them in parallel.",
     "Jev classifies the question: overview, single_fact, list, when, exact_value.",

@@ -109,7 +109,8 @@ class Service:
     def _view_worker(self):
         for db in sorted(self.cfg.spaces_dir.glob('*.db')):        # warm every existing memory at start-up
             try:
-                self.mem(db.stem, 'coding' if db.stem.startswith('code-') else 'generic')
+                m = self.mem(db.stem, 'coding' if db.stem.startswith('code-') else 'generic')
+                self.resume(db.stem, m)
             except Exception as ex:
                 print(f'[hypnos] could not open {db.stem}: {ex}', flush=True)
         while True:
@@ -130,6 +131,14 @@ class Service:
         m.remember_cleanup_map(cached[1])
         return {k: v for k, v in cached[1].items() if k != 'map'}
 
+    def resume(self, space, m):
+        """v0.9.8: the sleep queue lives in memory, so a restart (the service stops when no agent is open) used to drop
+        it, and messages of sessions that were not open again (imported chats, closed sessions) were never sorted.
+        At start-up every session with unsorted messages is queued; sessions active right now are left to the idle rule."""
+        live = self.live_sessions(space)
+        for sess in sorted({r['session'] for r in m.store.unconsolidated()} - live):
+            self.sleep_async(space, m.profile.name, sess)
+
     def sleep_async(self, space, profile, session=None):
         """Queue a sleep. Many sessions (Claude Code, opencode, other agents) can ask at once; the queue runs them one
         after another (inside one sleep, up to writer_parallel writer calls run at once), and the same request is never
@@ -146,8 +155,12 @@ class Service:
         while True:
             space, profile, session = self.jobs.get()
             self.sleeping.add(space)
+            more = False
             try:
-                self.mem(space, profile).sleep(session)
+                m = self.mem(space, profile)
+                rep = m.sleep(session)
+                # one sleep handles at most 50 episodes: a long backlog (an import) continues in the next turn
+                more = bool(session and rep.get('episodes') and m.store.unconsolidated(session))
             except Exception as ex:                      # a failed sleep leaves the watermark; next sleep retries
                 print(f'[hypnos] sleep failed for {space}: {ex}', flush=True)
             finally:
@@ -155,6 +168,8 @@ class Service:
                 self.sleeping.discard(space)
                 with self.lock:
                     self.queued.discard((space, session))
+            if more:
+                self.sleep_async(space, profile, session)
 
     def touch(self, space, session):
         if session:
@@ -195,7 +210,9 @@ class Service:
         if path == '/log':
             if m.store.note('paused') == '1':                         # v0.9: the user paused memory for this space
                 return {'id': None, 'paused': True}
-            lid = m.log(d['content'], d.get('role', 'user'), d.get('session', 'default'), d.get('meta'))
+            meta = d.get('meta') or {}
+            lid = m.log(d['content'], d.get('role', 'user'), d.get('session', 'default'), meta,
+                        fast=False if meta.get('imported') else None)     # v0.9.8: imports wait for sleep (no per-message calls)
             self.last_log[space] = time.time()
             if d.get('role', 'user') == 'user' and len(d['content'].strip()) > 15:
                 m.store.note('task:' + d.get('session', 'default'), ' '.join(d['content'].split())[:300])

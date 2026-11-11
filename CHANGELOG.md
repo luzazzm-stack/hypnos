@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.9.8: start with what you have, and know what to trust: 2026-11-11
+
+- **`hypnos import`.** Start with your history instead of an empty memory: `hypnos import ~/.claude/projects` loads past Claude Code chats (each into the memory of the folder it ran in), and `hypnos import notes.md docs/` loads text and Markdown files. Messages keep their real date, so older facts never override newer ones. Secrets are removed first, as with live messages. A chat or file imported once is skipped next time, and so is a chat Hypnos already saw live. `--dry` shows how much there is before anything is sorted, `--limit N` takes only the newest N. On one laptop, 368 past chats (about 4,400 messages) were sorted in a few hours.
+- **Stated or inferred.** The memory model now marks each fact as stated (the quoted text says it directly) or inferred (it concluded it). Inferred facts are labelled "inferred, not stated" when they are sent to an agent.
+- **Missing files are flagged.** A fact that names a local file or folder that is gone now is labelled "not on this machine now: <path>". Plain code, no model call. It stays quiet for paths of other machines, other users' home folders, drives that are not attached, and commands named without .exe.
+- **STALE labels in the main recall.** Facts whose cited code changed since were only labelled STALE in the older recall paths; the v0.8 recall that is used by default now labels them too.
+- **Unsorted messages survive a restart.** The service stops when no agent is open, and its sleep queue was lost each time, so messages of sessions that never came back (closed chats, imports) were never sorted. At start-up every session with unsorted messages is queued again, and a long backlog continues in the next sleep turn.
+
+
 ## v0.9.7: your rules reach every project, opencode v2, MIT License: 2026-11-10
 
 Found in three weeks of daily use on two machines.

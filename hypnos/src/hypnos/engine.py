@@ -308,7 +308,7 @@ class Memory:
             return ' [from another session running now: not your task]' if sess and sess in live and sess != session else ''
 
         def fact_text(f):
-            return (f'({(f["valid_from"] or "")[:10]}) {f["claim"]}  evidence: "{(f["quote"] or "")[:160]}"'
+            return (f'({(f["valid_from"] or "")[:10]}) {f["claim"]}{self.fact_flags(f)}  evidence: "{(f["quote"] or "")[:160]}"'
                     + origin(ep_sess.get(f['episode'])))
 
         def msg_text(r):
@@ -438,7 +438,8 @@ class Memory:
         def fmt(f):
             flag = ' [STALE: re-check before relying on it]' if f['id'] in stale_ids else ''
             src = '' if f['source'] == 'observed' else f' ({f["source"]})'
-            line = f'- ({(f["valid_from"] or "")[:10]}) {f["claim"]}{src}{flag}  evidence: "{(f["quote"] or "")[:160]}"'
+            line = (f'- ({(f["valid_from"] or "")[:10]}) {f["claim"]}{src}{flag}{self.fact_flags(f, stale=False)}  '
+                    f'evidence: "{(f["quote"] or "")[:160]}"')
             if ep_sess.get(f['episode']) in others:
                 line += not_yours
             for old in s.q('SELECT claim, valid_from, valid_to FROM facts WHERE superseded_by=?', (f['id'],)):   # R6
@@ -675,6 +676,61 @@ class Memory:
         return ('Long-term memory (hypnos, space "%s"). Summaries are orientation only: for exact values, '
                 'use the memory_recall tool or open the cited evidence. Your task is only what the user asks in this session.\n\n'
                 % self.space) + HOW_MEMORY_WORKS + '\n\n' + '\n\n'.join(parts)
+
+    # ------------------------------------------------------------------ checks without a model (v0.9.8)
+    _PATH = re.compile(r'(?<![\w/\\])(?:[A-Za-z]:[\\/]|~[\\/]|/(?:home|Users|opt|etc|var|srv|mnt|usr|tmp)/)[^\s"\'`<>|,;()\[\]]*')
+
+    def fact_flags(self, f, stale: bool = True) -> str:
+        """Labels added to a fact when it is sent to an agent: the writer concluded it rather than read it, the code it
+        cites has changed since (R13), or a file or folder it names is gone from this machine. All checks are plain code."""
+        flags = []
+        try:
+            meta = json.loads(f['meta'] or '{}') if isinstance(f['meta'], str) else dict(f['meta'] or {})
+        except (KeyError, IndexError, TypeError, ValueError):
+            meta = {}
+        if meta.get('origin') == 'inferred':
+            flags.append('inferred, not stated')
+        try:
+            if stale and self.profile.stale(f):
+                flags.append('STALE: re-check before relying on it')
+        except (KeyError, IndexError, TypeError):
+            pass
+        gone = self.missing_paths(f['claim'])
+        if gone:
+            flags.append('not on this machine now: ' + ', '.join(gone[:2]))
+        return ' [' + '; '.join(flags) + ']' if flags else ''
+
+    def missing_paths(self, text: str) -> list:
+        """Local paths named in the text that no longer exist. A path counts as gone only when its parent folder exists
+        (so the drive is attached and this is the machine it was about) and no longer reading of it with the words after
+        it (paths with spaces) exists either. Paths of another system (a Mac path on Windows) are not checked."""
+        import os
+        from pathlib import Path
+        out = []
+        for m in self._PATH.finditer(text or ''):
+            raw = m.group(0)
+            if (os.name == 'nt') != bool(re.match(r'[A-Za-z]:|~', raw)):
+                continue
+            words = text[m.start():].split(' ')
+            cands = [' '.join(words[:k]).rstrip('.,;:!?\'"`)') for k in range(1, min(6, len(words)) + 1)]
+            paths = [Path(os.path.expanduser(c)) for c in cands if c]
+            if os.name == 'nt':                    # a command named without its extension (ffmpeg -> ffmpeg.exe)
+                paths += [p.with_name(p.name + ext) for p in paths[:1] for ext in ('.exe', '.cmd', '.bat', '.ps1')]
+            users = Path.home().parent             # another user's home is another machine's (C:/Users/Pratima on the Vostro)
+            try:
+                if paths and users in paths[0].parents and Path.home() not in paths[0].parents and paths[0] != Path.home():
+                    continue
+            except (OSError, ValueError):
+                pass
+            try:
+                if any(p.exists() for p in paths):
+                    continue
+                base = paths[0]
+                if base.parent != base and base.parent.exists() and str(base.parent) not in (base.anchor, str(Path.home())):
+                    out.append(cands[0])
+            except (OSError, ValueError):
+                continue
+        return out
 
     # ------------------------------------------------------------------ user edits
     def pin(self, claim: str, session: str = 'default') -> str:
@@ -942,7 +998,8 @@ class Memory:
             f'explicitly, no pronouns), "kind" (one of: {", ".join(self.profile.kinds)}), "quote" (a short passage under 200 characters '
             'copied EXACTLY from the log that supports the claim), "entities" (the specific people, places, projects, tools, files, '
             'devices or objects the fact is about, as short names), "everywhere" (true ONLY for a rule, preference or fact about '
-            'themselves that the USER stated and that applies in any project or chat, not just this one; otherwise false). '
+            'themselves that the USER stated and that applies in any project or chat, not just this one; otherwise false), '
+            '"origin" ("stated" when the quoted text says it directly, "inferred" when you concluded it from the log). '
             'Return ONLY a JSON array.', [text])
 
     def _consolidate_episode(self, session, win, ep_id=None, only_row=None, allow_writer_topic=True, raw=None):
@@ -973,7 +1030,9 @@ class Memory:
                          'kind': x.get('kind') if x.get('kind') in self.profile.kinds else self.profile.kinds[-1],
                          'source': 'user' if hit['role'] in ('user', 'fact') and self.profile.name in ('chat', 'generic') else 'observed',
                          'quote': quote[:300], 'evidence': evidence, 'verify_p': p, 'entities': ents, 'valid_from': hit['ts'],
-                         'scope': meta.get('scope', {}), 'meta': {k: meta[k] for k in ('cwd', 'url', 'sensor') if k in meta},
+                         'scope': meta.get('scope', {}),
+                         'meta': {**{k: meta[k] for k in ('cwd', 'url', 'sensor') if k in meta},
+                                  **({'origin': 'inferred'} if x.get('origin') == 'inferred' else {})},   # v0.9.8
                          # v0.9.7: the user's own rules and preferences are shared with every project (see on_shared)
                          'everywhere': x.get('everywhere') is True and hit['role'] in ('user', 'fact')})
         kept = [f for f in kept if not self._duplicate(f)]

@@ -6,7 +6,7 @@
 <title>Building Hypnos</title>
 <meta name="author" content="Luza Maharjan">
 <meta name="copyright" content="© 2026 Luza Maharjan. MIT License.">
-<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.7, with every benchmark against Mem0, GBrain and my own earlier versions.">
+<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.8, with every benchmark against Mem0, GBrain and my own earlier versions.">
 <meta property="og:title" content="Building Hypnos: memory for AI agents that sleeps on it">
 <meta property="og:description" content="Nine versions, three releases from daily use, every benchmark, including the one where a new version lost by 10 points.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,7 +76,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <nav><div class="wrap"><b>Hypnos</b><a href="index.html">Architecture</a><a href="benchmarks.html">Benchmarks</a><a class="on" href="blog.html">Blog</a><a href="https://github.com/luzazzm-stack/hypnos">GitHub</a></div></nav>
 <main class="wrap">
 <header>
-  <div class="kicker">October 2026, updated 10 November 2026 · Luza Maharjan</div>
+  <div class="kicker">October 2026, updated 11 November 2026 · Luza Maharjan</div>
   <h1>Building Hypnos: memory for AI agents that sleeps on it</h1>
   <p class="lede">Nine versions in three weeks, three releases from daily use since, every benchmark I ran, and the one where a new version lost by ten points.</p>
 </header>
@@ -118,6 +118,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <tr class="me"><td>v0.9.5</td><td>Oct 16</td><td>Fixes from a day of real use: never a duplicate, small memory, housekeeping stays out of memory</td></tr>
 <tr class="me"><td>v0.9.6</td><td>Oct 19</td><td>Smaller chats: less memory per message, never repeated, a long-chat notice</td></tr>
 <tr class="me"><td>v0.9.7</td><td>Nov 10</td><td>Your rules reach every project, opencode v2, MIT License</td></tr>
+<tr class="me"><td>v0.9.8</td><td>Nov 11</td><td>Import past chats and files; stated vs inferred facts; missing files flagged</td></tr>
 </tbody></table></div>
 
 <p>v0.1 and v0.2 were designs on paper, so they have no scores. Everything from v0.3 on was measured.</p>
@@ -231,6 +232,12 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <p>Several sessions can work in the same project at once. Each one is told what the others are doing and that their tasks aren't its own, and it never hands your current conversation back to you as a "memory".</p>
 
 <p>Refusals aren't remembered. "The assistant couldn't do X" is never saved, so a later session won't refuse the same thing because a memory told it to.</p>
+
+<h2>Starting with what you have: v0.9.8</h2>
+
+<p>A new memory starts empty, even when you have months of chats with your agent sitting on disk. <code>hypnos import ~/.claude/projects</code> loads them: each chat goes to the memory of the folder it ran in, with its real date, so an old fact never overrides a newer one. I loaded 368 of my own chats, about 4,400 messages, and they were sorted in a few hours. Doing it found a bug: the service forgot its to-do list every time it restarted, so messages from chats that never came back were never sorted. It now picks up where it left off.</p>
+
+<p>Two labels tell the agent how far to trust a fact. One says the memory model worked it out rather than read it ("inferred, not stated"). The other says a file the fact names is gone now. That second check is plain code, and its first day turned up three false alarms (a trailing comma, a program named without .exe, a folder on another laptop), all fixed before release.</p>
 
 <h2>Three weeks of daily use: v0.9.7</h2>
 

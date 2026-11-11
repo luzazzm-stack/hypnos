@@ -58,6 +58,7 @@ hypnos hook claude <Event>          Claude Code hook handler
 hypnos hook generic <event>         any other agent with hooks
 hypnos setup [--yes] [--systemone jev|laya|none] [--list-models] [--memory-model ...] [--uninstall]
 hypnos check                        is every part installed and working? (memory tools, meaning search, service)
+hypnos import PATH... [--space S] [--dry] [--limit N]   past Claude Code chats (.jsonl) and text/Markdown files
 hypnos cleanup [--apply "1-5, T2"] [--space NAME]   the /memory-cleanup list: every fact numbered under its topic
 hypnos chat-proxy --upstream URL    memory for any OpenAI-compatible chat client
 hypnos log|recall|sleep|pin|forget|status|export|wake --space S --profile P

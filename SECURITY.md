@@ -5,6 +5,7 @@ hypnos stores what your agents see. Treat its database like the data it contains
 - **Local only:** memory lives in SQLite files under `~/.hypnos/spaces/`. The service listens on `127.0.0.1` only.
 - **Redaction before storage (R1):** API keys, tokens, private keys, JWTs, passwords in `key=value` form, and credentials in URLs are removed before anything is logged. The redactor catches common patterns, not everything, so don't pipe secret-heavy output through it on purpose.
 - **Shared rules (v0.9.7):** rules, preferences and facts about yourself that you state in one project are also copied to the shared `global` memory, which chats in every project can read. Remove them with `/memory-cleanup` in that memory, or `hypnos forget "..." --space global`.
+- **Imports (v0.9.8):** `hypnos import` sends the imported chats and files, with secrets removed, to your memory model to be sorted into facts, the same way live messages are. Check the size with `--dry` first.
 - **Real deletion:** `hypnos forget "..." --hard` replaces the original log text with a tombstone, and flags every fact that cited it.
 - **What leaves the machine:**
   - During sleep, redacted log text goes to the writer LLM you configure.

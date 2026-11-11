@@ -7,6 +7,7 @@
   hypnos chat-proxy --upstream URL     OpenAI-compatible proxy that gives any chat model memory
   hypnos setup [--yes] [--systemone jev|laya|none] [--jev-key K] [--agents a,b] [--memory-model ...] [--list-models] [--uninstall]
                                        connect every coding agent on this machine
+  hypnos import PATH... [--space S] [--dry] [--limit N]   past Claude Code chats (.jsonl) and text/Markdown files
   hypnos check                         is every part installed and working? (memory tools, meaning search, service)
   hypnos cleanup [--apply "1-5, T2"] [--space NAME] [--hard]   the /memory-cleanup list for this folder's memory (via the service)
   hypnos log|recall|sleep|pin|forget|status|export|wake   work with a memory space by hand
@@ -45,6 +46,8 @@ def main(argv=None):
     s = sub.add_parser('serve'); s.add_argument('--host'); s.add_argument('--port', type=int)
     sub.add_parser('mcp')
     sub.add_parser('check')
+    im = sub.add_parser('import'); im.add_argument('paths', nargs='+'); im.add_argument('--space')
+    im.add_argument('--profile', default='coding'); im.add_argument('--dry', action='store_true'); im.add_argument('--limit', type=int, default=0)
     h = sub.add_parser('hook'); h.add_argument('agent', choices=['claude', 'generic']); h.add_argument('event', nargs='?', default='')
     h.add_argument('payload', nargs='?', help='event JSON, if not given on stdin')
     cp = sub.add_parser('chat-proxy'); cp.add_argument('--upstream', required=True); cp.add_argument('--port', type=int, default=7440)
@@ -79,6 +82,9 @@ def main(argv=None):
         return mcp_main()
     if a.cmd == 'check':
         return check()
+    if a.cmd == 'import':
+        from .importer import run as run_import
+        return run_import(a.paths, a.space, a.profile, a.dry, a.limit)
     if a.cmd == 'hook':
         from .hooks import claude, generic
         return (claude if a.agent == 'claude' else generic)(a.event, a.payload)
