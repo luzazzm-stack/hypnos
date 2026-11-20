@@ -57,9 +57,9 @@ class Config:
     wake_tokens: int = 1500
     # v0.9.6: memory added to each user message (was 2500). It stays in the chat, so in a long chat it adds up.
     prompt_tokens: int = 800
-    # v0.9.7: once the agent's context passes this share of ITS model's context window, it is asked to suggest /clear
+    # v0.9.7: once the agent's context passes this share of ITS model's context window, it is asked to suggest /compact
     # or /compact (0 = never). A percentage, not tokens: models have 200k, 400k or 1M windows.
-    long_chat_percent: int = 50
+    long_chat_percent: int = 60
     # daemon
     # v0.9: the service lives only while an agent is open; it stops ~1-2 minutes after the last one closes.
     # true = keep it running (robots, automation, servers).

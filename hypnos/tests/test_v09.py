@@ -401,10 +401,11 @@ def test_service_reloads_changed_config(tmp_path, monkeypatch):
 def test_long_chat_notice_once_per_step(cfg):
     svc = Service(cfg)
     m = svc.mem('x', 'coding')
-    assert svc.long_chat_note(m, 's1', 40) == ''
-    assert '55%' in svc.long_chat_note(m, 's1', 55)
-    assert svc.long_chat_note(m, 's1', 58) == ''                                  # same 10% step: said already
-    assert '62%' in svc.long_chat_note(m, 's1', 62)
+    assert svc.long_chat_note(m, 's1', 55) == ''                                  # below the 60% default
+    assert '65%' in svc.long_chat_note(m, 's1', 65)
+    assert svc.long_chat_note(m, 's1', 68) == ''                                  # same 10% step: said already
+    assert '72%' in svc.long_chat_note(m, 's1', 72)
+    assert '/compact' in svc.long_chat_note(m, 's2', 80) and 'Do not suggest /clear' in svc.long_chat_note(m, 's3', 80)
 
 
 def test_context_tokens_from_transcript(tmp_path):
@@ -527,3 +528,143 @@ def test_restart_resumes_unsorted_sessions(cfg, monkeypatch):
     svc2.queued.clear()
     svc2.resume('code-a', m)
     assert ('code-a', 'old-chat') in svc2.queued
+
+
+# ---------------------------------------------------------------- v0.9.8 review fixes: import and supersede
+
+def _two_facts(cfg, monkeypatch, stored_ts, new_ts):
+    """A live fact (stored_ts) and, afterwards, an imported one (new_ts) about the same thing; System One says
+    'newer_replaces' for any pair. Returns (memory, labels the judge was shown)."""
+    m = Memory('test', 'coding', cfg=cfg, writer=FakeWriter())
+    shown = []
+
+    def choice(state, instructions, options, role='judge'):
+        if 'older' not in state:                                       # e.g. the topic choice: no answer
+            return None
+        shown.append(state)
+        return 'newer_replaces'
+    monkeypatch.setattr(m.jev, 'choice', choice)
+    m.log('The deploy target is staging_east for the site', role='agent', session='live', meta={'ts': stored_ts})
+    m.sleep()
+    m.log('The deploy target is staging_west for the site', role='agent', session='imp', meta={'ts': new_ts, 'imported': 'x.jsonl'})
+    m.sleep()
+    return m, shown
+
+
+def test_imported_older_fact_never_replaces_a_newer_one(cfg, monkeypatch):
+    m, shown = _two_facts(cfg, monkeypatch, '2026-11-10T10:00:00Z', '2026-09-01T10:00:00Z')
+    assert shown and shown[0]['older']['date'] == '2026-09-01' and shown[0]['newer']['date'] == '2026-11-10'
+    assert 'staging_west' in shown[0]['older']['claim']
+    rows = {r['claim']: r for r in m.store.q('SELECT * FROM facts')}
+    nov = next(r for c, r in rows.items() if 'staging_east' in c)
+    sep = next(r for c, r in rows.items() if 'staging_west' in c)
+    assert nov['status'] == 'active' and nov['valid_to'] is None          # the November fact is untouched
+    assert sep['status'] == 'superseded' and sep['superseded_by'] == nov['id']   # September is kept as history
+    assert sep['valid_to'] == nov['valid_from']
+
+
+def test_newer_fact_still_replaces_an_older_one(cfg, monkeypatch):
+    m, shown = _two_facts(cfg, monkeypatch, '2026-09-01T10:00:00Z', '2026-11-10T10:00:00Z')
+    assert shown[0]['older']['date'] == '2026-09-01' and shown[0]['newer']['date'] == '2026-11-10'
+    rows = {r['claim']: r for r in m.store.q('SELECT * FROM facts')}
+    assert next(r for c, r in rows.items() if 'staging_east' in c)['status'] == 'superseded'
+    assert next(r for c, r in rows.items() if 'staging_west' in c)['status'] == 'active'
+
+
+def _chat_file(path, session, cwd, n=2):
+    import json
+    lines = [{'type': 'user' if k % 2 == 0 else 'assistant', 'sessionId': session, 'cwd': str(cwd),
+              'timestamp': f'2026-10-0{k + 1}T10:00:00Z',
+              'message': {'content': f'Message number {k} says the build uses folder dist_site{k}'}} for k in range(n)]
+    path.write_text('\n'.join(json.dumps(x) for x in lines), encoding='utf-8')
+    return path
+
+
+@pytest.fixture
+def imp(cfg, tmp_path, monkeypatch):
+    """The importer wired to an in-process service (no network). `fail` lists /log call numbers that get no answer."""
+    from hypnos import importer
+    monkeypatch.setattr('hypnos.importer.load_config', lambda: cfg)
+    monkeypatch.setattr('hypnos.client.load_config', lambda: cfg)
+    monkeypatch.setattr('hypnos.importer.ensure_running', lambda: True)
+    monkeypatch.setattr('hypnos.engine.make_writer', lambda c: FakeWriter())
+    svc = Service(cfg)
+    state = {'fail': set(), 'paused': False, 'logs': 0}
+
+    def fake_call(path, payload=None, timeout=10.0):
+        if path == '/log':
+            state['logs'] += 1
+            if state['logs'] in state['fail']:
+                return None
+            if state['paused']:
+                return {'id': None, 'paused': True}
+        return svc.handle(path, payload or {})
+    monkeypatch.setattr('hypnos.importer.call', fake_call)
+    return importer, svc, state
+
+
+def _rows(svc, space, session):
+    return svc.mem(space, 'coding').store.q('SELECT content, meta FROM log WHERE session=? ORDER BY id', (session,))
+
+
+def test_import_is_not_marked_done_when_a_message_fails_and_a_rerun_finishes_it(imp, tmp_path):
+    importer, svc, state = imp
+    chat = _chat_file(tmp_path / 'c1.jsonl', 'sess-1', tmp_path, n=3)
+    state['fail'] = {2}                                               # the second message gets no answer
+    assert importer.run([chat], space='code-x') == 1
+    assert importer._load_done() == {}                                # not marked: the next run retries
+    assert len(_rows(svc, 'code-x', 'sess-1')) == 1
+    assert importer._seen_live('code-x', 'sess-1') is False           # its own import rows are not "seen live"
+    assert importer.run([chat], space='code-x') == 0                  # rerun: only the missing two, no duplicates
+    assert [r['content'] for r in _rows(svc, 'code-x', 'sess-1')] == [f'Message number {k} says the build uses folder dist_site{k}' for k in range(3)]
+    assert list(importer._load_done()) == [str(chat.resolve())]
+
+
+def test_import_into_a_paused_memory_is_not_marked_done(imp, tmp_path):
+    importer, svc, state = imp
+    chat = _chat_file(tmp_path / 'c2.jsonl', 'sess-2', tmp_path)
+    state['paused'] = True
+    assert importer.run([chat], space='code-x') == 1
+    assert importer._load_done() == {} and _rows(svc, 'code-x', 'sess-2') == []
+
+
+def test_chat_continued_after_import_gets_only_its_new_turns(imp, tmp_path):
+    importer, svc, state = imp
+    chat = _chat_file(tmp_path / 'c3.jsonl', 'sess-3', tmp_path, n=2)
+    assert importer.run([chat], space='code-x') == 0
+    _chat_file(tmp_path / 'c3.jsonl', 'sess-3', tmp_path, n=4)        # the chat went on (file changed)
+    import os
+    os.utime(chat, (chat.stat().st_atime, chat.stat().st_mtime + 10))
+    assert importer.run([chat], space='code-x') == 0
+    assert len(_rows(svc, 'code-x', 'sess-3')) == 4
+    # a chat Hypnos saw live is still left alone
+    svc.handle('/log', {'space': 'code-x', 'profile': 'coding', 'session': 'sess-live', 'content': 'The live chat talks about dist_live'})
+    live = _chat_file(tmp_path / 'c4.jsonl', 'sess-live', tmp_path)
+    assert importer.run([live], space='code-x') == 0
+    assert len(_rows(svc, 'code-x', 'sess-live')) == 1                # nothing was added to it
+
+
+def test_imported_messages_do_not_make_a_live_session(cfg, monkeypatch):
+    monkeypatch.setattr('hypnos.engine.make_writer', lambda c: FakeWriter())
+    svc = Service(cfg)
+    svc.handle('/log', {'space': 'code-a', 'profile': 'coding', 'session': 'old', 'role': 'user',
+                        'content': 'Please change the staging port to 8443 in the config', 'meta': {'imported': 'old.jsonl'}})
+    assert ('code-a', 'old') not in svc.seen and svc.live_sessions('code-a') == set()
+    assert svc.mem('code-a', 'coding').store.note('task:old') in (None, '')
+    svc.handle('/log', {'space': 'code-a', 'profile': 'coding', 'session': 'now', 'role': 'user',
+                        'content': 'Please change the staging port to 9000 in the config'})
+    assert ('code-a', 'now') in svc.seen and 'staging port' in svc.mem('code-a', 'coding').store.note('task:now')
+    assert svc.others_now(svc.mem('code-a', 'coding'), 'code-a', 'x') == ['- another session: "Please change the staging port to 9000 in the config"']
+
+
+def test_missing_folder_uses_the_repository_space(cfg, tmp_path, monkeypatch):
+    from hypnos import importer
+    monkeypatch.setattr('hypnos.client.load_config', lambda: cfg)
+    (tmp_path / 'myrepo' / '.git').mkdir(parents=True)
+    gone = tmp_path / 'myrepo' / 'web' / 'deleted_sub'                # a subfolder that no longer exists
+    assert importer._space_for_chat('s-a', str(gone)) == 'code-myrepo'
+    assert importer._space_for_chat('s-b', str(tmp_path / 'norepo' / 'gone_dir')) == 'code-gone_dir'
+    pins = cfg.home / 'session-spaces'
+    pins.mkdir(parents=True, exist_ok=True)
+    (pins / 's-c.txt').write_text('code-pinned', encoding='utf-8')    # what the hooks recorded when the chat ran
+    assert importer._space_for_chat('s-c', str(gone)) == 'code-pinned'

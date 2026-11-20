@@ -13,7 +13,7 @@ import json
 import sqlite3
 from pathlib import Path
 
-from .client import call, ensure_running, space_for_dir
+from .client import call, ensure_running, session_space, space_for_dir
 from .config import load_config
 
 TEXT_EXT = {'.md', '.txt', '.markdown', '.rst'}
@@ -39,19 +39,31 @@ def _save_done(done: dict):
     f.write_text(json.dumps(done, indent=1), encoding='utf-8')
 
 
-def _seen_live(space: str, session: str) -> bool:
-    """Hypnos already logged this session while it ran: importing it again would only add duplicates."""
+def _count(space: str, sql: str, args: tuple) -> int:
     db = load_config().db_path(space)
     if not db.exists():
-        return False
+        return 0
     try:
         con = sqlite3.connect(f'file:{db}?mode=ro', uri=True, timeout=5)
         try:
-            return con.execute('SELECT 1 FROM log WHERE session=? LIMIT 1', (session,)).fetchone() is not None
+            return con.execute(sql, args).fetchone()[0]
         finally:
             con.close()
     except sqlite3.Error:
-        return False
+        return 0
+
+
+def _seen_live(space: str, session: str) -> bool:
+    """Hypnos already logged this session while it ran: importing it again would only add duplicates.
+    Rows written by an import (meta.imported) do not count: those are not a live session."""
+    return _count(space, 'SELECT COUNT(*) FROM log WHERE session=? AND instr(meta, ?) = 0', (session, '"imported"')) > 0
+
+
+def _imported_count(space: str, session: str, f: Path) -> int:
+    """How many messages of this file an earlier (cut short) import already stored. The import sends messages in
+    order and stops at the first failure, so these are always the first N: a rerun continues after them."""
+    mark = json.dumps({'imported': str(f)})[1:-1]                # '"imported": "<path>"', as stored in meta
+    return _count(space, 'SELECT COUNT(*) FROM log WHERE session=? AND instr(meta, ?) > 0', (session, mark))
 
 
 def _text(content) -> str:
@@ -105,7 +117,7 @@ def plan(paths, space=None):
             if f.suffix == '.jsonl':
                 session, cwd, turns = claude_chat(f)
                 if turns:
-                    sp = space or (space_for_dir(cwd) if cwd and Path(cwd).exists() else _space_from_path(cwd))
+                    sp = space or _space_for_chat(session, cwd)
                     out.append(('chat', f, sp, session, turns))
             elif f.suffix.lower() in TEXT_EXT:
                 parts = text_file(f)
@@ -115,10 +127,29 @@ def plan(paths, space=None):
     return out
 
 
+def _space_for_chat(session: str, cwd: str) -> str:
+    """The memory a chat belongs to, named as the hooks name it: the space pinned to the session when it ran (if still
+    recorded), else the git repository of its folder, else (folder gone) the repository found by walking up the
+    recorded path, else the folder's own name."""
+    pinned = session_space(session)
+    if pinned:
+        return pinned
+    if cwd and Path(cwd).exists():
+        return space_for_dir(cwd)
+    return _space_from_path(cwd)
+
+
 def _space_from_path(cwd: str) -> str:
-    """Space for a chat whose folder no longer exists: the folder's name, as the hooks would have named it."""
-    name = Path(cwd.replace('\\', '/')).name if cwd else 'default'
-    return f'code-{name or "default"}'
+    """Space for a chat whose folder no longer exists. A chat run in a subfolder of a repository belongs to the
+    repository's memory (as with space_for_dir), so walk up the recorded path to the nearest folder that has a .git;
+    without one, the folder's own name."""
+    if not cwd:
+        return 'code-default'
+    p = Path(cwd.replace('\\', '/'))
+    for up in (p, *p.parents):
+        if (up / '.git').exists():
+            return f'code-{up.name}'
+    return f'code-{p.name or "default"}'
 
 
 def run(paths, space=None, profile='coding', dry=False, limit=0) -> int:
@@ -127,6 +158,10 @@ def run(paths, space=None, profile='coding', dry=False, limit=0) -> int:
     for kind, f, sp, session, items in plan(paths, space):
         key = str(f.resolve())
         if done.get(key) == f.stat().st_mtime or (kind == 'chat' and _seen_live(sp, session)):
+            skipped += 1
+            continue
+        items = items[_imported_count(sp, session, f):]           # a cut-short or continued chat: only what is not stored yet
+        if not items:
             skipped += 1
             continue
         todo.append((kind, f, sp, session, items))
@@ -143,17 +178,31 @@ def run(paths, space=None, profile='coding', dry=False, limit=0) -> int:
     if not ensure_running():
         print('hypnos: the memory service did not start')
         return 1
+    failed = 0
     for kind, f, sp, session, items in todo:
+        sent = 0
         for role, text, ts in items:
             meta = {'imported': str(f)}
             if ts:
                 meta['ts'] = ts
             if kind == 'file':
                 meta['evidence'] = [f'file:{f}']
-            call('/log', {'space': sp, 'profile': profile, 'session': session, 'role': role, 'content': text, 'meta': meta},
-                 timeout=30)
-        call('/sleep', {'space': sp, 'profile': profile, 'session': session}, timeout=10)
+            r = call('/log', {'space': sp, 'profile': profile, 'session': session, 'role': role, 'content': text, 'meta': meta},
+                     timeout=30)
+            if not isinstance(r, dict) or r.get('id') is None:   # service down, error, or the memory is paused
+                break                                           # stop here so what is stored stays the first N messages
+            sent += 1
+        if sent:
+            call('/sleep', {'space': sp, 'profile': profile, 'session': session}, timeout=10)
+        if sent < len(items):
+            failed += len(items) - sent
+            print(f'hypnos: {f}: {len(items) - sent} of {len(items)} messages were not stored '
+                  f'(service error or memory paused); not marked as imported, run import again to continue')
+            continue
         done[str(f.resolve())] = f.stat().st_mtime
         _save_done(done)
+    if failed:
+        print(f'{failed} messages failed; the rest was imported')
+        return 1
     print('imported; the memory sorts it into facts in the background (`hypnos status --space NAME` shows progress)')
     return 0

@@ -990,7 +990,7 @@ unarchive on any recall hit</code></pre>
       <tr><td><code>jev_promote_min_samples</code></td><td><span class="val">200</span></td><td>Shadow decisions needed before promotion is considered</td></tr>
       <tr><td><code>export_path</code></td><td><span class="val">memory.md</span></td><td>Where the readable export is written</td></tr>
       <tr><td><code>prompt_tokens</code></td><td><span class="val">800</span></td><td>Most memory added to one message (v0.9.6); a chat never gets the same item twice</td></tr>
-      <tr><td><code>long_chat_percent</code></td><td><span class="val">50</span></td><td>Past this share of the model's context window, the agent suggests /clear or /compact (v0.9.7)</td></tr>
+      <tr><td><code>long_chat_percent</code></td><td><span class="val">60</span></td><td>Past this share of the model's context window, the agent suggests /compact, never /clear (v0.9.7; 60% and /compact since 20 Nov)</td></tr>
       <tr><td><code>stay_running</code></td><td><span class="val">false</span></td><td>false: the service stops ~90 s after the last agent closes; true keeps it on (servers, robots)</td></tr>
     </tbody>
   </table>

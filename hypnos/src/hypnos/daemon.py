@@ -77,8 +77,8 @@ class Service:
             return ''
         m.store.note('longchat:' + session, step)
         return (f'This chat has used about {int(percent)}% of its context window, and every reply re-reads all of it. '
-                'Tell the user in one line that starting fresh (/clear, then "carry on") or /compact would make each '
-                'reply much cheaper; Hypnos keeps what matters for the next chat.')
+                'Tell the user in one line to type /compact, which keeps this chat going but much cheaper per reply. '
+                'Do not suggest /clear.')
 
     def share(self, claim, session='default'):
         """v0.9.7: a rule or preference the user stated in one project goes to the memory every project reads too.
@@ -214,9 +214,10 @@ class Service:
             lid = m.log(d['content'], d.get('role', 'user'), d.get('session', 'default'), meta,
                         fast=False if meta.get('imported') else None)     # v0.9.8: imports wait for sleep (no per-message calls)
             self.last_log[space] = time.time()
-            if d.get('role', 'user') == 'user' and len(d['content'].strip()) > 15:
-                m.store.note('task:' + d.get('session', 'default'), ' '.join(d['content'].split())[:300])
-            self.touch(space, d.get('session', 'default'))
+            if not meta.get('imported'):                              # an imported old chat is not a live session: no "another session" notice
+                if d.get('role', 'user') == 'user' and len(d['content'].strip()) > 15:
+                    m.store.note('task:' + d.get('session', 'default'), ' '.join(d['content'].split())[:300])
+                self.touch(space, d.get('session', 'default'))
             if len(m.store.unconsolidated()) >= MAX_AWAKE_ROWS:
                 self.sleep_async(space, profile)
             return {'id': lid}

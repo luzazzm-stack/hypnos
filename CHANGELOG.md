@@ -8,6 +8,14 @@
 - **STALE labels in the main recall.** Facts whose cited code changed since were only labelled STALE in the older recall paths; the v0.8 recall that is used by default now labels them too.
 - **Unsorted messages survive a restart.** The service stops when no agent is open, and its sleep queue was lost each time, so messages of sessions that never came back (closed chats, imports) were never sorted. At start-up every session with unsorted messages is queued again, and a long backlog continues in the next sleep turn.
 
+### Fixes: 2026-11-20
+
+- **An imported old fact never replaces a newer one.** The memory model was always told the incoming fact was the newer one, so an imported September fact could replace a November one. Facts are now compared by their own dates; an older one is kept as history.
+- **A failed import is not marked done.** If a message could not be stored (service restart, paused memory), the chat was still recorded as imported and skipped for good. Now it stays unmarked and the next run retries.
+- **A cut-short import finishes.** A rerun picks up after the messages already stored, and a chat continued after it was imported gets only its new turns.
+- **Imported chats are not live sessions.** Old imported chats no longer show up to running agents as "another session".
+- **Moved folders keep their memory.** A chat whose folder is gone goes to the same memory the live hooks used for it (the repository root), not a new one.
+- **The long-chat notice waits until 60%** of the model's window and suggests `/compact`, never `/clear`.
 
 ## v0.9.7: your rules reach every project, opencode v2, MIT License: 2026-11-10
 

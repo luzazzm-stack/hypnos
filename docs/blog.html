@@ -237,7 +237,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 
 <p>A new memory starts empty, even when you have months of chats with your agent sitting on disk. <code>hypnos import ~/.claude/projects</code> loads them: each chat goes to the memory of the folder it ran in, with its real date, so an old fact never overrides a newer one. I loaded 368 of my own chats, about 4,400 messages, and they were sorted in a few hours. Doing it found a bug: the service forgot its to-do list every time it restarted, so messages from chats that never came back were never sorted. It now picks up where it left off.</p>
 
-<p>Two labels tell the agent how far to trust a fact. One says the memory model worked it out rather than read it ("inferred, not stated"). The other says a file the fact names is gone now. That second check is plain code, and its first day turned up three false alarms (a trailing comma, a program named without .exe, a folder on another laptop), all fixed before release.</p>
+<p>Two labels tell the agent how far to trust a fact. One says the memory model worked it out rather than read it ("inferred, not stated"). The other says a file the fact names is gone now. That second check is plain code, and its first day turned up three false alarms (a trailing comma, a program named without .exe, a folder on another laptop), all fixed before release. A review on 20 November found five more bugs in import, the worst being that an imported old fact could still replace a newer one; all five are fixed (see the changelog).</p>
 
 <h2>Three weeks of daily use: v0.9.7</h2>
 

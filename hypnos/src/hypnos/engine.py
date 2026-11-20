@@ -1052,6 +1052,12 @@ class Memory:
         for f in kept:
             if self._resolve_contradictions(f):
                 s.add_fact(f); stored.append(f)
+                if f.get('_outdated_by'):                                    # older than a stored fact that replaces it
+                    newer = s.q('SELECT valid_from FROM facts WHERE id=?', (f['_outdated_by'],))
+                    s.x("UPDATE facts SET status='superseded', superseded_by=?, valid_to=? WHERE id=?",
+                        (f['_outdated_by'], newer[0]['valid_from'] if newer else now(), f['id']))
+                    s.x('DELETE FROM facts_fts WHERE fid=?', (f['id'],))
+                    s.x('INSERT INTO links(src, dst, type, note) VALUES (?,?,?,?)', (f['_outdated_by'], f['id'], 'supersedes', ''))
         if topic and stored:
             s.x('UPDATE topics SET dirty=1 WHERE id=?', (topic,))
         self.vec.index('fact', [(f['id'], f['claim'] + ' ' + f['quote']) for f in stored])
@@ -1132,10 +1138,16 @@ class Memory:
         if any(g['claim'] == new['claim'] for g in olds):                    # word for word already stored
             return False
 
+        def new_is_earlier(g):                                               # by event date, not by arrival order
+            return (new.get('valid_from') or '') < (g['valid_from'] or '')
+
         def judge(g):
+            a = {'claim': g['claim'], 'date': (g['valid_from'] or '')[:10]}
+            b = {'claim': new['claim'], 'date': (new.get('valid_from') or '')[:10]}
+            if new_is_earlier(g):                                            # an imported old fact meets a newer stored one
+                a, b = b, a
             return self.jev.choice(
-                {'older': {'claim': g['claim'], 'date': (g['valid_from'] or '')[:10]},
-                 'newer': {'claim': new['claim'], 'date': (new.get('valid_from') or '')[:10]}},
+                {'older': a, 'newer': b},
                 'Compare the older fact in `older` with the newer fact in `newer`. Are they about the same thing, and if so, which holds now?',
                 {'repeat': 'The newer fact says nothing the older one does not already say (a repeat, maybe in other words).',
                  'newer_replaces': 'Same thing; the newer fact replaces or updates the older one.',
@@ -1155,6 +1167,12 @@ class Memory:
                 same = (new['kind'] == g['kind'] and new['kind'] in self.STATE_KINDS and nw and gw
                         and len(nw & gw) / len(nw | gw) >= 0.45)
                 ch = 'newer_replaces' if same and (new.get('valid_from') or '') >= (g['valid_from'] or '') else 'unrelated'
+            if new_is_earlier(g):                                           # the stored fact is the newer one: it is never replaced
+                if ch == 'repeat':
+                    return False                                             # the stored fact already says it
+                if ch == 'newer_replaces' and not (new['source'] == 'user' and g['source'] != 'user'):
+                    new['_outdated_by'] = g['id']                            # kept as history: already replaced by g
+                continue
             if ch in ('older_still_valid', 'repeat'):                       # never store a fact twice
                 return False
             if ch == 'newer_replaces':

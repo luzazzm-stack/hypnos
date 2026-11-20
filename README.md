@@ -206,7 +206,7 @@ This is a research preview. Known limits:
 - entity resolution is by name only
 - tested installs: Windows and Linux; macOS not yet tested
 - without a working System One (no key, or no credits left), its checks run on the memory model, which uses more tokens; Hypnos says so when it happens
-- v0.9.5's changes to what gets saved, and v0.9.6's smaller per-message memory v0.9.7's shared rules and v0.9.8's import and labels, have not been re-run on LoCoMo yet
+- v0.9.5's changes to what gets saved, and v0.9.6's smaller per-message memory, v0.9.7's shared rules and v0.9.8's import and labels, have not been re-run on LoCoMo yet
 
 See [CHANGELOG.md](CHANGELOG.md), [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 
