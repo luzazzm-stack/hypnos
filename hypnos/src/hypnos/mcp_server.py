@@ -27,7 +27,57 @@ def _check_in_while_open():
     atexit.register(lambda: call('/detach', {'agent': agent}, timeout=2))
 
 
+
+def _answer_probes_early():
+    """v0.9.8 fix (23 Nov): clients such as opencode 2.x and Claude Code first send a version probe
+    (id "server-discover-probe-N") and wait only 5 s for it. Loading the mcp package takes several seconds on a slow
+    laptop, so the probe timed out, the late answer locked the server into the new protocol, and the client's
+    fallback handshake was then refused ("mcp connect failed").
+    Before anything slow is loaded, a reader thread answers such probes at once with "method not found", which makes
+    the client use the normal handshake (it waits the full server timeout), and passes every other line on unchanged."""
+    import threading
+    try:
+        real_in = os.fdopen(os.dup(0), 'rb', buffering=0)
+        r, w = os.pipe()
+        os.dup2(r, 0)
+        os.close(r)
+    except OSError:
+        return                                             # no stdin to wrap: run as before
+
+    def pump():
+        out = os.fdopen(w, 'wb', buffering=0)
+        buf = b''
+        try:
+            while True:
+                chunk = real_in.read(65536)
+                if not chunk:
+                    break
+                buf += chunk
+                while b'\n' in buf:
+                    line, buf = buf.split(b'\n', 1)
+                    try:
+                        msg = json.loads(line)
+                    except ValueError:
+                        msg = None
+                    if isinstance(msg, dict) and str(msg.get('id', '')).startswith('server-discover-probe'):
+                        reply = {'jsonrpc': '2.0', 'id': msg['id'], 'error': {'code': -32601, 'message': 'Method not found'}}
+                        os.write(1, (json.dumps(reply) + '\n').encode())
+                        continue
+                    out.write(line + b'\n')
+            if buf:
+                out.write(buf)
+        except OSError:
+            pass
+        finally:
+            try:
+                out.close()
+            except OSError:
+                pass
+    threading.Thread(target=pump, daemon=True).start()
+
+
 def main():
+    _answer_probes_early()
     try:                                                   # mcp 2.x renamed FastMCP to MCPServer
         from mcp.server.mcpserver import MCPServer as FastMCP
     except ImportError:
@@ -39,12 +89,16 @@ def main():
     space = current_space()
     profile = os.environ.get('HYPNOS_PROFILE', 'coding')
     base = {'space': space, 'profile': profile, 'session': os.environ.get('HYPNOS_SESSION', 'mcp')}
-    ensure_running()
+    # v0.9.8 fix (23 Nov): don't wait for the memory service before answering the client. Starting it can take 5-10 s, and clients
+    # such as opencode give up on a server that is silent that long. The check-in thread starts it in the background,
+    # and a tool call that finds it down starts it then.
     _check_in_while_open()
     app = FastMCP('hypnos')
 
     def _call(path, extra, timeout=30):
         r = call(path, {**base, **extra}, timeout=timeout)
+        if r is None and ensure_running():
+            r = call(path, {**base, **extra}, timeout=timeout)
         return r if r is not None else {'error': 'hypnos service is not running; start it with `hypnos serve`'}
 
     @app.tool()

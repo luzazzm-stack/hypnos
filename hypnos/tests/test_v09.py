@@ -668,3 +668,22 @@ def test_missing_folder_uses_the_repository_space(cfg, tmp_path, monkeypatch):
     pins.mkdir(parents=True, exist_ok=True)
     (pins / 's-c.txt').write_text('code-pinned', encoding='utf-8')    # what the hooks recorded when the chat ran
     assert importer._space_for_chat('s-c', str(gone)) == 'code-pinned'
+
+
+def test_mcp_answers_version_probe_at_once_and_passes_other_lines():
+    # v0.9.8 fix (23 Nov): clients (opencode 2.x, Claude Code) send a version probe first and wait only 5 s. Hypnos must answer it
+    # before anything slow loads, and pass every other message to the real MCP server unchanged.
+    import json
+    import subprocess
+    import sys
+    code = ('import sys; from hypnos.mcp_server import _answer_probes_early; _answer_probes_early()\n'
+            'for line in sys.stdin: sys.stdout.write("echo " + line); sys.stdout.flush()')
+    p = subprocess.Popen([sys.executable, '-c', code], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    probe = {'jsonrpc': '2.0', 'id': 'server-discover-probe-1', 'method': 'server/discover', 'params': {}}
+    init = {'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {}}
+    out, _ = p.communicate((json.dumps(probe) + '\n' + json.dumps(init) + '\n').encode(), timeout=60)
+    lines = out.decode().splitlines()
+    reply = json.loads(lines[0])
+    assert reply['id'] == 'server-discover-probe-1' and reply['error']['code'] == -32601
+    assert lines[1] == 'echo ' + json.dumps(init)                       # the handshake reached the server untouched
+    assert len(lines) == 2                                             # the probe itself was not passed on

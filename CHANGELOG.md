@@ -17,6 +17,11 @@
 - **Moved folders keep their memory.** A chat whose folder is gone goes to the same memory the live hooks used for it (the repository root), not a new one.
 - **The long-chat notice waits until 60%** of the model's window and suggests `/compact`, never `/clear`.
 
+### Fixes: 2026-11-23
+
+- **Agents connect to Hypnos even on a slow computer.** Claude Code and opencode 2.x now send a version check first and give a tool only 5 seconds to answer it. On a slow laptop `hypnos mcp` needed 7 to 30 seconds (Python, the MCP library, and waiting for the memory service), so the check timed out and the agent dropped Hypnos with "mcp connect failed". Hypnos now answers that check in under a second, before anything slow loads, and the agent then waits the normal time for the rest. Agents that don't send the check are unchanged.
+- **The tools no longer wait for the memory service to start.** It starts in the background, and a tool call that finds it down starts it then.
+
 ## v0.9.7: your rules reach every project, opencode v2, MIT License: 2026-11-10
 
 Found in three weeks of daily use on two machines.

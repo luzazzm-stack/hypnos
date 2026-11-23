@@ -239,6 +239,8 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 
 <p>Two labels tell the agent how far to trust a fact. One says the memory model worked it out rather than read it ("inferred, not stated"). The other says a file the fact names is gone now. That second check is plain code, and its first day turned up three false alarms (a trailing comma, a program named without .exe, a folder on another laptop), all fixed before release. A review on 20 November found five more bugs in import, the worst being that an imported old fact could still replace a newer one; all five are fixed (see the changelog).</p>
 
+<p>On 23 November Hypnos kept dropping out of opencode with "mcp connect failed". Claude Code and opencode 2.x now send a version check first and give a tool only 5 seconds to answer it, and on my slow laptop Hypnos needed 7 to 30 seconds just to load. It now answers that check in under a second, before anything slow loads, so it connects on slow computers too.</p>
+
 <h2>Three weeks of daily use: v0.9.7</h2>
 
 <p>I used Hypnos every day on two machines, with Claude Code and opencode, and kept a list of everything that went wrong.</p>
