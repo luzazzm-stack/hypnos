@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](hypnos/pyproject.toml)
 [![MCP](https://img.shields.io/badge/MCP-server-6E56CF)](integrations/claude-code/README.md)
-[![Version](https://img.shields.io/badge/version-0.9.9-2ea44f)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.9.10-2ea44f)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 ![Status](https://img.shields.io/badge/status-research%20preview-orange)
 
@@ -149,6 +149,7 @@ Writing facts and summaries needs an LLM. Hypnos isn't tied to one: setup lists 
 | v0.7 | 53% | ~3,100 tokens | evidence-first recall; ahead of Mem0 (51%) and GBrain (51%) in the same run |
 | v0.8 | 55% | ~600 tokens | System One routes each question to the smallest context that answers |
 | v0.9 | 60.5% (v0.8: 60.5% in the same run) | ~611 tokens | one-line install, any agent, any model, fast cleanup, parallel sleep, runs only while an agent is open. A first try with extra date instructions scored 47% and was reverted. |
+| v0.9.10 | not re-run yet | | memory keeps saving when the Claude limit runs out (free Groq / Gemini / OpenRouter writers, a limited one rests until its reset), your rules come first at chat start and the start text is about 40% smaller (capped at 9,000 characters), the other-chats note is one line with no prompt text, cleaner error log |
 | v0.9.9 | not re-run yet | | learns the chat before /compact, gives its facts back after, shows summary/memory clashes, pauses end after 12 h, failing sleeps reported |
 | v0.9.8 | not re-run yet | | `hypnos import` (past chats and files), stated/inferred facts, missing-file labels, STALE in the main recall, unsorted messages survive a restart |
 | v0.9.7 | not re-run yet | | your rules shared with every project, opencode v2 plugin, long-chat notice as a % of the window, 3-minute writer rest, Groq fix, `hypnos check`, MIT License |

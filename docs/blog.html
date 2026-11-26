@@ -6,7 +6,7 @@
 <title>Building Hypnos</title>
 <meta name="author" content="Luza Maharjan">
 <meta name="copyright" content="© 2026 Luza Maharjan. MIT License.">
-<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.9, with every benchmark against Mem0, GBrain and my own earlier versions.">
+<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.10, with every benchmark against Mem0, GBrain and my own earlier versions.">
 <meta property="og:title" content="Building Hypnos: memory for AI agents that sleeps on it">
 <meta property="og:description" content="Nine versions, three releases from daily use, every benchmark, including the one where a new version lost by 10 points.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,6 +118,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <tr class="me"><td>v0.9.5</td><td>Oct 16</td><td>Fixes from a day of real use: never a duplicate, small memory, housekeeping stays out of memory</td></tr>
 <tr class="me"><td>v0.9.6</td><td>Oct 19</td><td>Smaller chats: less memory per message, never repeated, a long-chat notice</td></tr>
 <tr class="me"><td>v0.9.7</td><td>Nov 10</td><td>Your rules reach every project, opencode v2, MIT License</td></tr>
+<tr class="me"><td>v0.9.10</td><td>Nov 26</td><td>Memory keeps saving when the Claude limit runs out (free fallback models); your rules come first at chat start; a smaller start text; one-line other-chats note</td></tr>
 <tr class="me"><td>v0.9.9</td><td>Nov 26</td><td>Memory learns the chat before /compact and gives its facts back after; summary/memory clashes shown; pauses end after 12 h; failing sleeps reported</td></tr>
 <tr class="me"><td>v0.9.8</td><td>Nov 11</td><td>Import past chats and files; stated vs inferred facts; missing files flagged</td></tr>
 </tbody></table></div>
@@ -233,6 +234,21 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <p>Several sessions can work in the same project at once. Each one is told what the others are doing and that their tasks aren't its own, and it never hands your current conversation back to you as a "memory".</p>
 
 <p>Refusals aren't remembered. "The assistant couldn't do X" is never saved, so a later session won't refuse the same thing because a memory told it to.</p>
+
+<h2>When the Claude limit runs out: v0.9.10</h2>
+
+<p>The next flaw came from reading the log. On one laptop, 262 of 305 failed sleeps were the same message: Claude's 5-hour limit. Every time the limit hit, memory stopped learning, and it kept asking Claude again and again.</p>
+
+<ul>
+<li><b>Free models take over.</b> After Claude, the writer list can go on to Groq, Gemini and OpenRouter models. Their answers must pass the same format check as Claude's, so a wrong-format answer is never stored.</li>
+<li><b>A limit means rest.</b> A writer that hits a usage limit rests until the reset time in its message (or for 1 hour for Claude, 10 minutes for the others), and the rest is kept on disk, so a restart does not ask in vain.</li>
+<li><b>No internet is not a failed sleep.</b> The sleep is put off and retried 5 minutes later.</li>
+<li><b>The start of a chat fits what the model sees.</b> Claude Code shows the model only about the first 2,000 characters of the start context, and Hypnos was sending 12 to 18 KB. Your rules now come first, the whole start text is capped at 9,000 characters (about 40% smaller), and old or repeated pins are left out.</li>
+<li><b>Other chats are one line.</b> The note about other chats open in the same project used to quote what their users last typed. It is now one line with no prompt text.</li>
+<li><b>A quieter log.</b> A hook that gives up before the service answers leaves one dated line instead of a traceback (there were about 500).</li>
+</ul>
+
+<p>Like v0.9.9, this has not been re-run on LoCoMo: it changes which model writes the memory and how the start text is built, not how recall ranks.</p>
 
 <h2>Trusting memory after /compact: v0.9.9</h2>
 
