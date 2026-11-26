@@ -7,8 +7,11 @@ import re
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
+import urllib.error
 import urllib.request
+from collections import Counter
 from pathlib import Path
 
 from .config import Config
@@ -146,22 +149,125 @@ class CodexWriter(Writer):
         return text
 
 
+def read_key(name: str, cfg: Config | None = None) -> str:
+    """v0.9.10: an API key by its variable name, from the environment or else from the user's keys file
+    (`keys_file` in config.toml, a KEY=value file). Keys are read when needed and never copied anywhere."""
+    if not name:
+        return ''
+    if os.environ.get(name):
+        return os.environ[name]
+    path = getattr(cfg, 'keys_file', '') if cfg else ''
+    if not path:
+        return ''
+    try:
+        for line in Path(os.path.expanduser(str(path))).read_text(encoding='utf-8-sig').splitlines():
+            m = re.match(r'\s*(?:export\s+)?([A-Za-z0-9_]+)\s*=\s*(.*)$', line)
+            if m and m.group(1) == name and not line.lstrip().startswith('#'):
+                return m.group(2).strip().strip('"\'')
+    except OSError:
+        pass
+    return ''
+
+
 class OpenAIWriter(Writer):
-    """Any OpenAI-compatible chat API: Ollama, LM Studio, OpenRouter, OpenAI, vLLM ..."""
+    """Any OpenAI-compatible chat API: Ollama, LM Studio, OpenRouter, OpenAI, Groq, Gemini, vLLM ..."""
     name = 'openai'
 
     def __init__(self, cfg: Config):
         self.url = cfg.openai_base_url.rstrip('/') + '/chat/completions'
-        self.key = os.environ.get(cfg.openai_api_key_env, '')
+        self.key = read_key(cfg.openai_api_key_env, cfg)
         self.model = cfg.writer_model
+        self.timeout = 300
 
     def complete(self, prompt, attachments=()):
         body = prompt + ''.join(f'\n\n--- attached file {i + 1} ---\n{a}' for i, a in enumerate(attachments))
         req = urllib.request.Request(self.url, method='POST', data=json.dumps(
             {'model': self.model, 'messages': [{'role': 'user', 'content': body}], 'temperature': 0}).encode(),
             headers={'Content-Type': 'application/json', 'User-Agent': 'hypnos-memory/0.9', **({'Authorization': 'Bearer ' + self.key} if self.key else {})})
-        with urllib.request.urlopen(req, timeout=300) as r:
-            return json.loads(r.read())['choices'][0]['message']['content'].strip()
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                text = json.loads(r.read())['choices'][0]['message'].get('content') or ''
+        except urllib.error.HTTPError as ex:           # v0.9.10: keep the reason (429, quota, retry time) for the router
+            try:
+                detail = ex.read().decode('utf-8', 'replace')[:300]
+            except Exception:
+                detail = ''
+            wait = ex.headers.get('Retry-After') if ex.headers else None
+            raise RuntimeError(f'HTTP {ex.code}: {detail}' + (f' (retry after {wait}s)' if wait else '')) from None
+        return re.sub(r'(?s)<think>.*?</think>', '', text).strip()   # reasoning models may put their thinking first
+
+
+# v0.9.10: free OpenAI-compatible providers, written in the chain as `groq:MODEL`, `gemini:MODEL`, `openrouter:MODEL`
+# (add `#KEY_NAME` to use another key, e.g. a second account). Keys come from the environment or `keys_file`.
+PROVIDERS = {
+    'groq': ('https://api.groq.com/openai/v1', 'GROQ_API_KEY'),
+    'gemini': ('https://generativelanguage.googleapis.com/v1beta/openai', 'GEMINI_API_KEY'),
+    'openrouter': ('https://openrouter.ai/api/v1', 'OPENROUTER_API_KEY'),
+}
+
+
+class WriterOffline(RuntimeError):
+    """No internet: the sleep is put off and retried later, instead of running through the whole chain."""
+    fresh = False
+
+
+class WritersResting(RuntimeError):
+    """Every writer is resting after a usage limit: the sleep is put off until one is back."""
+
+
+_LIMIT = re.compile(r"(?i)hit your .{0,20}limit|session limit|usage limit|weekly limit|rate.?limit|too many requests|"
+                    r"\b429\b|quota|resource.?exhausted|credits?\b.{0,30}(exhaust|insufficient|run out)|out of credits|"
+                    r"free usage limit|tokens per (minute|day)")
+_OFFLINE = re.compile(r"(?i)can'?t reach the api server|ENOTFOUND|EAI_AGAIN|getaddrinfo failed|name or service not known|"
+                      r"no address associated|network is unreachable|errno 1100[1-4]|temporary failure in name resolution|"
+                      r"internet connection|ENETUNREACH")
+
+
+def classify_error(text: str) -> str:
+    """'offline', 'limit' (usage limit, quota, HTTP 429) or 'other'."""
+    t = str(text or '')
+    if _OFFLINE.search(t):
+        return 'offline'
+    if _LIMIT.search(t):
+        return 'limit'
+    return 'other'
+
+
+def rest_seconds(text: str, spec: str, now_: float | None = None) -> float:
+    """How long a writer rests after a limit error: the reset time in the message when there is one ("resets 6:45pm
+    (Asia/Kathmandu)", "try again in 1m30s", "retry after 37s"); else 1 hour for Claude, 10 minutes for the others."""
+    from datetime import datetime, timedelta
+    t, now_ = str(text or ''), now_ or time.time()
+    m = re.search(r'(?i)resets\s+(?:(?P<mon>[A-Z][a-z]{2,8})\s+(?P<day>\d{1,2}),?\s+(?:at\s+)?)?'
+                  r'(?P<h>\d{1,2})(?::(?P<mi>\d{2}))?\s*(?P<ap>am|pm)(?:\s*\((?P<tz>[\w/+-]+)\))?', t)
+    if m:
+        tz = None
+        if m.group('tz'):
+            try:
+                from zoneinfo import ZoneInfo
+                tz = ZoneInfo(m.group('tz'))
+            except Exception:
+                tz = None                           # no tz database: the laptop's own clock is the best guess
+        cur = datetime.fromtimestamp(now_, tz) if tz else datetime.fromtimestamp(now_)
+        h = int(m.group('h')) % 12 + (12 if m.group('ap').lower() == 'pm' else 0)
+        at = cur.replace(hour=h, minute=int(m.group('mi') or 0), second=0, microsecond=0)
+        if m.group('mon'):
+            try:
+                mon = datetime.strptime(m.group('mon')[:3], '%b').month
+                at = at.replace(month=mon, day=int(m.group('day')))
+                if at < cur - timedelta(days=1):
+                    at = at.replace(year=at.year + 1)
+            except ValueError:
+                pass
+        while at <= cur:
+            at += timedelta(days=1)
+        return min(8 * 86400, (at - cur).total_seconds() + 60)
+    m = re.search(r'(?i)(?:try again|retry|retrydelay|retry after)[^0-9]{0,15}(?:(\d+)\s*h)?\s*(?:(\d+)\s*m(?!s))?\s*(?:([\d.]+)\s*s)?', t)
+    if m and any(m.groups()):
+        secs = int(m.group(1) or 0) * 3600 + int(m.group(2) or 0) * 60 + float(m.group(3) or 0)
+        if secs > 0:
+            return min(8 * 86400, max(5.0, secs + 2))
+    return 3600.0 if spec.startswith('claude') else 600.0
 
 
 class FakeWriter(Writer):
@@ -197,18 +303,37 @@ class FakeWriter(Writer):
 
 
 class ChainWriter(Writer):
-    """v0.9: a list of writers, cheapest first. A writer that fails (rate limit, quota, outage) rests for a while and the
-    next one takes over, so sleep never depends on one model. Bigger, paid models come last, used only if every
-    cheaper one is down. Shared by every memory space in the process."""
+    """v0.9: a list of writers in order of preference. A writer that fails rests for a while and the next one takes
+    over, so sleep never depends on one model. Shared by every memory space in the process.
+    v0.9.10 routing: a usage limit (Claude's 5-hour or session limit, HTTP 429, quota) rests that writer until the reset
+    time in the message (else 1 h for Claude, 10 min for the others), saved in writer-rest.json so a restart keeps it;
+    a Claude account limit rests every claude:* link. No internet stops the chain at once (WriterOffline) and the sleep
+    is retried later. An answer that fails the caller's check goes to the next writer. Every call is tallied by writer
+    so each sleep can log which writer did the work."""
     name = 'chain'
-    COOLDOWN = 180                        # seconds a failed writer rests before it is tried again (was 1800; 3 min since 2026-11-07)
-    down: dict = {}                       # link -> time it failed
+    COOLDOWN = 180                        # seconds a writer rests after any other failure (crash, empty answer, 5xx)
+    OFFLINE_RETRY = 300                   # v0.9.10: after a no-internet error, sleeps wait this long before trying again
+    down: dict = {}                       # link -> time it failed (short rest, this process only)
+    offline_until = 0.0
+    _lock = threading.Lock()
 
     def __init__(self, cfg: Config):
         self.links = []
+        self.rest_file = Path(cfg.home) / 'writer-rest.json'
+        self.tally: Counter = Counter()       # v0.9.10: successful calls per writer (read by Memory.sleep)
         for spec in cfg.writer_chain:
             kind, _, model = spec.partition(':')
-            if kind == 'opencode':
+            if kind in PROVIDERS:                       # groq:MODEL[#KEY_NAME] (v0.9.10)
+                base, key_env = PROVIDERS[kind]
+                model, _, other_key = model.partition('#')
+                w = OpenAIWriter(cfg)
+                w.url, w.model, w.timeout = base + '/chat/completions', model, 120
+                w.key = read_key(other_key or key_env, cfg)
+                if not w.key:
+                    print(f'[hypnos] writer {spec} skipped: no {other_key or key_env} in the environment or keys_file', flush=True)
+                    continue
+                self.links.append((spec, w))
+            elif kind == 'opencode':
                 self.links.append((spec, OpencodeWriter(cfg, model, attempts=1, timeout=150)))   # in a chain: fail fast, the next model takes over
             elif kind == 'claude':
                 self.links.append((spec, ClaudeWriter(cfg, model or 'haiku')))
@@ -222,27 +347,135 @@ class ChainWriter(Writer):
                 if base:
                     w.url = base.rstrip('/') + '/chat/completions'
                 if key_env:
-                    w.key = os.environ.get(key_env, '')
+                    w.key = read_key(key_env, cfg)
                 self.links.append((spec, w))
         self.last = None
 
-    def complete(self, prompt, attachments=()):
+    # ---- v0.9.10: rests after a usage limit, kept on disk
+    @staticmethod
+    def rest_key(spec, error=''):
+        """A Claude limit is for the whole account (Haiku and Sonnet share it), unless it names one model."""
+        if spec.startswith('claude') and not re.search(r'(?i)\b(opus|sonnet|haiku)\b', str(error)):
+            return 'claude'
+        return spec
+
+    def rests(self) -> dict:
+        try:
+            data = json.loads(self.rest_file.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            return {}
         now_ = time.time()
-        ready = [l for l in self.links if now_ - self.down.get(l[0], 0) > self.COOLDOWN]
-        errors = []
-        for spec, w in ready or self.links:           # all resting: try them anyway rather than fail
+        return {k: v for k, v in data.items() if isinstance(v, dict) and float(v.get('until', 0)) > now_}
+
+    def rest(self, key, seconds, reason=''):
+        with self._lock:
+            data = self.rests()
+            data[key] = {'until': time.time() + seconds, 'reason': str(reason)[:160],
+                         'set': time.strftime('%Y-%m-%d %H:%M:%S')}
+            try:
+                self.rest_file.parent.mkdir(parents=True, exist_ok=True)
+                tmp = self.rest_file.with_suffix('.tmp')
+                tmp.write_text(json.dumps(data, indent=1), encoding='utf-8')
+                os.replace(tmp, self.rest_file)
+            except OSError:
+                pass
+
+    def resting(self, spec, rests=None) -> float:
+        """Seconds until this link may be used again (0 = ready)."""
+        rests = self.rests() if rests is None else rests
+        until = max(float(rests.get(k, {}).get('until', 0)) for k in {spec, self.rest_key(spec)})
+        return max(0.0, until - time.time())
+
+    def complete(self, prompt, attachments=(), check=None):
+        """`check(text) -> bool` is the caller's validation (e.g. "a JSON array of facts"). An answer that fails it goes
+        to the next writer. If only the first writer of the chain answered and its answer failed the check, that answer
+        is returned (the behaviour before v0.9.10); an invalid answer from a fallback writer is never used."""
+        now_ = time.time()
+        if now_ < ChainWriter.offline_until:
+            raise WriterOffline('offline: writers are retried after ' + time.strftime('%H:%M', time.localtime(ChainWriter.offline_until)))
+        rests = self.rests()
+        usable = [l for l in self.links if not self.resting(l[0], rests)]
+        if not usable:
+            soon = min((self.resting(l[0], rests) for l in self.links), default=0)
+            raise WritersResting('every writer is resting after a usage limit; the first is back at ' +
+                                 time.strftime('%Y-%m-%d %H:%M', time.localtime(now_ + soon)))
+        ready = [l for l in usable if now_ - self.down.get(l[0], 0) > self.COOLDOWN]
+        errors, invalid = [], None
+        for spec, w in ready or usable:               # only short rests left: try them anyway rather than fail
+            if self.resting(spec, rests):             # put to rest earlier in this pass (Claude limit -> Sonnet too)
+                continue
             try:
                 out = w.complete(prompt, attachments)
-                if out and out.strip():
-                    self.last = spec
-                    ChainWriter.down.pop(spec, None)
-                    return out
-                raise RuntimeError('empty answer')
+                if not (out and out.strip()):
+                    raise RuntimeError('empty answer')
             except Exception as ex:
+                msg = str(ex)
+                kind = classify_error(msg)
+                if kind == 'offline':
+                    ChainWriter.offline_until = time.time() + self.OFFLINE_RETRY
+                    err = WriterOffline(f'offline ({spec}: {msg[:120]})')
+                    err.fresh = True
+                    print(f'[hypnos] writer {spec}: no internet, sleeps wait {self.OFFLINE_RETRY // 60} min: {msg[:120]}', flush=True)
+                    raise err from None
                 ChainWriter.down[spec] = time.time()
-                errors.append(f'{spec}: {str(ex)[:120]}')
-                print(f'[hypnos] writer {spec} failed, trying the next one: {str(ex)[:120]}', flush=True)
+                if kind == 'limit':
+                    secs = rest_seconds(msg, spec)
+                    key = self.rest_key(spec, msg)
+                    self.rest(key, secs, msg)
+                    rests = self.rests()
+                    print(f'[hypnos] writer {spec} hit a usage limit, {key} rests until '
+                          f'{time.strftime("%Y-%m-%d %H:%M", time.localtime(time.time() + secs))}: {msg[:120]}', flush=True)
+                else:
+                    print(f'[hypnos] writer {spec} failed, trying the next one: {msg[:120]}', flush=True)
+                errors.append(f'{spec}: {msg[:120]}')
+                continue
+            if check is not None:
+                try:
+                    ok = bool(check(out))
+                except Exception:
+                    ok = False
+                if not ok:
+                    print(f'[hypnos] writer {spec} gave an answer in the wrong format, trying the next one', flush=True)
+                    errors.append(f'{spec}: wrong format')
+                    if invalid is None and spec == self.links[0][0]:
+                        invalid = (spec, out)
+                    continue
+            self.last = spec
+            ChainWriter.down.pop(spec, None)
+            with self._lock:
+                self.tally[spec] += 1
+            return out
+        if invalid:
+            self.last = invalid[0]
+            with self._lock:
+                self.tally[invalid[0]] += 1
+            return invalid[1]
         raise RuntimeError('every writer failed: ' + ' | '.join(errors))
+
+
+def write(writer: Writer, prompt: str, attachments=(), check=None) -> str:
+    """v0.9.10: call a writer with an answer check; only the chain can use it to move on to the next writer."""
+    if isinstance(writer, ChainWriter):
+        return writer.complete(prompt, attachments, check=check)
+    return writer.complete(prompt, attachments)
+
+
+def is_json_list(text) -> bool:
+    v = parse_json(text)
+    return isinstance(v, list) and (not v or any(isinstance(x, dict) and x.get('claim') for x in v))
+
+
+def is_json_object_with(key):
+    return lambda text: isinstance(parse_json(text), dict) and bool(parse_json(text).get(key))
+
+
+_NOT_TEXT = re.compile(r"(?i)^\s*(i'?m sorry|sorry,|i can(?:no|')t|i am unable|as an ai\b|error:)")
+
+
+def is_prose(text) -> bool:
+    """A summary or wake note: real text, not a refusal, an error or a JSON object."""
+    t = (text or '').strip()
+    return len(t) >= 15 and not _NOT_TEXT.search(t) and not t.startswith('{')
 
 
 def make_writer(cfg: Config) -> Writer:

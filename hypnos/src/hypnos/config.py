@@ -24,6 +24,9 @@ class Config:
     writer_model: str = 'opencode/mimo-v2.6-flash-free'
     openai_base_url: str = 'http://localhost:11434/v1'   # any OpenAI-compatible server (Ollama, OpenRouter, ...)
     openai_api_key_env: str = 'OPENAI_API_KEY'
+    # v0.9.10: a KEY=value file the API keys of groq:/gemini:/openrouter:/openai: writers are read from when they are
+    # not in the environment (read when needed, never copied)
+    keys_file: str = ''
     # Jev (TypeSafe) for typed decisions; falls back to heuristics without a key
     jev: bool = True
     # v0.9: the System One decision model: jev (TypeSafe's hosted API, needs a key) or laya (open weights, run

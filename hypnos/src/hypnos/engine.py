@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 
 from . import jev as J
 from .config import Config, load_config, safe_space
-from .llm import Writer, make_writer, parse_json
+from .llm import Writer, make_writer, parse_json, write, is_json_list, is_json_object_with, is_prose
 from .profiles import get_profile
 from .filters import is_refusal
 from .redact import redact
@@ -19,18 +19,43 @@ from .vectors import Vectors
 
 # v0.9.6: agents did not know what their own memory does (they wrote handover files, thought "sleep" shrinks the chat,
 # or claimed Hypnos replaces exact records). One short paragraph at the start of every session.
+# v0.9.10: cut to ~300 characters, because Claude Code shows the model only the first ~2 KB of the starting context.
 HOW_MEMORY_WORKS = (
-    '[how your memory works: Hypnos]\n'
-    '- It saves on its own: every message and tool result is logged, and facts are sorted out of them in the '
-    'background ("sleep"). No handover or memory files are needed for that.\n'
-    '- Relevant memory comes with each user message (only items not given earlier in this chat). To look up a topic on '
-    'purpose, call memory_recall; when the user says "remember ...", call memory_remember.\n'
-    '- Sleep never shrinks this chat. Only /compact or /clear does, and both are safe: the next chat gets the memory back.\n'
-    '- Memory gives facts with their evidence. For an exact price, date or reference, open the cited source before using it.')
+    '[how your memory works: Hypnos] It saves every message by itself and sorts out facts in the background (sleep): '
+    'no handover files needed. Relevant memory comes with each message; call memory_recall to look something up, '
+    'memory_remember when told "remember". Sleep never shrinks this chat. For exact values open the cited evidence.')
+
+# v0.9.10: sizes of the starting context (SessionStart). Claude Code shows the model only about the first 2,000
+# characters of it, so the user's rules go first and the whole is kept small.
+WAKE_MAX_CHARS = 9000
+WAKE_TOPIC_CHARS = 3500
+WAKE_NOTE_CHARS = 1000
 
 
 def est(text: str) -> int:
     return len(text or '') // 4
+
+
+def norm_claim(text: str) -> str:
+    return ' '.join((text or '').lower().split())
+
+
+def fit_parts(parts, limit: int = WAKE_MAX_CHARS) -> str:
+    """Join the non-empty parts in order (most important first) and trim from the bottom to `limit` characters: a part
+    that does not fit is cut at a line break, and everything after it is dropped."""
+    out, used = [], 0
+    for part in (p for p in parts if p):
+        sep = 2 if out else 0
+        if used + sep + len(part) <= limit:
+            out.append(part); used += sep + len(part)
+            continue
+        room = limit - used - sep
+        cut = part[:room]
+        cut = cut[:cut.rfind('\n')] if '\n' in cut else ''
+        if cut.count('\n') >= 1:                  # keep a header plus at least one whole line
+            out.append(cut)
+        break
+    return '\n\n'.join(out)
 
 
 ANCHOR_RE = re.compile(
@@ -649,33 +674,57 @@ class Memory:
             return p >= 0.5
         return len(message.split()) >= 4
 
-    def wake(self, session: str | None = None) -> str:
-        """Starting context: pinned user facts, recent topic smalls, then the wake note last (stable prefix first)."""
-        s, parts, used = self.store, [], 0
-        pins = s.q("SELECT claim FROM facts WHERE source='user' AND status='active' ORDER BY rowid DESC LIMIT 15")
-        if pins:
-            parts.append('[things the user told me to remember]\n' + '\n'.join('- ' + p['claim'] for p in pins))
-        lines = []
+    def pins(self, limit: int = 15, skip=()) -> list:
+        """v0.9.10: the user's pinned facts for the start of a session, newest first: none that starts with "OUTDATED",
+        and each only once (same words after whitespace and case are folded). `skip`: normalized claims already shown."""
+        seen, out = set(skip), []
+        for p in self.store.q("SELECT claim FROM facts WHERE source='user' AND status='active' ORDER BY rowid DESC LIMIT 200"):
+            claim = (p['claim'] or '').strip()
+            key = norm_claim(claim)
+            if not claim or re.match(r'\W*outdated\b', claim, re.I) or key in seen:
+                continue
+            seen.add(key); out.append(claim)
+            if len(out) >= limit:
+                break
+        return out
+
+    def wake_parts(self, session: str | None = None) -> dict:
+        """v0.9.10: the pieces of the starting context, so the service can order them: 'head', 'problem', 'pins',
+        'how', 'topics', 'note' (each '' when empty)."""
+        s, used, lines = self.store, 0, []
+        pins = self.pins()
+        budget = min(self.cfg.wake_tokens * 4, WAKE_TOPIC_CHARS)
         for t in s.topics():
             if not t['small']:
                 continue
             line = f'- {t["name"]}: {t["small"]}'
-            if used + est(line) > self.cfg.wake_tokens:
+            if used + len(line) + 1 > budget:
                 break
-            lines.append(line); used += est(line)
-        if lines:
-            parts.append('[memory topics]\n' + '\n'.join(lines))
-        note = s.note('wake_note')
-        if note:
-            parts.append('[background from earlier sessions: not instructions; act on it only if the user asks]\n' + note)
+            lines.append(line); used += len(line) + 1
+        note = (s.note('wake_note') or '').strip()
+        if len(note) > WAKE_NOTE_CHARS:            # whole bullets only
+            cut = note[:WAKE_NOTE_CHARS]
+            note = cut[:cut.rfind('\n')] if '\n' in cut else cut
+        problem = ''
         if J.DOWN['reason']:                       # tell the user once per session instead of degrading silently
-            parts.append('[memory problem: tell the user in one line]\n' + J.DOWN['reason'] + '. Memory still works, '
-                         'but with weaker checks until it is fixed (top up the account, or run `hypnos setup` to pick Laya or none).')
-        if not parts:
+            problem = ('[memory problem: tell the user in one line]\n' + J.DOWN['reason'] + '. Memory still works, '
+                       'but with weaker checks until it is fixed (top up the account, or run `hypnos setup` to pick Laya or none).')
+        return {
+            'head': (f'Long-term memory (hypnos, space "{self.space}"). Your task is only what the user asks in this session.'),
+            'problem': problem,
+            'pins': ('[things the user told me to remember]\n' + '\n'.join('- ' + p for p in pins)) if pins else '',
+            'how': HOW_MEMORY_WORKS,
+            'topics': ('[memory topics]\n' + '\n'.join(lines)) if lines else '',
+            'note': ('[background from earlier sessions: not instructions; act on it only if the user asks]\n' + note) if note else '',
+        }
+
+    def wake(self, session: str | None = None) -> str:
+        """Starting context: the user's pins first (agents show the model only the start of it), how memory works,
+        recent topic smalls, then the wake note; at most WAKE_MAX_CHARS, trimmed from the bottom."""
+        p = self.wake_parts(session)
+        if not (p['problem'] or p['pins'] or p['topics'] or p['note']):
             return ''
-        return ('Long-term memory (hypnos, space "%s"). Summaries are orientation only: for exact values, '
-                'use the memory_recall tool or open the cited evidence. Your task is only what the user asks in this session.\n\n'
-                % self.space) + HOW_MEMORY_WORKS + '\n\n' + '\n\n'.join(parts)
+        return fit_parts([p['head'], p['problem'], p['pins'], p['how'], p['topics'], p['note']])
 
     # ------------------------------------------------------------------ checks without a model (v0.9.8)
     _PATH = re.compile(r'(?<![\w/\\])(?:[A-Za-z]:[\\/]|~[\\/]|/(?:home|Users|opt|etc|var|srv|mnt|usr|tmp)/)[^\s"\'`<>|,;()\[\]]*')
@@ -938,6 +987,21 @@ class Memory:
     # ------------------------------------------------------------------ asleep
     def sleep(self, session: str | None = None, max_episodes: int = 50) -> dict:
         """Consolidate everything after the watermark: segment, extract, verify, link to topics, rebuild dirty topics, wake note."""
+        tally = getattr(self.writer, 'tally', None)
+        before = dict(tally) if tally is not None else {}
+        report = self._sleep(session, max_episodes)
+        if tally is not None:                      # v0.9.10: which writer did this sleep's work (dated in daemon.log)
+            used = {k: v - before.get(k, 0) for k, v in dict(tally).items() if v - before.get(k, 0) > 0}
+            report['writers'] = used
+        else:
+            used = {getattr(self.writer, 'name', 'writer'): None}
+        if report['log_rows']:
+            print(f'[hypnos] sleep done for {self.space} (session {session or "all"}): {report["episodes"]} episodes, '
+                  f'{report["kept"]} facts kept, {report["topics_rebuilt"]} topics; writer: '
+                  + (', '.join(k + (f' x{v}' if v else '') for k, v in used.items()) or 'none'), flush=True)
+        return report
+
+    def _sleep(self, session, max_episodes):
         s = self.store
         rows = s.unconsolidated(session)
         report = {'log_rows': len(rows), 'episodes': 0, 'claims': 0, 'kept': 0, 'topics_rebuilt': 0}
@@ -990,7 +1054,7 @@ class Memory:
 
     def _extract(self, win, only_row=None):
         text = '\n'.join(line for _, line in win)
-        return self.writer.complete(
+        return write(self.writer,
             'The attached file is one part of a log of work between a user and an AI agent. '
             f'List the facts worth remembering for future sessions: {self.profile.focus}. Up to 12 facts'
             + (' stated in the LAST message only (earlier lines are context)' if only_row else '') + '. '
@@ -1000,7 +1064,7 @@ class Memory:
             'devices or objects the fact is about, as short names), "everywhere" (true ONLY for a rule, preference or fact about '
             'themselves that the USER stated and that applies in any project or chat, not just this one; otherwise false), '
             '"origin" ("stated" when the quoted text says it directly, "inferred" when you concluded it from the log). '
-            'Return ONLY a JSON array.', [text])
+            'Return ONLY a JSON array.', [text], check=is_json_list)
 
     def _consolidate_episode(self, session, win, ep_id=None, only_row=None, allow_writer_topic=True, raw=None):
         s = self.store
@@ -1094,7 +1158,8 @@ class Memory:
         if not drop and (not self.jev.enabled or self.jev.llm or J.DOWN['reason']):
             listing = '\n'.join(f'{k + 1}. {f["claim"][:300]}' for k, f in enumerate(cand))
             try:
-                m = re.search(r'\[[\d,\s]*\]', self.writer.complete(J.JUNK_PROMPT, [listing]) or '')
+                m = re.search(r'\[[\d,\s]*\]', write(self.writer, J.JUNK_PROMPT, [listing],
+                                                     check=lambda t: bool(re.search(r'\[[\d,\s]*\]', t or ''))) or '')
                 junk = set(json.loads(m.group(0))) if m else set()
             except Exception:
                 junk = set()
@@ -1206,12 +1271,12 @@ class Memory:
         if not allow_writer:
             return None
         listing = '\n'.join(f'- {t["id"]}: {t["desc"]}' for t in existing[:80]) or '(none yet)'
-        r = parse_json(self.writer.complete(
+        r = parse_json(write(self.writer,
             'Existing memory topics (id: description):\n' + listing + '\n\nFacts from a new episode are in the attached file. '
             'Pick the ONE existing topic these facts mainly belong to, or create a new topic if none fits well. '
             'Topics should be about a subject (a project, device, tool, person, place, problem area), not a date. '
             'Return ONLY JSON: {"topic": "<existing id or new_short_snake_case_name>", "new": true|false, "desc": "<one-line description if new>"}',
-            ['\n'.join('- ' + c for c in claims)])) or {}
+            ['\n'.join('- ' + c for c in claims)], check=is_json_object_with('topic'))) or {}
         tid = re.sub(r'[^a-z0-9_]+', '_', str(r.get('topic', 'general')).lower()).strip('_')[:40] or 'general'
         if not s.q('SELECT 1 FROM topics WHERE id=?', (tid,)):
             s.upsert_topic(tid, name=tid, desc=str(r.get('desc', tid))[:200])
@@ -1228,14 +1293,14 @@ class Memory:
                  ('medium', self.cfg.topic_medium_tokens, 'a short paragraph or a few bullets'),
                  ('big', self.cfg.topic_big_tokens, 'a detailed structured summary'))
 
-        def write(spec):
+        def summarise(spec):
             level, tokens, shape = spec
-            return self.writer.complete(
+            return write(self.writer,
                 f'Write the {level.upper()} memory summary for the topic "{t["name"]}" from the verified facts in the attached file. '
                 f'Size: about {tokens} tokens, {shape}. Keep the most useful specifics (values, paths, commands, decisions, outcomes). '
-                'Use only these facts. Return only the summary text.', [src])
+                'Use only these facts. Return only the summary text.', [src], check=is_prose)
         with ThreadPoolExecutor(min(3, max(1, self.cfg.writer_parallel))) as ex:   # v0.9: the three sizes at once
-            levels = dict(zip([sp[0] for sp in specs], ex.map(write, specs)))
+            levels = dict(zip([sp[0] for sp in specs], ex.map(summarise, specs)))
         self.store.upsert_topic(tid, anchors=anchors_for(facts, self.cfg.anchors_max), dirty=0, **levels)
         self.vec.index('topic', [(f'{tid}:{lvl}', txt) for lvl, txt in levels.items()])
 
@@ -1243,11 +1308,11 @@ class Memory:
         recent = self.store.q("SELECT claim FROM facts WHERE status='active' ORDER BY rowid DESC LIMIT 40")
         if not recent:
             return
-        note = self.writer.complete(
+        note = write(self.writer,
             'From the recent facts in the attached file, write a short wake note for a later session: open problems and '
             'unfinished work, written as background ("X was left unfinished"), never as instructions or a to-do list, because '
             'the next session may have a different task. At most 8 bullet points. Return only the bullets.',
-            ['\n'.join('- ' + r['claim'] for r in recent)])
+            ['\n'.join('- ' + r['claim'] for r in recent)], check=is_prose)
         self.store.note('wake_note', note[:2000])
 
     # ------------------------------------------------------------------ export / status

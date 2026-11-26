@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.9.10: memory keeps learning when the Claude limit runs out, and a start the model can read: 2026-11-26
+
+- **Smart writer routing.** On one laptop, 262 of 305 failed sleeps were Claude's "You've hit your 5-hour limit". The writer list can now go on to free models after Claude: `groq:MODEL`, `gemini:MODEL` and `openrouter:MODEL` (add `#KEY_NAME` for a second account). Their API keys are read when needed from the environment or from the file named by the new `keys_file` setting; they are never copied.
+- **A usage limit rests the writer until it resets.** Claude's 5-hour or session limit, an HTTP 429 or a used-up quota now rests that writer until the reset time in the message ("resets 6:45pm", "try again in 1m30s"), or for 1 hour (Claude) or 10 minutes (others) when there is none. A Claude limit rests every `claude:` entry at once, since they share the account. Rests are kept in `writer-rest.json`, so a restart does not ask Claude again in vain.
+- **No internet is not a failed sleep.** A no-internet error stops the writer list at once (it no longer tries every writer), the sleep is put off and retried 5 minutes later, and it does not count towards the "failed to learn" warning.
+- **Fallback answers are checked.** A writer's answer must pass the same check as Claude's (a JSON list of facts, a topic object, real summary text); one that does not goes to the next writer. A wrong-format answer from a fallback writer is never stored.
+- **Each sleep says which writer did the work.** `daemon.log` gets one dated line per sleep, for example `sleep done for code-x (session ...): 2 episodes, 5 facts kept, 1 topics; writer: groq:openai/gpt-oss-120b x6`.
+- **The start of a session fits what the model sees.** Claude Code shows the model only about the first 2,000 characters of the SessionStart context, and Hypnos sent 12 to 18 KB with the user's rules for every project at about 12 KB. The context now goes: problems, the user's rules from every project (inside the first 2,000 characters), this project's pins, a 300-character "how memory works" line, the /compact pack (each fact at most 160 characters), topics (3,500 characters), the wake note (1,000 characters). It is at most 9,000 characters, trimmed from the bottom. Pins that start with "OUTDATED" are left out, and a pin is shown only once.
+- **Other chats are one line.** The note about other chats open in the same project used to quote what their users last typed. It is now one line, such as "1 other chat is open in this project; its task is not yours.", and nothing when no other chat is open. A chat's last request is kept only for its own /compact pack.
+- **Quieter log.** A hook that gives up before the service answers now leaves one dated line in `daemon.log` instead of a traceback (there were about 500).
+
 ## v0.9.9: memory you can trust after /compact, and no silent pauses: 2026-11-26
 
 - **Memory learns the chat before it is compacted.** The PreCompact hook now waits for this chat's sleep to finish (up to 110 seconds; the hook timeout is 150), so facts from the part about to be summarised are in memory first. It also gives Claude Code instructions for the summary: date each fact and decision, keep the user's own corrections word for word, mark anything unsure as "check memory".

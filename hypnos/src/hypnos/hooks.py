@@ -207,7 +207,8 @@ def run(kind: str, d: dict, emit) -> int:
             'session': session}
     if kind == 'start':
         if ensure_running():
-            emit((call('/wake', {**base, 'source': str(_first(d, 'source', default=''))}, timeout=8) or {}).get('context', ''))
+            ctx = (call('/wake', {**base, 'source': str(_first(d, 'source', default=''))}, timeout=8) or {}).get('context', '')
+            emit((ctx or '')[:9000])               # v0.9.10: hard cap, even from an older service
     elif kind == 'prompt':
         prompt = _first(d, 'prompt', 'text', 'message', 'input', default='')
         if not prompt:
@@ -225,9 +226,8 @@ def run(kind: str, d: dict, emit) -> int:
                              'context_percent': _context_percent(session, d.get('transcript_path'))}, timeout=20) or {}
         ctx, others = r.get('context', ''), r.get('others') or []
         parts = [r['notice']] if r.get('notice') else []
-        if others:                                         # v0.9: know the parallel sessions, never take over their work
-            parts.append('Other sessions are working in this project right now. Their tasks are NOT yours; do only what '
-                         'the user asks in this session:\n' + '\n'.join(others))
+        if others:                                         # v0.9.10: one line, no other chat's words
+            parts.append('\n'.join(others))
         if ctx:
             parts.append('Relevant long-term memory (hypnos). Its facts are dated and quoted from the logs: use them as facts, '
                          'and if one disagrees with this chat or its /compact summary, trust the newer one that has evidence and '

@@ -992,6 +992,8 @@ unarchive on any recall hit</code></pre>
       <tr><td><code>prompt_tokens</code></td><td><span class="val">800</span></td><td>Most memory added to one message (v0.9.6); a chat never gets the same item twice</td></tr>
       <tr><td><code>long_chat_percent</code></td><td><span class="val">60</span></td><td>Past this share of the model's context window, the agent suggests /compact, never /clear (v0.9.7; 60% and /compact since 20 Nov)</td></tr>
       <tr><td><code>stay_running</code></td><td><span class="val">false</span></td><td>false: the service stops ~90 s after the last agent closes; true keeps it on (servers, robots)</td></tr>
+      <tr><td><code>writer_chain</code></td><td><span class="val">claude, then free</span></td><td>Writers tried in order. A usage limit rests a writer until its reset time (else 1 h Claude, 10 min others), kept on disk; no internet puts the sleep off 5 min; a fallback answer must pass the same format check (v0.9.10)</td></tr>
+      <tr><td><code>wake_max_chars</code></td><td><span class="val">9,000</span></td><td>Most SessionStart context; the user's rules sit in the first 2,000 characters, the only part Claude Code shows the model (v0.9.10)</td></tr>
     </tbody>
   </table>
   </div>

@@ -143,7 +143,9 @@ def test_other_live_sessions_are_named_and_never_your_task(cfg):
     svc.handle('/log', {'space': 'proj', 'session': 'A', 'content': 'Please refactor the payment_gateway module to async'})
     svc.handle('/log', {'space': 'proj', 'session': 'B', 'content': 'Fix the flaky login_test in the auth suite please'})
     r = svc.handle('/recall', {'space': 'proj', 'session': 'C', 'query': 'what is happening with payment_gateway?'})
-    assert any('payment_gateway' in o for o in r['others']) and any('login_test' in o for o in r['others'])
+    # v0.9.10: one line with the number of other chats, never their words
+    assert r['others'] == ['2 other chats are open in this project; their tasks are not yours.']
+    assert not any('payment_gateway' in o or 'login_test' in o or 'refactor' in o for o in r['others'])
     assert 'payment_gateway' in r['context'] and 'not your task' in r['context']
 
 
@@ -654,7 +656,7 @@ def test_imported_messages_do_not_make_a_live_session(cfg, monkeypatch):
     svc.handle('/log', {'space': 'code-a', 'profile': 'coding', 'session': 'now', 'role': 'user',
                         'content': 'Please change the staging port to 9000 in the config'})
     assert ('code-a', 'now') in svc.seen and 'staging port' in svc.mem('code-a', 'coding').store.note('task:now')
-    assert svc.others_now(svc.mem('code-a', 'coding'), 'code-a', 'x') == ['- another session: "Please change the staging port to 9000 in the config"']
+    assert svc.others_now(svc.mem('code-a', 'coding'), 'code-a', 'x') == ['1 other chat is open in this project; its task is not yours.']
 
 
 def test_missing_folder_uses_the_repository_space(cfg, tmp_path, monkeypatch):
