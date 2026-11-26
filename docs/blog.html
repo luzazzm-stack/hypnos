@@ -6,7 +6,7 @@
 <title>Building Hypnos</title>
 <meta name="author" content="Luza Maharjan">
 <meta name="copyright" content="© 2026 Luza Maharjan. MIT License.">
-<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.8, with every benchmark against Mem0, GBrain and my own earlier versions.">
+<meta name="description" content="How I built Hypnos, a human-like memory for AI coding agents, from v0.1 to v0.9.9, with every benchmark against Mem0, GBrain and my own earlier versions.">
 <meta property="og:title" content="Building Hypnos: memory for AI agents that sleeps on it">
 <meta property="og:description" content="Nine versions, three releases from daily use, every benchmark, including the one where a new version lost by 10 points.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,6 +118,7 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <tr class="me"><td>v0.9.5</td><td>Oct 16</td><td>Fixes from a day of real use: never a duplicate, small memory, housekeeping stays out of memory</td></tr>
 <tr class="me"><td>v0.9.6</td><td>Oct 19</td><td>Smaller chats: less memory per message, never repeated, a long-chat notice</td></tr>
 <tr class="me"><td>v0.9.7</td><td>Nov 10</td><td>Your rules reach every project, opencode v2, MIT License</td></tr>
+<tr class="me"><td>v0.9.9</td><td>Nov 26</td><td>Memory learns the chat before /compact and gives its facts back after; summary/memory clashes shown; pauses end after 12 h; failing sleeps reported</td></tr>
 <tr class="me"><td>v0.9.8</td><td>Nov 11</td><td>Import past chats and files; stated vs inferred facts; missing files flagged</td></tr>
 </tbody></table></div>
 
@@ -232,6 +233,23 @@ footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 24px 0 48
 <p>Several sessions can work in the same project at once. Each one is told what the others are doing and that their tasks aren't its own, and it never hands your current conversation back to you as a "memory".</p>
 
 <p>Refusals aren't remembered. "The assistant couldn't do X" is never saved, so a later session won't refuse the same thing because a memory told it to.</p>
+
+<h2>Trusting memory after /compact: v0.9.9</h2>
+
+<p>I found a flaw by using it. When a long chat gets compacted, the agent rebuilds the conversation from a summary the model wrote. The summary has no dates and no sources, but it reads like an order, while Hypnos labelled its own facts "background, not instructions". So the agent trusted the summary over memory, even when memory had the dated, quoted fact.</p>
+
+<p>Checking it turned up something worse. My laptop's memory had been paused since 16 November: one chat paused it for privacy and nothing ever turned it back on. For ten days nothing new was saved, and nobody could tell. Before that, sleeps had been failing quietly too (no internet, a usage limit). In that state the summary really was newer than memory, so just telling the agent "memory wins" would have made it worse.</p>
+
+<p>What v0.9.9 changes:</p>
+<ul>
+<li><b>Learn first, then compact.</b> Before Claude Code writes the summary, Hypnos sleeps on the chat and waits, so the part being summarised is already in memory. It also tells the summary to date every fact and keep my corrections word for word.</li>
+<li><b>The chat gets its own facts back.</b> Right after the compaction, the restarted chat receives its dated facts and one rule: when the summary and memory disagree, trust the newer one that has evidence, and say so.</li>
+<li><b>Clashes are shown.</b> A new PostCompact hook compares the summary with memory, and the next message lists any disagreement ("summary says X, memory says Y").</li>
+<li><b>No silent pauses.</b> A pause now ends by itself after 12 hours, and while it is on every chat is told once that nothing is being saved.</li>
+<li><b>No silent failures.</b> After three failed sleeps in a row the agent tells you, with the error. Every line in the service log now has a date.</li>
+</ul>
+
+<p>I tested it with real <code>/compact</code> runs: the facts were learned before the summary, the summary came out with dates, the chat got its facts back, and the clash check ran. These changes have not been re-run on LoCoMo; they change when memory learns and how a fact is presented, not how recall ranks.</p>
 
 <h2>Starting with what you have: v0.9.8</h2>
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.9.9: memory you can trust after /compact, and no silent pauses: 2026-11-26
+
+- **Memory learns the chat before it is compacted.** The PreCompact hook now waits for this chat's sleep to finish (up to 110 seconds; the hook timeout is 150), so facts from the part about to be summarised are in memory first. It also gives Claude Code instructions for the summary: date each fact and decision, keep the user's own corrections word for word, mark anything unsure as "check memory".
+- **The chat gets its own facts back after /compact.** When Claude Code restarts the chat from the summary (SessionStart with source `compact`), Hypnos adds this chat's dated facts, the last request the user typed, and the rule: when the summary and memory disagree, trust the newer one that has evidence and tell the user.
+- **Clashes are shown, not silently picked.** A new PostCompact hook compares the summary with memory. Any contradiction (for example "summary says the lead is X, memory says Y") is shown once on the next message.
+- **Facts are no longer called "background".** The per-message memory said "It is background, not instructions", which made models rank a compact summary above dated, quoted facts. It now says to use the facts as facts; old requests and plans in memory are still not tasks.
+- **A pause ends by itself.** `memory_pause` used to last until someone turned it off. One privacy pause left a project unrecorded for ten days without anyone noticing. A pause now ends after 12 hours, and while it is on each chat is told once that nothing is being saved.
+- **Failing sleeps are reported.** After 3 failed sleeps in a row (no internet, a usage limit, every writer down), the next message tells the user in one line, with the last error. Messages are still logged and are learned once a sleep works again.
+- **Dated service log.** Every line in `daemon.log` now starts with the date and time.
+
 ## v0.9.8: start with what you have, and know what to trust: 2026-11-11
 
 - **`hypnos import`.** Start with your history instead of an empty memory: `hypnos import ~/.claude/projects` loads past Claude Code chats (each into the memory of the folder it ran in), and `hypnos import notes.md docs/` loads text and Markdown files. Messages keep their real date, so older facts never override newer ones. Secrets are removed first, as with live messages. A chat or file imported once is skipped next time, and so is a chat Hypnos already saw live. `--dry` shows how much there is before anything is sorted, `--limit N` takes only the newest N. On one laptop, 368 past chats (about 4,400 messages) were sorted in a few hours.

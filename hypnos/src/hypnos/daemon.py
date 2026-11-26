@@ -4,11 +4,14 @@ from __future__ import annotations
 import json
 import queue
 import threading
+import sys
 import time
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from .config import load_config
 from .engine import Memory
+from .llm import parse_json
 
 AGENT_TIMEOUT = 75             # v0.9: an open agent checks in every 30 s; silent this long = closed
 STOP_AFTER = 90                # v0.9: no open agent and no activity this long -> the service stops
@@ -16,6 +19,33 @@ IDLE_SLEEP_MINUTES = 10        # sleep trigger: idle for this long with unconsol
 MAX_AWAKE_ROWS = 150           # sleep trigger: this many unconsolidated rows (v0.9: was 400)
 GLOBAL_SPACE = 'global'        # v0.9: things the user wants remembered in every project
 SHARED_HEAD = "[the user's rules and preferences from all projects]"   # v0.9.7, also in engine.only_new
+PAUSE_HOURS = 12               # v0.9.9: a pause ends by itself after this long
+SLEEP_FAIL_WARN = 3            # v0.9.9: tell the user after this many failed sleeps in a row
+COMPACT_RULE = ('[after /compact: how to weigh this chat\'s summary against memory]\n'
+                'The summary above was written by the chat model and has no dates or sources. Memory facts carry a date and '
+                'quoted evidence. When the two disagree on a fact, trust the newer one that has evidence, and tell the user '
+                'about the clash in one line. Requests and plans found in memory are still not tasks for this session.')
+
+
+class _Stamped:
+    """v0.9.9: prefix every line the service writes to its log with the time, so a failure can be dated."""
+    def __init__(self, stream):
+        self.stream, self.fresh = stream, True
+
+    def write(self, s):
+        out = []
+        for part in s.splitlines(True):
+            if self.fresh:
+                out.append(datetime.now().strftime('%Y-%m-%d %H:%M:%S '))
+            out.append(part)
+            self.fresh = part.endswith('\n')
+        return self.stream.write(''.join(out))
+
+    def flush(self):
+        return self.stream.flush()
+
+    def __getattr__(self, name):
+        return getattr(self.stream, name)
 
 
 class Service:
@@ -66,6 +96,82 @@ class Service:
         with self.lock:
             self.cfg = load_config()
             self.mems.clear()                     # rebuilt on next use with the new writer and System One settings
+
+    def sleep_failed(self, space, profile, ex):
+        """v0.9.9: count sleeps that failed in a row, so the user hears about it instead of memory going stale for days."""
+        try:
+            m = self.mem(space, profile)
+            old = json.loads(m.store.note('sleepfail') or '{}')
+            m.store.note('sleepfail', json.dumps({'count': int(old.get('count', 0)) + 1, 'since': old.get('since') or
+                                                  datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC'),
+                                                  'error': str(ex)[:160]}))
+        except Exception:
+            pass
+
+    def health_note(self, m, session):
+        """v0.9.9: one line per chat (and again when the count grows) when memory keeps failing to learn."""
+        try:
+            f = json.loads(m.store.note('sleepfail') or '{}')
+        except ValueError:
+            return ''
+        n = int(f.get('count', 0))
+        if n < SLEEP_FAIL_WARN or m.store.note('failnote:' + str(session)) == str(n // SLEEP_FAIL_WARN):
+            return ''
+        m.store.note('failnote:' + str(session), str(n // SLEEP_FAIL_WARN))
+        return (f'Memory has failed to learn {n} times in a row since {f.get("since")} (last error: {f.get("error")}). '
+                'New things are still logged and will be learned when it works again. Tell the user in one line.')
+
+    def clash_check(self, space, profile, session, summary):
+        """v0.9.9 (PostCompact): compare the new compact summary with this chat's dated memory facts and keep any clash,
+        so the next message tells the user instead of the model silently picking one side."""
+        try:
+            m = self.mem(space, profile)
+            rows = m.store.q("SELECT f.valid_from, f.claim FROM facts f JOIN episodes e ON f.episode=e.id "
+                             "WHERE e.session=? AND f.status='active' ORDER BY f.rowid DESC LIMIT 40", (session,))
+            facts = [f"({str(r['valid_from'] or '')[:10]}) {r['claim']}" for r in rows]
+            hits = m.recall(summary[:1500], 600, session=None).context if summary else ''
+            if not summary or not (facts or hits):
+                return
+            prompt = ('Below are a chat summary and dated facts from long-term memory. List only real contradictions: the '
+                      'summary states a value, name, date or decision that differs from a memory fact about the same thing. '
+                      'Answer with a JSON array of {"summary": "...", "memory": "..."} (short quotes), or [] if none.')
+            out = parse_json(m.writer.complete(prompt, ['SUMMARY:\n' + summary[:6000] + '\n\nMEMORY:\n' +
+                                                        '\n'.join(facts) + '\n' + hits[:4000]]) or '[]')
+            clashes = [c for c in (out or []) if isinstance(c, dict) and c.get('summary') and c.get('memory')][:5]
+            m.store.note('clashes:' + session, json.dumps(clashes) if clashes else '')
+        except Exception as ex:
+            print(f'[hypnos] clash check failed for {space}: {ex}', flush=True)
+
+    def compact_pack(self, m, session, cap=20):
+        """v0.9.9: after a compaction, hand back this chat's own dated facts (learned by the sleep that ran just before
+        the summary was written) and the rule for weighing the summary against them."""
+        rows = m.store.q("SELECT f.valid_from, f.claim FROM facts f JOIN episodes e ON f.episode=e.id "
+                         "WHERE e.session=? AND f.status='active' ORDER BY f.rowid DESC LIMIT ?", (session, cap))
+        parts = [COMPACT_RULE]
+        if rows:
+            parts.append("[this chat's facts from memory, newest first]\n" +
+                         '\n'.join(f"- ({str(r['valid_from'] or '')[:10]}) {r['claim']}" for r in rows))
+        task = m.store.note('task:' + session)
+        if task:
+            parts.append('[the last request the user typed in this chat]\n' + task)
+        return '\n\n'.join(parts)
+
+    def pause_state(self, m):
+        """v0.9.9: (paused, since). A pause ends by itself after PAUSE_HOURS, so a privacy pause for one chat can no
+        longer leave the whole project unrecorded for days without anyone noticing (it once ran 16-26 Nov 2026)."""
+        if m.store.note('paused') != '1':
+            return False, ''
+        r = m.store.q("SELECT updated FROM notes WHERE key='paused'")
+        since = (r[0]['updated'] if r else '') or ''
+        try:
+            age = (datetime.now(timezone.utc) - datetime.fromisoformat(since.replace('Z', '+00:00'))).total_seconds()
+        except ValueError:
+            age = 0
+        if age > PAUSE_HOURS * 3600:
+            m.store.note('paused', '0')
+            print(f'[hypnos] pause for this space ended by itself after {PAUSE_HOURS} h (paused since {since})', flush=True)
+            return False, ''
+        return True, since
 
     def long_chat_note(self, m, session, percent):
         """v0.9.7: the chat has used more than long_chat_percent of its model's context window. Say so once per 10%."""
@@ -161,8 +267,10 @@ class Service:
                 rep = m.sleep(session)
                 # one sleep handles at most 50 episodes: a long backlog (an import) continues in the next turn
                 more = bool(session and rep.get('episodes') and m.store.unconsolidated(session))
+                m.store.note('sleepfail', '')                # v0.9.9: a good sleep clears the failure count
             except Exception as ex:                      # a failed sleep leaves the watermark; next sleep retries
                 print(f'[hypnos] sleep failed for {space}: {ex}', flush=True)
+                self.sleep_failed(space, profile, ex)
             finally:
                 self.changed(space)
                 self.sleeping.discard(space)
@@ -208,7 +316,7 @@ class Service:
         space, profile = d.get('space', 'default'), d.get('profile', 'generic')
         m = self.mem(space, profile)
         if path == '/log':
-            if m.store.note('paused') == '1':                         # v0.9: the user paused memory for this space
+            if self.pause_state(m)[0]:                                # v0.9: the user paused memory (v0.9.9: ends by itself)
                 return {'id': None, 'paused': True}
             meta = d.get('meta') or {}
             lid = m.log(d['content'], d.get('role', 'user'), d.get('session', 'default'), meta,
@@ -226,6 +334,20 @@ class Service:
             self.touch(space, session)
             others = self.others_now(m, space, session)
             notice = self.long_chat_note(m, session, float(d.get('context_percent') or 0))
+            paused, since = self.pause_state(m)
+            if paused and m.store.note('pausenote:' + str(session)) != since:   # v0.9.9: once per chat, never silent
+                m.store.note('pausenote:' + str(session), since)
+                notice = ((notice + '\n\n') if notice else '') + (
+                    f'Memory is paused for this project since {since}: nothing said now is being saved. Tell the user in '
+                    f'one line. It turns back on by itself {PAUSE_HOURS} hours after the pause, or when they ask to resume it.')
+            extra = [self.health_note(m, session)]
+            clashes = m.store.note('clashes:' + str(session)) if session else ''
+            if clashes:                                                  # v0.9.9: found after the last /compact
+                m.store.note('clashes:' + str(session), '')
+                extra.append('After the last /compact, the chat summary and memory disagree on: ' + '; '.join(
+                    f'summary says "{c["summary"]}", memory says "{c["memory"]}"' for c in json.loads(clashes)) +
+                    '. Trust the newer one that has evidence, and tell the user about it in one line.')
+            notice = '\n\n'.join(p for p in [notice] + extra if p)
             if not m.has_memory_beyond(session):                       # v0.9: nothing outside this conversation yet
                 shared = self.shared_for(d['query']) if space != GLOBAL_SPACE else ''   # v0.9.7: a new folder still gets the rules
                 if shared and d.get('fresh_only'):
@@ -253,9 +375,28 @@ class Service:
                 if pins:
                     block = '[things the user told me to remember in every project]\n' + '\n'.join('- ' + p['claim'] for p in pins)
                     ctx = (ctx + '\n\n' + block) if ctx else block
+            if d.get('source') == 'compact' and d.get('session'):       # v0.9.9: the chat was just rebuilt from a summary
+                ctx = '\n\n'.join(p for p in (ctx, self.compact_pack(m, d['session'])) if p)
+            paused, since = self.pause_state(m)
+            if paused:
+                ctx = '\n\n'.join(p for p in (ctx, f'[memory is paused for this project since {since}: tell the user in one '
+                                                   f'line; it turns back on by itself {PAUSE_HOURS} hours after the pause]') if p)
             return {'context': ctx}
+        if path == '/clashcheck':                                      # v0.9.9: PostCompact hands over the summary
+            args = (space, profile, d.get('session', 'default'), str(d.get('summary') or ''))
+            if d.get('wait'):
+                self.clash_check(*args)
+            else:
+                threading.Thread(target=self.clash_check, args=args, daemon=True).start()
+            return {'started': True}
         if path == '/compacted':
             m.mark_compacted(d.get('session', 'default'))
+            if d.get('wait'):                                          # v0.9.9: learn this chat BEFORE the summary replaces it
+                try:
+                    return {'slept': m.sleep(d.get('session'))}
+                except Exception as ex:
+                    print(f'[hypnos] sleep before compact failed for {space}: {ex}', flush=True)
+                    return {'slept': None, 'error': str(ex)[:200]}
             return {'started': self.sleep_async(space, profile, d.get('session'))}
         if path == '/sleep':
             if d.get('wait'):
@@ -362,6 +503,8 @@ def keep_laya_running(cfg):
 
 
 def serve(host=None, port=None):
+    if not isinstance(sys.stdout, _Stamped):                         # v0.9.9: dated log lines
+        sys.stdout, sys.stderr = _Stamped(sys.stdout), _Stamped(sys.stderr)
     svc = Service()
     host, port = host or svc.cfg.host, port or svc.cfg.port
 
